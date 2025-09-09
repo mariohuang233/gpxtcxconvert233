@@ -437,7 +437,10 @@
             resultIcon.classList.add('success-bounce');
             resultMessage.textContent = '转换完成！';
             
-            downloadBtn.href = `/download/${currentTaskId}`;
+            // 正确设置下载按钮的点击事件
+            downloadBtn.onclick = () => {
+                window.location.href = `/download/${currentTaskId}`;
+            };
             resetUI();
         }
 

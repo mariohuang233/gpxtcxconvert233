@@ -438,6 +438,82 @@ body::before {
     user-select: none;
 }
 
+/* 按钮涟漪效果 */
+.btn-ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(0);
+    animation: none;
+    pointer-events: none;
+}
+
+.btn-ripple.ripple-active {
+    animation: ripple 0.6s linear;
+}
+
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* 成功动画 */
+.success-bounce {
+    animation: successBounce 0.6s ease-out;
+}
+
+@keyframes successBounce {
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* 错误摇摆动画 */
+.shake {
+    animation: shake 0.6s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    10%, 30%, 50%, 70%, 90% {
+        transform: translateX(-5px);
+    }
+    20%, 40%, 60%, 80% {
+        transform: translateX(5px);
+    }
+}
+
+/* 进度条活跃状态 */
+.progress-active {
+    background: linear-gradient(90deg, 
+        var(--primary-500) 0%, 
+        var(--primary-400) 50%, 
+        var(--primary-500) 100%);
+    background-size: 200% 100%;
+    animation: progressShimmer 2s ease-in-out infinite;
+}
+
+@keyframes progressShimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
 .btn-primary {
     background: var(--primary-gradient);
     color: var(--white);
@@ -452,6 +528,57 @@ body::before {
 .btn-primary:active {
     transform: translateY(0);
     box-shadow: var(--shadow-md);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: var(--white);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl);
+    background: linear-gradient(135deg, #059669, #047857);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    color: var(--white);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl);
+    background: linear-gradient(135deg, #4b5563, #374151);
+}
+
+.btn-large {
+    padding: var(--space-5) var(--space-8);
+    font-size: 1rem;
+}
+
+.btn-loading {
+    opacity: 0.8;
+    cursor: not-allowed;
+}
+
+.btn-loading:hover {
+    transform: none;
+}
+
+.btn-ready {
+    animation: readyPulse 2s ease-in-out infinite;
+}
+
+@keyframes readyPulse {
+    0%, 100% {
+        box-shadow: var(--shadow-md);
+    }
+    50% {
+        box-shadow: var(--shadow-xl), 0 0 20px rgba(102, 126, 234, 0.3);
+    }
 }
 
 .convert-btn {
