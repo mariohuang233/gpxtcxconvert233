@@ -4,356 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GPX转TCX在线转换器</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            padding: 40px;
-            max-width: 800px;
-            width: 100%;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .header h1 {
-            color: #333;
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .header p {
-            color: #666;
-            font-size: 1.1em;
-            line-height: 1.6;
-        }
-
-        .upload-section {
-            margin-bottom: 30px;
-        }
-
-        .file-upload {
-            border: 3px dashed #ddd;
-            border-radius: 15px;
-            padding: 40px 20px;
-            text-align: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            position: relative;
-            background: #fafafa;
-        }
-
-        .file-upload:hover {
-            border-color: #667eea;
-            background: #f0f4ff;
-        }
-
-        .file-upload.dragover {
-            border-color: #667eea;
-            background: #e8f2ff;
-            transform: scale(1.02);
-        }
-
-        .upload-icon {
-            font-size: 3em;
-            color: #667eea;
-            margin-bottom: 15px;
-        }
-
-        .upload-text {
-            font-size: 1.2em;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .upload-hint {
-            color: #999;
-            font-size: 0.9em;
-        }
-
-        #fileInput {
-            display: none;
-        }
-
-        .config-section {
-            margin-bottom: 30px;
-        }
-
-        .config-title {
-            font-size: 1.3em;
-            color: #333;
-            margin-bottom: 20px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-        }
-
-        .config-title::before {
-            content: '⚙️';
-            margin-right: 10px;
-        }
-
-        .config-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .config-group {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid #e9ecef;
-        }
-
-        .config-group h3 {
-            color: #495057;
-            font-size: 1.1em;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .form-group {
-            flex: 1;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-weight: 500;
-            font-size: 0.9em;
-        }
-
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 10px 12px;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            font-size: 0.9em;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-group input:focus, .form-group select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .convert-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 20px;
-        }
-
-        .convert-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .convert-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .progress-section {
-            display: none;
-            margin-bottom: 20px;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #e9ecef;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        .progress-text {
-            text-align: center;
-            color: #666;
-            font-size: 0.9em;
-        }
-
-        .result-section {
-            display: none;
-            text-align: center;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            border: 1px solid #e9ecef;
-        }
-
-        .success-icon {
-            font-size: 3em;
-            color: #28a745;
-            margin-bottom: 15px;
-        }
-
-        .download-btn {
-            display: inline-block;
-            padding: 12px 30px;
-            background: #28a745;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .download-btn:hover {
-            background: #218838;
-            transform: translateY(-2px);
-        }
-
-        .error-message {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #f5c6cb;
-            display: none;
-        }
-
-        .features {
-            margin-top: 40px;
-            text-align: center;
-        }
-
-        .features h3 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 1.3em;
-        }
-
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-
-        .feature-item {
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            border: 1px solid #e9ecef;
-        }
-
-        .feature-icon {
-            font-size: 2em;
-            margin-bottom: 10px;
-        }
-
-        .feature-title {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .feature-desc {
-            color: #666;
-            font-size: 0.9em;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-                margin: 10px;
-            }
-
-            .header h1 {
-                font-size: 2em;
-            }
-
-            .config-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .form-row {
-                flex-direction: column;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="container">
+    <div class="container fade-in">
         <div class="header">
             <h1>🏃‍♂️ GPX转TCX转换器</h1>
             <p>将您的GPX轨迹文件转换为专业的TCX格式，支持心率、步频、功率等数据模拟</p>
-            <div class="author-info" style="margin-top: 15px; padding: 10px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; color: #856404;">
-                <p><strong>作者:</strong> mariohuang | <strong>⚠️ 仅用于测试场景，不能作为比赛作弊用途</strong></p>
-            </div>
         </div>
 
-        <div class="error-message" id="errorMessage"></div>
+        <div class="author-info card slide-in">
+            <h3>👨‍💻 开发者信息</h3>
+            <p><strong>作者:</strong> mariohuang</p>
+            <p><strong>⚠️ 重要提醒:</strong> 仅用于测试场景，不能作为比赛作弊用途</p>
+        </div>
 
-        <div class="upload-section">
+        <div class="status-indicator status-error" id="errorMessage" style="display: none;"></div>
+
+        <div class="upload-section card">
             <div class="file-upload" id="fileUpload">
                 <div class="upload-icon">📁</div>
                 <div class="upload-text">点击选择GPX文件或拖拽到此处</div>
                 <div class="upload-hint">支持最大16MB的GPX文件</div>
-                <input type="file" id="fileInput" accept=".gpx" />
+                <input type="file" id="fileInput" accept=".gpx" style="display: none;" />
             </div>
         </div>
 
-        <div class="config-section">
+        <div class="config-section card">
             <div class="config-title">转换配置</div>
             <form id="configForm">
                 <div class="config-grid">
@@ -450,47 +127,72 @@
             </form>
         </div>
 
-        <button class="convert-btn" id="convertBtn" disabled>
-            🚀 开始转换
-        </button>
+        <div class="convert-section">
+            <button id="convertBtn" class="btn btn-primary btn-large" disabled>
+                <span class="btn-icon">🔄</span>
+                <span class="btn-text">开始转换</span>
+                <div class="btn-ripple"></div>
+            </button>
+        </div>
 
-        <div class="progress-section" id="progressSection">
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
+        <div class="progress-section card" id="progressSection" style="display: none;">
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">准备转换...</div>
             </div>
-            <div class="progress-text" id="progressText">准备中...</div>
         </div>
 
-        <div class="result-section" id="resultSection">
-            <div class="success-icon">✅</div>
-            <h3>转换完成！</h3>
-            <p>您的TCX文件已准备就绪</p>
-            <br>
-            <a href="#" class="download-btn" id="downloadBtn">📥 下载TCX文件</a>
+        <div class="result-section card" id="resultSection" style="display: none;">
+            <div class="result-content">
+                <div class="result-icon" id="resultIcon">✅</div>
+                <div class="result-message" id="resultMessage">转换完成！</div>
+                <div class="result-actions">
+                    <button id="downloadBtn" class="btn btn-success">
+                        <span class="btn-icon">⬇️</span>
+                        <span class="btn-text">下载TCX文件</span>
+                        <div class="btn-ripple"></div>
+                    </button>
+                    <button id="resetBtn" class="btn btn-secondary">
+                        <span class="btn-icon">🔄</span>
+                        <span class="btn-text">重新转换</span>
+                        <div class="btn-ripple"></div>
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <div class="features">
+        <div class="features card">
             <h3>✨ 功能特色</h3>
             <div class="feature-grid">
                 <div class="feature-item">
                     <div class="feature-icon">🎯</div>
-                    <div class="feature-title">精确转换</div>
-                    <div class="feature-desc">保持原始轨迹精度，完美兼容各种设备</div>
+                    <div class="feature-content">
+                        <div class="feature-title">精确转换</div>
+                        <div class="feature-desc">保持原始轨迹精度，完美兼容各种设备</div>
+                    </div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">📊</div>
-                    <div class="feature-title">数据丰富</div>
-                    <div class="feature-desc">自动生成心率、步频、功率等专业数据</div>
+                    <div class="feature-content">
+                        <div class="feature-title">数据丰富</div>
+                        <div class="feature-desc">自动生成心率、步频、功率等专业数据</div>
+                    </div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">⚙️</div>
-                    <div class="feature-title">高度自定义</div>
-                    <div class="feature-desc">支持详细的参数配置，满足个性化需求</div>
+                    <div class="feature-content">
+                        <div class="feature-title">高度自定义</div>
+                        <div class="feature-desc">支持详细的参数配置，满足个性化需求</div>
+                    </div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">🔒</div>
-                    <div class="feature-title">隐私安全</div>
-                    <div class="feature-desc">文件本地处理，1小时后自动清理</div>
+                    <div class="feature-content">
+                        <div class="feature-title">隐私安全</div>
+                        <div class="feature-desc">文件本地处理，1小时后自动清理</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -510,6 +212,34 @@
         const progressFill = document.getElementById('progressFill');
         const progressText = document.getElementById('progressText');
         const downloadBtn = document.getElementById('downloadBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // 添加按钮涟漪效果
+        function addRippleEffect(button, event) {
+            const ripple = button.querySelector('.btn-ripple');
+            if (!ripple) return;
+            
+            const rect = button.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = event.clientX - rect.left - size / 2;
+            const y = event.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.classList.add('ripple-active');
+            
+            setTimeout(() => {
+                ripple.classList.remove('ripple-active');
+            }, 600);
+        }
+
+        // 为所有按钮添加涟漪效果
+        document.addEventListener('click', (event) => {
+            if (event.target.closest('.btn')) {
+                addRippleEffect(event.target.closest('.btn'), event);
+            }
+        });
 
         // 点击上传区域
         fileUpload.addEventListener('click', () => {
@@ -560,7 +290,9 @@
 
             selectedFile = file;
             updateUploadUI();
+            fileUpload.classList.add('file-selected');
             convertBtn.disabled = false;
+            convertBtn.classList.add('btn-ready');
             hideError();
         }
 
@@ -576,6 +308,7 @@
 
         // 转换按钮
         convertBtn.addEventListener('click', startConversion);
+        resetBtn.addEventListener('click', resetConversion);
 
         async function startConversion() {
             if (!selectedFile) {
@@ -598,7 +331,9 @@
 
             try {
                 convertBtn.disabled = true;
-                convertBtn.textContent = '上传中...';
+                convertBtn.classList.add('btn-loading');
+                convertBtn.querySelector('.btn-text').textContent = '转换中...';
+                convertBtn.querySelector('.btn-icon').textContent = '⏳';
                 hideError();
                 resultSection.style.display = 'none';
 
@@ -618,13 +353,37 @@
                 }
             } catch (error) {
                 showError(error.message);
-                convertBtn.disabled = false;
-                convertBtn.textContent = '🚀 开始转换';
+                resetUI();
             }
+        }
+
+        function resetConversion() {
+            selectedFile = null;
+            currentTaskId = null;
+            
+            // 重置文件上传区域
+            fileUpload.innerHTML = `
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">点击选择GPX文件或拖拽到此处</div>
+                <div class="upload-hint">支持最大16MB的GPX文件</div>
+            `;
+            fileUpload.classList.remove('file-selected');
+            
+            // 重置按钮状态
+            convertBtn.disabled = true;
+            convertBtn.classList.remove('btn-ready', 'btn-loading');
+            convertBtn.querySelector('.btn-text').textContent = '开始转换';
+            convertBtn.querySelector('.btn-icon').textContent = '🔄';
+            
+            // 隐藏进度和结果
+            progressSection.style.display = 'none';
+            resultSection.style.display = 'none';
+            hideError();
         }
 
         function showProgress() {
             progressSection.style.display = 'block';
+            progressSection.classList.add('fade-in');
             progressFill.style.width = '0%';
             progressText.textContent = '准备中...';
         }
@@ -659,27 +418,49 @@
         function updateProgress(progress, message) {
             progressFill.style.width = progress + '%';
             progressText.textContent = message;
+            
+            // 添加进度动画
+            if (progress > 0) {
+                progressFill.classList.add('progress-active');
+            }
         }
 
         function showSuccess() {
             progressSection.style.display = 'none';
             resultSection.style.display = 'block';
+            resultSection.classList.add('fade-in');
+            
+            const resultIcon = document.getElementById('resultIcon');
+            const resultMessage = document.getElementById('resultMessage');
+            
+            resultIcon.textContent = '✅';
+            resultIcon.classList.add('success-bounce');
+            resultMessage.textContent = '转换完成！';
+            
             downloadBtn.href = `/download/${currentTaskId}`;
             resetUI();
         }
 
         function resetUI() {
             convertBtn.disabled = false;
-            convertBtn.textContent = '🚀 开始转换';
+            convertBtn.classList.remove('btn-loading');
+            convertBtn.querySelector('.btn-text').textContent = '开始转换';
+            convertBtn.querySelector('.btn-icon').textContent = '🔄';
         }
 
         function showError(message) {
             errorMessage.textContent = message;
             errorMessage.style.display = 'block';
+            errorMessage.classList.add('shake');
+            
+            setTimeout(() => {
+                errorMessage.classList.remove('shake');
+            }, 600);
         }
 
         function hideError() {
             errorMessage.style.display = 'none';
+            errorMessage.classList.remove('shake');
         }
 
         // 步频显示值转换函数
