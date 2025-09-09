@@ -435,7 +435,7 @@ class GPXToTCXConverter:
             start_time_input = self.config['start_time']
             
             if isinstance(start_time_input, datetime):
-                # 如果已经是datetime对象，直接使用
+                # 如果已经是datetime对象，直接使用（保持本地时间）
                 start_time = start_time_input
             elif isinstance(start_time_input, str):
                 # 如果是字符串，需要解析
@@ -443,7 +443,7 @@ class GPXToTCXConverter:
                     # 如果已经是UTC格式，直接解析
                     start_time = datetime.fromisoformat(start_time_input.replace('Z', '+00:00'))
                 else:
-                    # 如果是本地时间格式，需要转换为UTC
+                    # 如果是本地时间格式，直接解析不转换时区
                     try:
                         # 尝试解析不同格式的时间
                         if 'T' in start_time_input:
@@ -458,6 +458,7 @@ class GPXToTCXConverter:
                 # 其他类型，使用默认时间
                 start_time = datetime(2024, 12, 25, 6, 0, 0)
                 
+            # 生成Activity ID，使用本地时间但格式化为ISO格式
             activity_id = start_time.strftime('%Y-%m-%dT%H:%M:%S.000Z')
         else:
             # 使用2024年12月25日早上6点作为默认开始时间
