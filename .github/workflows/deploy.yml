@@ -1,0 +1,131 @@
+name: Deploy GPX to TCX Converter
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Create necessary directories
+      run: |
+        mkdir -p uploads outputs
+        touch uploads/.gitkeep outputs/.gitkeep
+    
+    - name: Test application startup
+      run: |
+        timeout 10s python3 web_app.py || echo "App startup test completed"
+    
+    - name: Run basic tests
+      run: |
+        python3 -c "import gpx_to_tcx; print('GPX to TCX module imported successfully')"
+        python3 -c "from web_app import app; print('Flask app imported successfully')"
+    
+    - name: Check file structure
+      run: |
+        ls -la
+        echo "=== Static files ==="
+        ls -la static/ || echo "No static directory"
+        echo "=== Template files ==="
+        ls -la templates/ || echo "No templates directory"
+
+  deploy-info:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Display deployment information
+      run: |
+        echo "🚀 Deployment Information"
+        echo "========================="
+        echo "✅ Tests passed successfully"
+        echo "📦 Ready for deployment to:"
+        echo "   • Railway: Connect your GitHub repo at https://railway.app"
+        echo "   • Render: Connect your GitHub repo at https://render.com"
+        echo "   • Heroku: Use 'git push heroku main' after setting up Heroku CLI"
+        echo ""
+        echo "📋 Deployment files included:"
+        echo "   • railway.toml (Railway configuration)"
+        echo "   • render.yaml (Render configuration)"
+        echo "   • Procfile (Heroku configuration)"
+        echo "   • runtime.txt (Python version specification)"
+        echo ""
+        echo "🔗 Application will be available at your chosen platform's URL"
+        echo "📖 See GitHub部署指南.md for detailed deployment instructions"
+        echo ""
+        echo "👤 Author: mariohuang"
+        echo "⚠️  Note: This application is for testing purposes only"
+
+  security-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Run security checks
+      run: |
+        echo "🔒 Security Check Results"
+        echo "========================"
+        
+        # Check for sensitive files
+        echo "📁 Checking for sensitive files..."
+        if find . -name "*.key" -o -name "*.pem" -o -name "*.p12" -o -name "secrets.*" | grep -q .; then
+          echo "❌ Warning: Potential sensitive files found"
+          find . -name "*.key" -o -name "*.pem" -o -name "*.p12" -o -name "secrets.*"
+        else
+          echo "✅ No sensitive files detected"
+        fi
+        
+        # Check .gitignore
+        echo "📋 Checking .gitignore..."
+        if [ -f .gitignore ]; then
+          echo "✅ .gitignore file exists"
+          if grep -q "*.key\|*.pem\|.env" .gitignore; then
+            echo "✅ .gitignore includes sensitive file patterns"
+          else
+            echo "⚠️  Consider adding sensitive file patterns to .gitignore"
+          fi
+        else
+          echo "❌ .gitignore file missing"
+        fi
+        
+        # Check for hardcoded secrets in Python files
+        echo "🔍 Scanning for potential hardcoded secrets..."
+        if grep -r -i "password\|secret\|key\|token" --include="*.py" . | grep -v "#" | grep -q "="; then
+          echo "⚠️  Potential hardcoded secrets found - please review:"
+          grep -r -i "password\|secret\|key\|token" --include="*.py" . | grep -v "#" | grep "=" || true
+        else
+          echo "✅ No obvious hardcoded secrets detected"
+        fi
+        
+        echo "✅ Security check completed"

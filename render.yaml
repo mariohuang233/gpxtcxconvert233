@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: gpx-to-tcx-converter
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python3 web_app.py
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: PORT
+        value: 8080
+      - key: FLASK_ENV
+        value: production
+      - key: MAX_CONTENT_LENGTH
+        value: 16777216
+    disk:
+      name: uploads
+      mountPath: /tmp
+      sizeGB: 1
+    autoDeploy: true
+    branch: main
+    rootDir: .
+    dockerfilePath: ./Dockerfile
+    preDeployCommand: mkdir -p uploads outputs
+    
+# 可选：数据库配置（如需要）
+# databases:
+#   - name: gpx-converter-db
+#     databaseName: converter
+#     user: converter_user
+#     region: oregon
+#     plan: free
+#     ipAllowList: []
+
+# 可选：Redis缓存（如需要）
+# - type: redis
+#   name: gpx-converter-cache
+#   region: oregon
+#   plan: free
+#   maxmemoryPolicy: allkeys-lru

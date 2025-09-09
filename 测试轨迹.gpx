@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="GPX转TCX测试" xmlns="http://www.topografix.com/GPX/1/1">
+  <trk>
+    <name>测试跑步轨迹</name>
+    <trkseg>
+      <trkpt lat="39.9042" lon="116.4074">
+        <ele>50.0</ele>
+        <time>2024-01-15T08:30:00Z</time>
+      </trkpt>
+      <trkpt lat="39.9043" lon="116.4075">
+        <ele>51.0</ele>
+        <time>2024-01-15T08:30:30Z</time>
+      </trkpt>
+      <trkpt lat="39.9044" lon="116.4076">
+        <ele>52.0</ele>
+        <time>2024-01-15T08:31:00Z</time>
+      </trkpt>
+      <trkpt lat="39.9045" lon="116.4077">
+        <ele>53.0</ele>
+        <time>2024-01-15T08:31:30Z</time>
+      </trkpt>
+      <trkpt lat="39.9046" lon="116.4078">
+        <ele>54.0</ele>
+        <time>2024-01-15T08:32:00Z</time>
+      </trkpt>
+      <trkpt lat="39.9047" lon="116.4079">
+        <ele>55.0</ele>
+        <time>2024-01-15T08:32:30Z</time>
+      </trkpt>
+      <trkpt lat="39.9048" lon="116.4080">
+        <ele>56.0</ele>
+        <time>2024-01-15T08:33:00Z</time>
+      </trkpt>
+      <trkpt lat="39.9049" lon="116.4081">
+        <ele>57.0</ele>
+        <time>2024-01-15T08:33:30Z</time>
+      </trkpt>
+      <trkpt lat="39.9050" lon="116.4082">
+        <ele>58.0</ele>
+        <time>2024-01-15T08:34:00Z</time>
+      </trkpt>
+      <trkpt lat="39.9051" lon="116.4083">
+        <ele>59.0</ele>
+        <time>2024-01-15T08:34:30Z</time>
+      </trkpt>
+    </trkseg>
+  </trk>
+</gpx>
