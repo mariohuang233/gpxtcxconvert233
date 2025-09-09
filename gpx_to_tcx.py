@@ -443,14 +443,16 @@ class GPXToTCXConverter:
                     # 如果已经是UTC格式，直接解析
                     start_time = datetime.fromisoformat(start_time_input.replace('Z', '+00:00'))
                 else:
-                    # 如果是本地时间格式，直接解析不转换时区
+                    # 如果是本地时间格式，解析后转换为UTC时间
                     try:
                         # 尝试解析不同格式的时间
                         if 'T' in start_time_input:
-                            start_time = datetime.fromisoformat(start_time_input)
+                            local_time = datetime.fromisoformat(start_time_input)
                         else:
                             # 处理 "2025-09-09 01:52:39" 格式
-                            start_time = datetime.strptime(start_time_input, '%Y-%m-%d %H:%M:%S')
+                            local_time = datetime.strptime(start_time_input, '%Y-%m-%d %H:%M:%S')
+                        # 将本地时间转换为UTC时间（减去8小时）
+                        start_time = local_time - timedelta(hours=8)
                     except:
                         # 如果解析失败，使用默认时间
                         start_time = datetime(2024, 12, 25, 6, 0, 0)
@@ -458,12 +460,12 @@ class GPXToTCXConverter:
                 # 其他类型，使用默认时间
                 start_time = datetime(2024, 12, 25, 6, 0, 0)
                 
-            # 生成Activity ID，使用本地时间但格式化为ISO格式
-            activity_id = start_time.strftime('%Y-%m-%dT%H:%M:%S.000')
+            # 生成Activity ID，使用UTC时间格式
+            activity_id = start_time.strftime('%Y-%m-%dT%H:%M:%S.000Z')
         else:
             # 使用2024年12月25日早上6点作为默认开始时间
             start_time = datetime(2024, 12, 25, 6, 0, 0)
-            activity_id = start_time.strftime('%Y-%m-%dT%H:%M:%S.000')
+            activity_id = start_time.strftime('%Y-%m-%dT%H:%M:%S.000Z')
         
         # 根据压缩后的平均速度重新计算合理的总时间
         # 确保距离/时间比值与实际速度一致，避免运动平台显示异常配速
@@ -509,7 +511,7 @@ class GPXToTCXConverter:
         <Track>'''.format(
             sport=self.config['activity_type'],
             activity_id=activity_id,
-            start_time=start_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3],
+            start_time=start_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ')[:-3] + 'Z',
             total_time=realistic_total_time,
             total_distance=metrics['total_distance'],
             max_speed=metrics['max_speed'],
@@ -555,7 +557,7 @@ class GPXToTCXConverter:
             power = self.simulate_power(current_speed, heart_rate)
             
             # 格式化时间（使用更简洁的格式）
-            time_str = point['time'].strftime('%Y-%m-%dT%H:%M:%S.000')
+            time_str = point['time'].strftime('%Y-%m-%dT%H:%M:%S.000Z')
             
             # 生成轨迹点XML
             trackpoint_xml = f'''
