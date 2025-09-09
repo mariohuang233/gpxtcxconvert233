@@ -451,8 +451,8 @@ class GPXToTCXConverter:
                         else:
                             # 处理 "2025-09-09 01:52:39" 格式
                             local_time = datetime.strptime(start_time_input, '%Y-%m-%d %H:%M:%S')
-                        # 将本地时间转换为UTC时间（减去8小时）
-                        start_time = local_time - timedelta(hours=8)
+                        # 直接使用本地时间，不进行时区转换
+                        start_time = local_time
                     except:
                         # 如果解析失败，使用默认时间
                         start_time = datetime(2024, 12, 25, 6, 0, 0)
