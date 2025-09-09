@@ -435,8 +435,8 @@ class GPXToTCXConverter:
             start_time_input = self.config['start_time']
             
             if isinstance(start_time_input, datetime):
-                # 如果已经是datetime对象，直接使用（保持本地时间）
-                start_time = start_time_input
+                # 如果已经是datetime对象，将北京时间转换为UTC时间
+                start_time = start_time_input - timedelta(hours=8)
             elif isinstance(start_time_input, str):
                 # 如果是字符串，需要解析
                 if 'Z' in start_time_input:
@@ -451,8 +451,8 @@ class GPXToTCXConverter:
                         else:
                             # 处理 "2025-09-09 01:52:39" 格式
                             local_time = datetime.strptime(start_time_input, '%Y-%m-%d %H:%M:%S')
-                        # 直接使用本地时间，不进行时区转换
-                        start_time = local_time
+                        # 将北京时间转换为UTC时间（北京时间 = UTC + 8小时）
+                        start_time = local_time - timedelta(hours=8)
                     except:
                         # 如果解析失败，使用默认时间
                         start_time = datetime(2024, 12, 25, 6, 0, 0)
