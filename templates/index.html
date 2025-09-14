@@ -163,6 +163,56 @@
             </div>
         </div>
 
+        <div class="ip-info-section card" style="animation: fadeIn 0.8s ease 0.7s both;">
+            <h3>🌐 您的IP地址信息</h3>
+            <div class="ip-info-content">
+                <button id="getIpInfoBtn" class="btn btn-info">
+                    <span class="btn-icon">🔍</span>
+                    <span class="btn-text">查询我的IP信息</span>
+                    <div class="btn-ripple"></div>
+                </button>
+                
+                <div id="ipInfoResult" class="ip-info-result" style="display: none;">
+                    <div class="ip-info-grid">
+                        <div class="ip-info-item">
+                            <div class="ip-info-label">IP地址:</div>
+                            <div class="ip-info-value" id="ipAddress">-</div>
+                        </div>
+                        <div class="ip-info-item">
+                            <div class="ip-info-label">国家:</div>
+                            <div class="ip-info-value" id="ipCountry">-</div>
+                        </div>
+                        <div class="ip-info-item">
+                            <div class="ip-info-label">地区:</div>
+                            <div class="ip-info-value" id="ipRegion">-</div>
+                        </div>
+                        <div class="ip-info-item">
+                            <div class="ip-info-label">城市:</div>
+                            <div class="ip-info-value" id="ipCity">-</div>
+                        </div>
+                        <div class="ip-info-item">
+                            <div class="ip-info-label">时区:</div>
+                            <div class="ip-info-value" id="ipTimezone">-</div>
+                        </div>
+                        <div class="ip-info-item">
+                            <div class="ip-info-label">ISP:</div>
+                            <div class="ip-info-value" id="ipIsp">-</div>
+                        </div>
+                        <div class="ip-info-item">
+                            <div class="ip-info-label">大洲:</div>
+                            <div class="ip-info-value" id="ipContinent">-</div>
+                        </div>
+                        <div class="ip-info-item">
+                            <div class="ip-info-label">坐标:</div>
+                            <div class="ip-info-value" id="ipCoordinates">-</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="ipInfoError" class="status-indicator status-error" style="display: none;"></div>
+            </div>
+        </div>
+
         <div class="features card" style="animation: fadeIn 0.8s ease 0.8s both;">
             <h3>✨ 功能特色</h3>
             <div class="feature-grid">
@@ -192,6 +242,13 @@
                     <div class="feature-content">
                         <div class="feature-title">隐私安全</div>
                         <div class="feature-desc">文件本地处理，1小时后自动清理</div>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🌐</div>
+                    <div class="feature-content">
+                        <div class="feature-title">IP信息查询</div>
+                        <div class="feature-desc">基于ipstack API的实时IP地理位置查询</div>
                     </div>
                 </div>
             </div>
@@ -493,6 +550,58 @@
         const minutes = String(now.getMinutes()).padStart(2, '0');
         const localTimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
         document.getElementById('startTime').value = localTimeString;
+
+        // IP信息查询功能
+        const getIpInfoBtn = document.getElementById('getIpInfoBtn');
+        const ipInfoResult = document.getElementById('ipInfoResult');
+        const ipInfoError = document.getElementById('ipInfoError');
+
+        getIpInfoBtn.addEventListener('click', async function() {
+            try {
+                // 显示加载状态
+                getIpInfoBtn.disabled = true;
+                getIpInfoBtn.querySelector('.btn-text').textContent = '查询中...';
+                getIpInfoBtn.querySelector('.btn-icon').textContent = '⏳';
+                
+                // 隐藏之前的结果和错误
+                ipInfoResult.style.display = 'none';
+                ipInfoError.style.display = 'none';
+
+                const response = await fetch('/ip-info');
+                const data = await response.json();
+
+                if (data.success) {
+                    // 显示IP信息
+                    document.getElementById('ipAddress').textContent = data.ip;
+                    document.getElementById('ipCountry').textContent = data.data.country;
+                    document.getElementById('ipRegion').textContent = data.data.region;
+                    document.getElementById('ipCity').textContent = data.data.city;
+                    document.getElementById('ipTimezone').textContent = data.data.timezone;
+                    document.getElementById('ipIsp').textContent = data.data.isp;
+                    document.getElementById('ipContinent').textContent = data.data.continent;
+                    document.getElementById('ipCoordinates').textContent = 
+                        `${data.data.latitude}, ${data.data.longitude}`;
+                    
+                    ipInfoResult.style.display = 'block';
+                    ipInfoResult.classList.add('fade-in');
+                } else {
+                    throw new Error(data.error || 'IP信息查询失败');
+                }
+            } catch (error) {
+                ipInfoError.textContent = `查询失败: ${error.message}`;
+                ipInfoError.style.display = 'block';
+                ipInfoError.classList.add('shake');
+                
+                setTimeout(() => {
+                    ipInfoError.classList.remove('shake');
+                }, 600);
+            } finally {
+                // 恢复按钮状态
+                getIpInfoBtn.disabled = false;
+                getIpInfoBtn.querySelector('.btn-text').textContent = '查询我的IP信息';
+                getIpInfoBtn.querySelector('.btn-icon').textContent = '🔍';
+            }
+        });
     </script>
 </body>
 </html>

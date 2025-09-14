@@ -15,6 +15,7 @@ import time
 import logging
 from pathlib import Path
 import psutil
+import requests
 
 app = Flask(__name__)
 app.secret_key = 'gpx_to_tcx_converter_2025'
@@ -380,6 +381,75 @@ def health_check():
             'timestamp': datetime.now().isoformat(),
             'error': f'Health check failed: {str(e)}'
         }), 503
+
+@app.route('/ip-info')
+def get_ip_info():
+    """获取用户IP地址信息"""
+    try:
+        # 获取用户真实IP地址
+        if request.headers.get('X-Forwarded-For'):
+            user_ip = request.headers.get('X-Forwarded-For').split(',')[0].strip()
+        elif request.headers.get('X-Real-IP'):
+            user_ip = request.headers.get('X-Real-IP')
+        else:
+            user_ip = request.remote_addr
+        
+        # 如果是本地IP，使用一个示例IP进行演示
+        if user_ip in ['127.0.0.1', '::1', 'localhost']:
+            user_ip = '8.8.8.8'  # 使用Google DNS作为示例
+        
+        # 调用ipstack API
+        api_key = 'a67f3911868f6c642b949296b6f6ef6a'
+        api_url = f'http://api.ipstack.com/{user_ip}?access_key={api_key}'
+        
+        response = requests.get(api_url, timeout=10)
+        
+        if response.status_code == 200:
+            ip_data = response.json()
+            
+            # 检查API响应是否有错误
+            if 'error' in ip_data:
+                return jsonify({
+                    'success': False,
+                    'error': ip_data['error']['info']
+                })
+            
+            return jsonify({
+                'success': True,
+                'ip': user_ip,
+                'data': {
+                    'country': ip_data.get('country_name', 'Unknown'),
+                    'country_code': ip_data.get('country_code', 'Unknown'),
+                    'region': ip_data.get('region_name', 'Unknown'),
+                    'city': ip_data.get('city', 'Unknown'),
+                    'latitude': ip_data.get('latitude', 0),
+                    'longitude': ip_data.get('longitude', 0),
+                    'timezone': ip_data.get('time_zone', {}).get('id', 'Unknown'),
+                    'isp': ip_data.get('connection', {}).get('isp', 'Unknown'),
+                    'continent': ip_data.get('continent_name', 'Unknown')
+                }
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': f'API请求失败: {response.status_code}'
+            })
+            
+    except requests.exceptions.Timeout:
+        return jsonify({
+            'success': False,
+            'error': 'API请求超时'
+        })
+    except requests.exceptions.RequestException as e:
+        return jsonify({
+            'success': False,
+            'error': f'网络请求错误: {str(e)}'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'服务器错误: {str(e)}'
+        })
 
 # 定时清理任务
 def schedule_cleanup():

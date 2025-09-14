@@ -799,6 +799,15 @@ body::before {
     .file-upload {
         padding: var(--space-8) var(--space-4);
     }
+    
+    .ip-info-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-3);
+    }
+    
+    .ip-info-item {
+        padding: var(--space-2);
+    }
 }
 
 @media (max-width: 480px) {
@@ -821,6 +830,20 @@ body::before {
     
     .upload-text {
         font-size: 1.125rem;
+    }
+    
+    .ip-info-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-2);
+    }
+    
+    .ip-info-item {
+        padding: var(--space-2);
+    }
+    
+    .btn-info {
+        padding: var(--space-3) var(--space-4);
+        font-size: 0.875rem;
     }
 }
 
@@ -1678,6 +1701,93 @@ body::before {
     .btn:hover {
         transform: none;
     }
+}
+
+/* IP信息查询区域样式 */
+.ip-info-section {
+    margin-bottom: var(--space-8);
+}
+
+.ip-info-content {
+    text-align: center;
+}
+
+.btn-info {
+    background: var(--accent-gradient);
+    color: var(--white);
+    border: none;
+    padding: var(--space-3) var(--space-6);
+    border-radius: var(--radius-lg);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    margin-bottom: var(--space-6);
+}
+
+.btn-info:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: var(--shadow-lg), 0 0 20px rgba(79, 172, 254, 0.3);
+}
+
+.btn-info:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.ip-info-result {
+    margin-top: var(--space-6);
+    padding: var(--space-6);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.95) 100%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.ip-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-4);
+}
+
+.ip-info-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--space-3);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    transition: all 0.3s ease;
+}
+
+.ip-info-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+.ip-info-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gray-600);
+    margin-bottom: var(--space-2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ip-info-value {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--gray-900);
+    word-break: break-all;
 }
 
 /* 打印样式 - 优化的打印体验 */
