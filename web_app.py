@@ -430,35 +430,26 @@ def get_greeting_info():
         
         weather_response = requests.get(weather_url, timeout=10)
         
-        if weather_response.status_code != 200:
-            # 如果天气API失败，仍然返回位置信息，天气显示为默认值
-            weather_info = {
-                'temperature': 'N/A',
-                'description': '晴朗',
-                'humidity': 'N/A',
-                'wind_speed': 'N/A'
-            }
-        else:
+        weather_info = None
+        
+        if weather_response.status_code == 200:
             weather_data = weather_response.json()
             
-            if 'error' in weather_data:
-                weather_info = {
-                    'temperature': 'N/A',
-                    'description': '晴朗',
-                    'humidity': 'N/A',
-                    'wind_speed': 'N/A'
-                }
-            else:
+            if 'error' not in weather_data and 'current' in weather_data:
                 current = weather_data.get('current', {})
-                weather_info = {
-                    'temperature': current.get('temperature', 'N/A'),
-                    'description': current.get('weather_descriptions', ['晴朗'])[0],
-                    'humidity': current.get('humidity', 'N/A'),
-                    'wind_speed': current.get('wind_speed', 'N/A'),
-                    'wind_dir': current.get('wind_dir', 'N/A'),
-                    'pressure': current.get('pressure', 'N/A'),
-                    'visibility': current.get('visibility', 'N/A')
-                }
+                # 只有当所有关键数据都存在时才显示天气信息
+                if (current.get('temperature') is not None and 
+                    current.get('humidity') is not None and 
+                    current.get('wind_speed') is not None):
+                    weather_info = {
+                        'temperature': f"{current.get('temperature')}°C",
+                        'description': current.get('weather_descriptions', ['晴朗'])[0],
+                        'humidity': f"{current.get('humidity')}%",
+                        'wind_speed': f"{current.get('wind_speed')} km/h",
+                        'wind_dir': current.get('wind_dir', 'N/A'),
+                        'pressure': current.get('pressure', 'N/A'),
+                        'visibility': current.get('visibility', 'N/A')
+                    }
         
         return jsonify({
             'success': True,
@@ -476,7 +467,7 @@ def get_greeting_info():
                     'continent': ip_data.get('continent_name', 'Unknown')
                 },
                 'weather': weather_info,
-                'greeting': f"你好，来自{ip_data.get('city', ip_data.get('region_name', '未知地区'))}的用户，今天天气{weather_info['description']}，气温{weather_info['temperature']}°C"
+                'greeting': f"你好，来自{ip_data.get('city', ip_data.get('region_name', '未知地区'))}的用户！" + (f"今天天气{weather_info['description']}，气温{weather_info['temperature']}" if weather_info else "欢迎使用GPX转TCX转换器")
             }
         })
             
