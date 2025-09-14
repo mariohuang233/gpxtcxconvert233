@@ -12,46 +12,48 @@
 </head>
 <body>
     <div class="container fade-in">
-        <!-- 英雄问候区域 -->
+        <!-- 英雄介绍区域 -->
         <div class="hero-greeting">
-            <div class="running-animation">
-                🏃‍♂️
+            <div class="greeting-content">
+                <div class="runner-animation">
+                    <div class="runner">🏃‍♂️</div>
+                </div>
+                <div class="app-intro">
+                    <h1 class="app-title">佳明杀手 - GPX转TCX转换器</h1>
+                    <p class="app-description">专业的GPX轨迹文件转换工具，支持心率、步频、功率等数据模拟</p>
+                    <div class="developer-info">
+                        <span class="developer-label">👨‍💻 开发者:</span>
+                        <span class="developer-name">mariohuang</span>
+                    </div>
+                    <div class="disclaimer">
+                        <span class="warning-icon">⚠️</span>
+                        <span class="disclaimer-text">仅用于测试场景，不得用于比赛作弊</span>
+                    </div>
+                </div>
+                <div id="weatherDetails" class="weather-cards" style="display: none;">
+                    <div class="weather-card">
+                        <div class="weather-icon">🌡️</div>
+                        <div class="weather-label">温度</div>
+                        <div class="weather-value" id="temperature">--°C</div>
+                    </div>
+                    <div class="weather-card">
+                        <div class="weather-icon">💧</div>
+                        <div class="weather-label">湿度</div>
+                        <div class="weather-value" id="humidity">--%</div>
+                    </div>
+                    <div class="weather-card">
+                        <div class="weather-icon">💨</div>
+                        <div class="weather-label">风速</div>
+                        <div class="weather-value" id="windSpeed">-- km/h</div>
+                    </div>
+                    <div class="weather-card">
+                        <div class="weather-icon">📍</div>
+                        <div class="weather-label">位置</div>
+                        <div class="weather-value" id="location">获取中...</div>
+                    </div>
+                </div>
+                <div id="greetingError" class="error-message" style="display: none;"></div>
             </div>
-            <h1 id="greetingText" class="hero-title">正在获取您的位置信息...</h1>
-            <div id="weatherDetails" class="weather-cards" style="display: none;">
-                <div class="weather-card">
-                    <div class="weather-icon">🌡️</div>
-                    <div class="weather-label">温度</div>
-                    <div class="weather-value" id="temperature">--°C</div>
-                </div>
-                <div class="weather-card">
-                    <div class="weather-icon">💧</div>
-                    <div class="weather-label">湿度</div>
-                    <div class="weather-value" id="humidity">--%</div>
-                </div>
-                <div class="weather-card">
-                    <div class="weather-icon">💨</div>
-                    <div class="weather-label">风速</div>
-                    <div class="weather-value" id="windSpeed">-- km/h</div>
-                </div>
-                <div class="weather-card">
-                    <div class="weather-icon">📍</div>
-                    <div class="weather-label">位置</div>
-                    <div class="weather-value" id="location">获取中...</div>
-                </div>
-            </div>
-            <div id="greetingError" class="error-message" style="display: none;"></div>
-        </div>
-
-        <div class="header">
-            <h1>🏃‍♂️ 佳明杀手-GPX转TCX转换器</h1>
-            <p>我是没有感情的佳明杀手，专门将您的GPX轨迹文件转换为专业的佳明TCX格式，支持心率、步频、功率等数据模拟</p>
-        </div>
-
-        <div class="author-info card" style="animation: fadeIn 0.8s ease 0.2s both;">
-            <h3>👨‍💻 开发者信息</h3>
-            <p><strong>作者:</strong> mariohuang</p>
-            <p><strong>⚠️ 重要提醒:</strong> 我是没有感情的佳明杀手，仅用于测试场景，不能作为比赛作弊用途，违反者必究</p>
         </div>
 
         <div class="status-indicator status-error" id="errorMessage" style="display: none;"></div>
@@ -546,14 +548,12 @@
         document.getElementById('startTime').value = localTimeString;
 
         // 个性化问候功能
-         const greetingText = document.getElementById('greetingText');
          const weatherDetails = document.getElementById('weatherDetails');
          const greetingError = document.getElementById('greetingError');
 
-         // 页面加载时自动获取问候信息
+         // 页面加载时自动获取天气信息
          async function loadGreeting() {
              try {
-                 greetingText.textContent = '正在获取您的位置和天气信息...';
                  if (weatherDetails) weatherDetails.style.display = 'none';
                  if (greetingError) greetingError.style.display = 'none';
 
@@ -561,10 +561,6 @@
                  const data = await response.json();
  
                  if (data.success) {
-                     // 显示问候语
-                     greetingText.textContent = data.data.greeting;
-                     greetingText.classList.add('hero-title');
-                     
                      // 显示天气信息
                      if (data.data.weather && weatherDetails) {
                          document.getElementById('temperature').textContent = data.data.weather.temperature;
@@ -579,8 +575,6 @@
                      throw new Error(data.error || '获取问候信息失败');
                  }
              } catch (error) {
-                 greetingText.textContent = '🏃‍♂️ 欢迎使用GPX转TCX转换器！开始您的跑步数据转换之旅';
-                 greetingText.classList.add('hero-title');
                  if (greetingError) {
                      greetingError.textContent = `获取位置信息失败: ${error.message}`;
                      greetingError.style.display = 'block';

@@ -186,83 +186,9 @@ body::before {
     border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
 }
 
-/* 作者信息 - 优雅的极简设计 */
-.author-info {
-    margin-top: var(--space-8);
-    padding: var(--space-6);
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-    border: 1px solid rgba(102, 126, 234, 0.1);
-    border-radius: var(--radius-lg);
-    color: var(--gray-600);
-    font-size: 14px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
 
-.author-info::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-    transition: left 0.6s ease;
-}
 
-.author-info:hover::before {
-    left: 100%;
-}
 
-.author-info p {
-    margin: 0;
-    font-weight: 500;
-    position: relative;
-    z-index: 1;
-}
-
-.author-info strong {
-    color: var(--error);
-    font-weight: 600;
-}
-
-/* 头部区域 - 信息层级清晰呈现 */
-.header {
-    text-align: center;
-    margin-bottom: var(--space-12);
-    position: relative;
-    padding: var(--space-16) 0;
-    background: #ffffff;
-    border-radius: var(--radius-lg);
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    box-shadow: var(--shadow-sm);
-}
-
-.header h1 {
-    color: var(--gray-900);
-    font-size: clamp(2rem, 4vw, 3.2rem);
-    margin-bottom: var(--space-4);
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    line-height: 1.1;
-}
-
-@keyframes gradientText {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-.header p {
-    color: var(--gray-600);
-    font-size: 1.1rem;
-    line-height: 1.6;
-    max-width: 600px;
-    margin: 0 auto;
-    font-weight: 400;
-}
 
 /* 卡片布局系统 */
 .card {
@@ -839,17 +765,37 @@ body::before {
     }
     
     .hero-greeting {
-        padding: 60px 1rem;
-        margin: 20px 0;
+        padding: 2rem 1rem;
+        margin: -1rem -1rem 2rem -1rem;
     }
     
-    .hero-title {
-        font-size: 2.2rem;
+    .app-title {
+        font-size: 1.8rem;
+    }
+    
+    .app-description {
+        font-size: 1rem;
+    }
+    
+    .runner {
+        font-size: 3rem;
     }
     
     .weather-cards {
-        grid-template-columns: 1fr;
-        gap: 12px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .developer-info {
+        flex-direction: column;
+        gap: 0.25rem;
+        text-align: center;
+    }
+    
+    .disclaimer {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
     }
 }
 
@@ -1765,11 +1711,11 @@ body::before {
     }
 }
 
-/* 英雄问候区域样式 - 现代卡片风格 */
+/* 英雄介绍区域样式 - 现代卡片风格 */
 .hero-greeting {
     background: #ffffff;
     color: #1a1a1a;
-    padding: 5rem 2rem;
+    padding: 3rem 2rem;
     margin: -2rem -2rem 3rem -2rem;
     position: relative;
     overflow: hidden;
@@ -1789,10 +1735,20 @@ body::before {
     opacity: 0.3;
 }
 
-.running-animation {
-    position: absolute;
-    top: 30px;
-    right: 30px;
+.greeting-content {
+    position: relative;
+    z-index: 2;
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+}
+
+.runner-animation {
+    margin-bottom: 1rem;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -1800,8 +1756,8 @@ body::before {
     filter: grayscale(0.3);
 }
 
-.runner-icon {
-    font-size: 2rem;
+.runner {
+    font-size: 4rem;
     animation: runnerBounce 2s ease-in-out infinite;
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
 }
@@ -1837,50 +1793,88 @@ body::before {
     100% { left: 100%; }
 }
 
-.greeting-content {
-    position: relative;
-    z-index: 2;
-    max-width: 900px;
-    margin: 0 auto;
+.app-intro {
     text-align: center;
+    max-width: 600px;
 }
 
-.hero-title {
-    font-size: 2.8rem;
-    font-weight: 600;
-    margin: 0 0 2rem 0;
-    color: #1a1a1a;
+.app-title {
+    margin: 0 0 1rem 0;
+    color: #2c3e50;
+    font-size: 2.2rem;
+    font-weight: 700;
     line-height: 1.2;
-    letter-spacing: -0.02em;
 }
 
-@keyframes titleGlow {
-    0% { filter: brightness(1); }
-    100% { filter: brightness(1.2); }
+.app-description {
+    margin: 0 0 1.5rem 0;
+    color: #5a6c7d;
+    font-size: 1.1rem;
+    line-height: 1.5;
+}
+
+.developer-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #f8f9fa;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    margin-bottom: 1rem;
+    border: 1px solid #e9ecef;
+}
+
+.developer-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.developer-name {
+    font-weight: 600;
+    color: #495057;
+}
+
+.disclaimer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: #fff3cd;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #ffeaa7;
+    margin-top: 1rem;
+}
+
+.warning-icon {
+    font-size: 1rem;
+}
+
+.disclaimer-text {
+    font-size: 0.9rem;
+    color: #856404;
+    font-weight: 500;
 }
 
 .weather-info {
     margin-top: 2rem;
+    width: 100%;
 }
 
 .weather-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 1rem;
-    margin-top: 2.5rem;
-    max-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
+    margin-top: 2rem;
+    width: 100%;
 }
 
 .weather-card {
     background: #f8f9fa;
     border: 1px solid rgba(0, 0, 0, 0.08);
-    padding: 1.5rem;
+    padding: 1rem;
     border-radius: 12px;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+    text-align: center;
     transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
@@ -1909,8 +1903,9 @@ body::before {
 }
 
 .weather-icon {
-    font-size: 1.8rem;
-    min-width: 40px;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    display: block;
     opacity: 0.8;
     animation: iconFloat 3s ease-in-out infinite;
 }
@@ -1920,24 +1915,18 @@ body::before {
     50% { transform: translateY(-5px); }
 }
 
-.weather-data {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-}
-
 .weather-label {
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: #6b7280;
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
     text-transform: uppercase;
     letter-spacing: 0.8px;
 }
 
 .weather-value {
-    font-size: 1.3rem;
     font-weight: 600;
-    color: #1a1a1a;
+    color: #495057;
+    font-size: 0.9rem;
 }
 
 /* 移动端适配 */
