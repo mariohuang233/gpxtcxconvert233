@@ -8,6 +8,50 @@
 </head>
 <body>
     <div class="container fade-in">
+        <!-- 个性化问候语区域 - 置顶 -->
+        <div class="hero-greeting">
+            <div class="running-animation">
+                <div class="runner-icon">🏃‍♂️</div>
+                <div class="track-line"></div>
+            </div>
+            <div class="greeting-content">
+                <h1 id="greetingText" class="hero-title">正在获取您的位置和天气信息...</h1>
+                <div id="weatherDetails" class="weather-info" style="display: none;">
+                    <div class="weather-cards">
+                        <div class="weather-card">
+                            <div class="weather-icon">🌡️</div>
+                            <div class="weather-data">
+                                <span class="weather-label">温度</span>
+                                <span id="temperature" class="weather-value">-</span>°C
+                            </div>
+                        </div>
+                        <div class="weather-card">
+                            <div class="weather-icon">💧</div>
+                            <div class="weather-data">
+                                <span class="weather-label">湿度</span>
+                                <span id="humidity" class="weather-value">-</span>%
+                            </div>
+                        </div>
+                        <div class="weather-card">
+                            <div class="weather-icon">💨</div>
+                            <div class="weather-data">
+                                <span class="weather-label">风速</span>
+                                <span id="windSpeed" class="weather-value">-</span> km/h
+                            </div>
+                        </div>
+                        <div class="weather-card">
+                            <div class="weather-icon">📍</div>
+                            <div class="weather-data">
+                                <span class="weather-label">位置</span>
+                                <span id="location" class="weather-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="greetingError" class="error-message" style="display: none;"></div>
+            </div>
+        </div>
+
         <div class="header">
             <h1>🏃‍♂️ 佳明杀手-GPX转TCX转换器</h1>
             <p>我是没有感情的佳明杀手，专门将您的GPX轨迹文件转换为专业的佳明TCX格式，支持心率、步频、功率等数据模拟</p>
@@ -163,48 +207,7 @@
             </div>
         </div>
 
-        <div class="greeting-section card" style="animation: fadeIn 0.8s ease 0.7s both;">
-            <h3>🌟 个性化问候</h3>
-            <div class="greeting-content">
-                <div id="greetingDisplay" class="greeting-display">
-                    <p id="greetingText" class="greeting-text">正在获取您的位置和天气信息...</p>
-                    <div id="weatherDetails" class="weather-details" style="display: none;">
-                        <div class="weather-grid">
-                            <div class="weather-item">
-                                <span class="weather-icon">🌡️</span>
-                                <div>
-                                    <strong>温度</strong>
-                                    <span id="temperature">-</span>°C
-                                </div>
-                            </div>
-                            <div class="weather-item">
-                                <span class="weather-icon">💧</span>
-                                <div>
-                                    <strong>湿度</strong>
-                                    <span id="humidity">-</span>%
-                                </div>
-                            </div>
-                            <div class="weather-item">
-                                <span class="weather-icon">💨</span>
-                                <div>
-                                    <strong>风速</strong>
-                                    <span id="windSpeed">-</span> km/h
-                                </div>
-                            </div>
-                            <div class="weather-item">
-                                <span class="weather-icon">📍</span>
-                                <div>
-                                    <strong>位置</strong>
-                                    <span id="location">-</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="greetingError" class="status-indicator status-error" style="display: none;"></div>
-            </div>
-        </div>
+
 
         <div class="features card" style="animation: fadeIn 0.8s ease 0.8s both;">
             <h3>✨ 功能特色</h3>
@@ -238,12 +241,19 @@
                     </div>
                 </div>
                 <div class="feature-item">
-                        <div class="feature-icon">🌟</div>
-                        <div class="feature-content">
-                            <div class="feature-title">个性化问候</div>
-                            <div class="feature-desc">基于位置的智能天气信息和个性化问候语</div>
-                        </div>
+                    <div class="feature-icon">🔧</div>
+                    <div class="feature-content">
+                        <div class="feature-title">高级配置</div>
+                        <div class="feature-desc">支持心率、步频、功率等多项运动数据自定义</div>
                     </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🌍</div>
+                    <div class="feature-content">
+                        <div class="feature-title">智能定位</div>
+                        <div class="feature-desc">自动获取位置和天气信息，提供个性化跑步建议</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -545,26 +555,27 @@
         document.getElementById('startTime').value = localTimeString;
 
         // 个性化问候功能
-        const greetingText = document.getElementById('greetingText');
-        const weatherDetails = document.getElementById('weatherDetails');
-        const greetingError = document.getElementById('greetingError');
+         const greetingText = document.getElementById('greetingText');
+         const weatherDetails = document.getElementById('weatherDetails');
+         const greetingError = document.getElementById('greetingError');
 
-        // 页面加载时自动获取问候信息
-        async function loadGreeting() {
-            try {
-                greetingText.textContent = '正在获取您的位置和天气信息...';
-                weatherDetails.style.display = 'none';
-                greetingError.style.display = 'none';
+         // 页面加载时自动获取问候信息
+         async function loadGreeting() {
+             try {
+                 greetingText.textContent = '正在获取您的位置和天气信息...';
+                 if (weatherDetails) weatherDetails.style.display = 'none';
+                 if (greetingError) greetingError.style.display = 'none';
 
-                const response = await fetch('/greeting-info');
+                 const response = await fetch('/greeting-info');
                  const data = await response.json();
  
                  if (data.success) {
                      // 显示问候语
                      greetingText.textContent = data.data.greeting;
+                     greetingText.classList.add('hero-title');
                      
                      // 显示天气信息
-                     if (data.data.weather) {
+                     if (data.data.weather && weatherDetails) {
                          document.getElementById('temperature').textContent = data.data.weather.temperature;
                          document.getElementById('humidity').textContent = data.data.weather.humidity;
                          document.getElementById('windSpeed').textContent = data.data.weather.wind_speed;
@@ -573,23 +584,26 @@
                          weatherDetails.style.display = 'block';
                          weatherDetails.classList.add('fade-in');
                      }
-                } else {
-                    throw new Error(data.error || '获取问候信息失败');
-                }
-            } catch (error) {
-                greetingText.textContent = '欢迎使用GPX转TCX转换器！';
-                greetingError.textContent = `获取位置信息失败: ${error.message}`;
-                greetingError.style.display = 'block';
-                greetingError.classList.add('shake');
-                
-                setTimeout(() => {
-                    greetingError.classList.remove('shake');
-                }, 600);
-            }
-        }
-
-        // 页面加载完成后自动执行
-        document.addEventListener('DOMContentLoaded', loadGreeting);
+                 } else {
+                     throw new Error(data.error || '获取问候信息失败');
+                 }
+             } catch (error) {
+                 greetingText.textContent = '🏃‍♂️ 欢迎使用GPX转TCX转换器！开始您的跑步数据转换之旅';
+                 greetingText.classList.add('hero-title');
+                 if (greetingError) {
+                     greetingError.textContent = `获取位置信息失败: ${error.message}`;
+                     greetingError.style.display = 'block';
+                     greetingError.classList.add('shake');
+                     
+                     setTimeout(() => {
+                         greetingError.classList.remove('shake');
+                     }, 600);
+                 }
+             }
+         }
+ 
+         // 页面加载完成后自动执行
+         loadGreeting();
     </script>
 </body>
 </html>

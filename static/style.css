@@ -1703,103 +1703,221 @@ body::before {
     }
 }
 
-/* 个性化问候区域样式 */
-.greeting-section {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+/* 英雄问候区域样式 */
+.hero-greeting {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%, #f093fb 200%);
     color: white;
-    padding: 2rem;
-    border-radius: 15px;
-    margin: 2rem 0;
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    padding: 3rem 2rem;
+    margin: -2rem -2rem 3rem -2rem;
+    position: relative;
+    overflow: hidden;
+    border-radius: 0 0 30px 30px;
+    box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+}
+
+.hero-greeting::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><linearGradient id="a" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0.1"/><stop offset="100%" stop-color="%23ffffff" stop-opacity="0"/></linearGradient></defs><polygon fill="url(%23a)" points="0,20 100,0 100,20"/></svg>') repeat-x;
+    opacity: 0.3;
+}
+
+.running-animation {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.runner-icon {
+    font-size: 2rem;
+    animation: runnerBounce 2s ease-in-out infinite;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+@keyframes runnerBounce {
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    50% { transform: translateY(-10px) rotate(5deg); }
+}
+
+.track-line {
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #ffd700, #ff6b6b, #4ecdc4);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+}
+
+.track-line::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+    animation: trackShine 3s ease-in-out infinite;
+}
+
+@keyframes trackShine {
+    0% { left: -100%; }
+    100% { left: 100%; }
 }
 
 .greeting-content {
-    max-width: 800px;
+    position: relative;
+    z-index: 2;
+    max-width: 900px;
     margin: 0 auto;
     text-align: center;
 }
 
-.greeting-display {
-    padding: 1rem;
+.hero-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 0 0 2rem 0;
+    color: #ffffff;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    line-height: 1.2;
+    background: linear-gradient(45deg, #ffd700, #ff6b6b, #4ecdc4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: titleGlow 3s ease-in-out infinite alternate;
 }
 
-.greeting-text {
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin: 1rem 0;
+@keyframes titleGlow {
+    0% { filter: brightness(1); }
+    100% { filter: brightness(1.2); }
+}
+
+.weather-info {
+    margin-top: 2rem;
+}
+
+.weather-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.weather-card {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 1.5rem;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.weather-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.6s ease;
+}
+
+.weather-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.weather-card:hover::before {
+    left: 100%;
+}
+
+.weather-icon {
+    font-size: 2rem;
+    min-width: 40px;
+    animation: iconFloat 3s ease-in-out infinite;
+}
+
+@keyframes iconFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.weather-data {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.weather-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.weather-value {
+    font-size: 1.4rem;
+    font-weight: 700;
     color: #ffd700;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.weather-details {
-    margin-top: 2rem;
-    padding: 1.5rem;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    backdrop-filter: blur(10px);
-}
-
-.weather-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
-}
-
-.weather-item {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 1rem;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    transition: transform 0.3s ease;
-}
-
-.weather-item:hover {
-    transform: translateY(-2px);
-    background: rgba(255, 255, 255, 0.15);
-}
-
-.weather-icon {
-    font-size: 1.5rem;
-    min-width: 30px;
-}
-
-.weather-item div {
-    text-align: left;
-}
-
-.weather-item strong {
-    display: block;
-    margin-bottom: 0.3rem;
-    color: #ffd700;
-    font-size: 0.9rem;
-}
-
-.weather-item span {
-    font-size: 1.1rem;
-    font-weight: 600;
-}
-
 /* 移动端适配 */
 @media (max-width: 768px) {
-    .weather-grid {
-        grid-template-columns: repeat(2, 1fr);
+    .hero-greeting {
+        padding: 2rem 1rem;
+        margin: -1rem -1rem 2rem -1rem;
     }
     
-    .weather-item {
+    .hero-title {
+        font-size: 1.6rem;
+    }
+    
+    .running-animation {
+        top: 15px;
+        right: 15px;
+    }
+    
+    .runner-icon {
+        font-size: 1.5rem;
+    }
+    
+    .track-line {
+        width: 40px;
+    }
+    
+    .weather-cards {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .weather-card {
+        padding: 1rem;
         flex-direction: column;
         text-align: center;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
     
-    .weather-item div {
-        text-align: center;
+    .weather-icon {
+        font-size: 1.5rem;
     }
     
-    .greeting-text {
-        font-size: 1rem;
+    .weather-value {
+        font-size: 1.2rem;
     }
 }
 
