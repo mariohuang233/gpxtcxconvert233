@@ -3,248 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPX转TCX转换器 - 专业运动数据转换工具</title>
+    <title>GPX to TCX - Precision in Motion</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Leaflet地图库 -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏃</text></svg>">
 </head>
 <body>
-    <div class="container fade-in">
-        <!-- 英雄介绍区域 -->
-        <div class="hero-greeting">
-            <div class="greeting-content">
-                <div class="runner-animation">
-                    <div class="runner">🏃‍♂️</div>
+    <div class="container">
+        <!-- 全屏居中欢迎区域 -->
+        <div class="welcome-section animate-fade-in">
+            <h1 class="welcome-title animate-scale-in">Precision in Motion</h1>
+            <p class="welcome-subtitle animate-fade-in animate-delay-2">Transform every step into meaningful data</p>
+            
+            <div class="welcome-info animate-slide-up animate-delay-3">
+                <div class="info-item">
+                    <span class="info-label">FORMAT</span>
+                    <span class="info-value">GPX → TCX</span>
                 </div>
-                <div class="app-intro">
-                    <h1 class="app-title">佳明杀手 - GPX转TCX转换器</h1>
-                    <p class="app-description">专业的GPX轨迹文件转换工具，支持心率、步频、功率等数据模拟</p>
-                    <div class="developer-info">
-                        <span class="developer-label">👨‍💻 开发者:</span>
-                        <span class="developer-name">mariohuang</span>
-                    </div>
-                    <div class="disclaimer">
-                        <span class="warning-icon">⚠️</span>
-                        <span class="disclaimer-text">仅用于测试场景，不得用于比赛作弊</span>
-                    </div>
+                <div class="info-item">
+                    <span class="info-label">DEVELOPER</span>
+                    <span class="info-value">mariohuang</span>
                 </div>
-                <div id="weatherDetails" class="weather-cards" style="display: none;">
-                    <div class="weather-card">
-                        <div class="weather-icon">🌡️</div>
-                        <div class="weather-label">温度</div>
-                        <div class="weather-value" id="temperature">--°C</div>
-                    </div>
-                    <div class="weather-card">
-                        <div class="weather-icon">💧</div>
-                        <div class="weather-label">湿度</div>
-                        <div class="weather-value" id="humidity">--%</div>
-                    </div>
-                    <div class="weather-card">
-                        <div class="weather-icon">💨</div>
-                        <div class="weather-label">风速</div>
-                        <div class="weather-value" id="windSpeed">-- km/h</div>
-                    </div>
-                    <div class="weather-card">
-                        <div class="weather-icon">📍</div>
-                        <div class="weather-label">位置</div>
-                        <div class="weather-value" id="location">获取中...</div>
-                    </div>
+                <div class="info-item" id="weatherInline" style="display: none;">
+                    <span class="info-label">天气:</span>
+                    <span class="info-value" id="weatherSummary">--</span>
                 </div>
-                <div id="greetingError" class="error-message" style="display: none;"></div>
             </div>
+            
+            <div class="status-indicator status-warning animate-scale-in animate-delay-3" style="margin-top: 1.5rem;">
+                ⚠️ For testing purposes only
+            </div>
+            
+            <div id="greetingError" class="status-indicator status-error" style="display: none;"></div>
         </div>
 
         <div class="status-indicator status-error" id="errorMessage" style="display: none;"></div>
 
-        <div class="upload-section card" style="animation: fadeIn 0.8s ease 0.4s both;">
-            <div class="file-upload" id="fileUpload">
-                <div class="upload-icon">📁</div>
-                <div class="upload-text">点击选择GPX文件或拖拽到此处</div>
-                <div class="upload-hint">支持最大16MB的GPX文件</div>
-                <input type="file" id="fileInput" accept=".gpx" style="display: none;" />
+        <div class="upload-section animate-slide-up animate-delay-4">
+            <div class="card">
+                <div class="file-upload" id="fileUpload">
+                    <div class="upload-icon">⚡</div>
+                    <div class="upload-text">Drop your GPX file</div>
+                    <div class="upload-hint">Seamless conversion • Instant results • Professional grade</div>
+                    <input type="file" id="fileInput" accept=".gpx" style="display: none;" />
+                </div>
+                
+                <!-- GPX路径可视化区域 -->
+                <div class="gpx-preview" id="gpxPreview" style="display: none;">
+                    <div class="preview-header">
+                        <h4>🗺️ 路径预览</h4>
+                        <div class="route-stats" id="routeStats"></div>
+                    </div>
+                    <div class="map-container">
+                        <div id="gpxMap" class="gpx-map"></div>
+                    </div>
+                    <div class="route-info" id="routeInfo"></div>
+                </div>
             </div>
         </div>
 
-        <div class="config-section card" style="animation: fadeIn 0.8s ease 0.6s both;">
-            <div class="config-title">转换配置</div>
+        <div class="config-section animate-fade-in animate-delay-2">
             <form id="configForm">
                 <div class="config-grid">
-                    <div class="config-group">
-                        <h3>🏃‍♂️ 运动设置</h3>
+                    <div class="card config-group animate-scale-in animate-delay-3">
+                        <h3>🏃‍♂️ Activity</h3>
                         <div class="form-group">
-                            <label for="activityType">运动类型</label>
+                            <label for="activityType">Sport Type</label>
                             <select id="activityType" name="activity_type">
-                                <option value="Running">跑步</option>
-                                <option value="Cycling">骑行</option>
-                                <option value="Walking">步行</option>
+                                <option value="Running">Running</option>
+                                <option value="Cycling">Cycling</option>
+                                <option value="Walking">Walking</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="targetPace">目标配速 (分:秒/公里)</label>
+                            <label for="targetPace">Target Pace</label>
                             <input type="text" id="targetPace" name="target_pace" value="5:30" placeholder="5:30">
                         </div>
                         <div class="form-group">
-                            <label for="weight">体重 (kg)</label>
+                            <label for="weight">Weight (kg)</label>
                             <input type="number" id="weight" name="weight" value="70" min="30" max="200">
                         </div>
                     </div>
 
-                    <div class="config-group">
-                        <h3>💓 心率设置</h3>
+                    <div class="card config-group animate-scale-in animate-delay-4">
+                        <h3>💓 Heart Rate</h3>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="baseHr">基础心率</label>
+                                <label for="baseHr">Base BPM</label>
                                 <input type="number" id="baseHr" name="base_hr" value="135" min="60" max="200">
                             </div>
                             <div class="form-group">
-                                <label for="maxHr">最大心率</label>
+                                <label for="maxHr">Max BPM</label>
                                 <input type="number" id="maxHr" name="max_hr" value="165" min="100" max="220">
                             </div>
                         </div>
                     </div>
 
-                    <div class="config-group">
-                        <h3>🦵 步频设置</h3>
+                    <div class="card config-group animate-scale-in animate-delay-5">
+                        <h3>🦵 Cadence</h3>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="baseCadenceDisplay">基础步频 (显示)</label>
+                                <label for="baseCadenceDisplay">Base SPM</label>
                                 <input type="number" id="baseCadenceDisplay" value="100" min="60" max="200" onchange="updateCadenceValue('base')">
                                 <input type="hidden" id="baseCadence" name="base_cadence" value="50">
                             </div>
                             <div class="form-group">
-                                <label for="maxCadenceDisplay">最大步频 (显示)</label>
+                                <label for="maxCadenceDisplay">Max SPM</label>
                                 <input type="number" id="maxCadenceDisplay" value="140" min="100" max="240" onchange="updateCadenceValue('max')">
                                 <input type="hidden" id="maxCadence" name="max_cadence" value="70">
                             </div>
                         </div>
                     </div>
 
-                    <div class="config-group">
-                        <h3>⚡ 功率设置</h3>
+                    <div class="card config-group animate-scale-in animate-delay-6">
+                        <h3>⚡ Power</h3>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="basePower">基础功率</label>
+                                <label for="basePower">Base Watts</label>
                                 <input type="number" id="basePower" name="base_power" value="150" min="50" max="500">
                             </div>
                             <div class="form-group">
-                                <label for="maxPower">最大功率</label>
+                                <label for="maxPower">Max Watts</label>
                                 <input type="number" id="maxPower" name="max_power" value="300" min="100" max="800">
                             </div>
                         </div>
                     </div>
 
-                    <div class="config-group">
-                        <h3>📱 设备信息</h3>
+                    <div class="card config-group animate-scale-in animate-delay-7">
+                        <h3>📱 Device</h3>
                         <div class="form-group">
-                            <label>设备名称</label>
+                            <label>Device Name</label>
                             <input type="text" value="Forerunner 570" disabled style="background: #f5f5f5; color: #666;">
                             <input type="hidden" name="device_name" value="Forerunner 570">
                         </div>
                         <div class="form-group">
-                            <label>设备版本</label>
+                            <label>Firmware</label>
                             <input type="text" value="12.70" disabled style="background: #f5f5f5; color: #666;">
                             <input type="hidden" name="device_version" value="12.70">
                         </div>
                     </div>
 
-                    <div class="config-group">
-                        <h3>🕐 时间设置</h3>
+                    <div class="card config-group animate-scale-in animate-delay-8">
+                        <h3>🕐 Timing</h3>
                         <div class="form-group">
-                            <label for="startTime">自定义开始时间 (可选)</label>
+                            <label for="startTime">Custom Start Time</label>
                             <input type="datetime-local" id="startTime" name="start_time">
                         </div>
                         <div class="form-group">
-                            <label for="caloriesPerKm">卡路里/公里</label>
+                            <label for="caloriesPerKm">Calories per KM</label>
                             <input type="number" id="caloriesPerKm" name="calories_per_km" value="60" min="30" max="150">
                         </div>
                     </div>
                 </div>
+                </div>
             </form>
         </div>
 
-        <div class="convert-section">
-            <button id="convertBtn" class="btn btn-primary btn-large" disabled>
-                <span class="btn-icon">🔄</span>
-                <span class="btn-text">开始转换</span>
+        <div class="convert-section animate-fade-in animate-delay-9">
+            <button id="convertBtn" class="btn btn-primary" disabled>
+                <span class="btn-icon">⚡</span>
+                <span class="btn-text">INITIALIZE CONVERSION</span>
                 <div class="btn-ripple"></div>
             </button>
         </div>
 
-        <div class="progress-section card" id="progressSection" style="display: none;">
-            <div class="progress-container">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-                <div class="progress-text" id="progressText">准备转换...</div>
-            </div>
-        </div>
-
-        <div class="result-section card" id="resultSection" style="display: none;">
-            <div class="result-content">
-                <div class="result-icon" id="resultIcon">✅</div>
-                <div class="result-message" id="resultMessage">转换完成！</div>
-                <div class="result-actions">
-                    <button id="downloadBtn" class="btn btn-success">
-                        <span class="btn-icon">⬇️</span>
-                        <span class="btn-text">下载TCX文件</span>
-                        <div class="btn-ripple"></div>
-                    </button>
-                    <button id="resetBtn" class="btn btn-secondary">
-                        <span class="btn-icon">🔄</span>
-                        <span class="btn-text">重新转换</span>
-                        <div class="btn-ripple"></div>
-                    </button>
+        <div class="progress-section" id="progressSection" style="display: none;">
+            <div class="card">
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">INITIALIZING...</div>
                 </div>
             </div>
         </div>
 
+        <div class="result-section" id="resultSection" style="display: none;">
+            <div class="card">
+                <div class="result-content">
+                    <div class="result-icon" id="resultIcon">⚡</div>
+                    <div class="result-message" id="resultMessage">CONVERSION COMPLETE</div>
+                    <div class="result-actions">
+                        <button id="downloadBtn" class="btn btn-success">
+                            <span class="btn-icon">⬇</span>
+                            <span class="btn-text">DOWNLOAD TCX</span>
+                            <div class="btn-ripple"></div>
+                        </button>
+                        <button id="resetBtn" class="btn btn-secondary">
+                            <span class="btn-icon">↻</span>
+                            <span class="btn-text">RESET</span>
+                            <div class="btn-ripple"></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-
-        <div class="features card" style="animation: fadeIn 0.8s ease 0.8s both;">
-            <h3>✨ 功能特色</h3>
-            <div class="feature-grid">
+        <div class="features animate-fade-in animate-delay-10">
+            <div class="card">
+                <h3>CORE FEATURES</h3>
+                <div class="feature-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-content">
+                        <div class="feature-title">INSTANT PROCESSING</div>
+                        <div class="feature-desc">Advanced algorithms deliver sub-second GPX to TCX conversion</div>
+                    </div>
+                </div>
                 <div class="feature-item">
                     <div class="feature-icon">🎯</div>
                     <div class="feature-content">
-                        <div class="feature-title">精确转换</div>
-                        <div class="feature-desc">保持原始轨迹精度，完美兼容各种设备</div>
-                    </div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">📊</div>
-                    <div class="feature-content">
-                        <div class="feature-title">数据丰富</div>
-                        <div class="feature-desc">自动生成心率、步频、功率等专业数据</div>
-                    </div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">⚙️</div>
-                    <div class="feature-content">
-                        <div class="feature-title">高度自定义</div>
-                        <div class="feature-desc">支持详细的参数配置，满足个性化需求</div>
+                        <div class="feature-title">PRECISION DATA</div>
+                        <div class="feature-desc">Maintains original trajectory accuracy with complete data integrity</div>
                     </div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">🔒</div>
                     <div class="feature-content">
-                        <div class="feature-title">隐私安全</div>
-                        <div class="feature-desc">文件本地处理，1小时后自动清理</div>
+                        <div class="feature-title">PRIVACY FIRST</div>
+                        <div class="feature-desc">Local processing ensures your fitness data never leaves your device</div>
                     </div>
                 </div>
                 <div class="feature-item">
-                    <div class="feature-icon">🔧</div>
+                    <div class="feature-icon">📱</div>
                     <div class="feature-content">
-                        <div class="feature-title">高级配置</div>
-                        <div class="feature-desc">支持心率、步频、功率等多项运动数据自定义</div>
+                        <div class="feature-title">UNIVERSAL ACCESS</div>
+                        <div class="feature-desc">Cross-platform compatibility for seamless conversion anywhere</div>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">⚙️</div>
+                    <div class="feature-content">
+                        <div class="feature-title">ADVANCED CONFIG</div>
+                        <div class="feature-desc">Comprehensive parameter customization for professional athletes</div>
                     </div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">🌍</div>
                     <div class="feature-content">
-                        <div class="feature-title">智能定位</div>
-                        <div class="feature-desc">自动获取位置和天气信息，提供个性化跑步建议</div>
+                        <div class="feature-title">SMART LOCATION</div>
+                        <div class="feature-desc">Intelligent weather integration for personalized training insights</div>
                     </div>
                 </div>
             </div>
@@ -252,6 +254,283 @@
     </div>
 
     <script>
+        // 多语言支持
+        const translations = {
+            'zh': {
+                title: 'Run Beyond Data',
+                subtitle: '将您的跑步数据转化为强大洞察',
+                status: '状态',
+                online: '● 在线',
+                format: '格式',
+                speed: '速度',
+                developer: '开发者',
+                warning: '⚠️ 仅供测试使用，请勿用于正式比赛',
+                uploadText: '拖拽GPX文件到此处',
+                uploadHint: '支持.gpx格式 • 最大10MB • 即时处理',
+                sportConfig: '🏃‍♂️ 运动设置',
+                activityType: '运动类型',
+                running: '跑步',
+                cycling: '骑行',
+                walking: '步行',
+                targetPace: '目标配速 (分:秒/公里)',
+                weight: '体重 (kg)',
+                heartRate: '💓 心率设置',
+                baseHr: '基础心率',
+                maxHr: '最大心率',
+                cadenceConfig: '🦵 步频设置',
+                baseCadence: '基础步频 (显示)',
+                maxCadence: '最大步频 (显示)',
+                powerConfig: '⚡ 功率设置',
+                basePower: '基础功率',
+                maxPower: '最大功率',
+                deviceInfo: '📱 设备信息',
+                deviceName: '设备名称',
+                deviceVersion: '设备版本',
+                timeConfig: '🕐 时间设置',
+                startTime: '自定义开始时间 (可选)',
+                caloriesPerKm: '卡路里/公里',
+                convertBtn: '开始转换',
+                initializing: '初始化中...',
+                conversionComplete: '转换完成',
+                downloadTcx: '下载TCX文件',
+                reset: '重新转换',
+                coreFeatures: '核心功能',
+                instantProcessing: '即时处理',
+                instantDesc: '先进算法实现亚秒级GPX到TCX转换',
+                precisionData: '精确数据',
+                precisionDesc: '保持原始轨迹精度，完整数据完整性',
+                privacyFirst: '隐私优先',
+                privacyDesc: '本地处理确保您的健身数据不会离开设备',
+                universalAccess: '通用访问',
+                universalDesc: '跨平台兼容性，随时随地无缝转换',
+                advancedConfig: '高级配置',
+                advancedDesc: '为专业运动员提供全面的参数定制',
+                smartLocation: '智能定位',
+                smartDesc: '智能天气集成，提供个性化训练洞察',
+                routePreview: '🗺️ 路径预览',
+                totalDistance: '总距离',
+                trackPoints: '轨迹点',
+                elevationGain: '海拔变化',
+                routeDetails: '📍 轨迹详情',
+                routeName: '名称',
+                routeDesc: '描述',
+                timeRange: '时间范围',
+                avgSpeed: '平均速度',
+                startPoint: '起点',
+                endPoint: '终点',
+                unnamedTrack: '未命名轨迹',
+                unknown: '未知'
+            },
+            'en': {
+                title: 'Run Beyond Data',
+                subtitle: 'Transform your runs into powerful insights',
+                status: 'STATUS',
+                online: '● ONLINE',
+                format: 'FORMAT',
+                speed: 'SPEED',
+                developer: 'DEVELOPER',
+                warning: '⚠️ For testing only, not for official competitions',
+                uploadText: 'DROP GPX FILE HERE',
+                uploadHint: 'Supports .gpx format • Max 10MB • Instant processing',
+                sportConfig: '🏃‍♂️ SPORT CONFIG',
+                activityType: 'Activity Type',
+                running: 'Running',
+                cycling: 'Cycling',
+                walking: 'Walking',
+                targetPace: 'Target Pace (min:sec/km)',
+                weight: 'Weight (kg)',
+                heartRate: '💓 HEART RATE',
+                baseHr: 'Base Heart Rate',
+                maxHr: 'Max Heart Rate',
+                cadenceConfig: '🦵 CADENCE CONFIG',
+                baseCadence: 'Base Cadence (Display)',
+                maxCadence: 'Max Cadence (Display)',
+                powerConfig: '⚡ POWER CONFIG',
+                basePower: 'Base Power',
+                maxPower: 'Max Power',
+                deviceInfo: '📱 DEVICE INFO',
+                deviceName: 'Device Name',
+                deviceVersion: 'Device Version',
+                timeConfig: '🕐 TIME CONFIG',
+                startTime: 'Custom Start Time (Optional)',
+                caloriesPerKm: 'Calories/km',
+                convertBtn: 'INITIALIZE CONVERSION',
+                initializing: 'INITIALIZING...',
+                conversionComplete: 'CONVERSION COMPLETE',
+                downloadTcx: 'DOWNLOAD TCX',
+                reset: 'RESET',
+                coreFeatures: 'CORE FEATURES',
+                instantProcessing: 'INSTANT PROCESSING',
+                instantDesc: 'Advanced algorithms deliver sub-second GPX to TCX conversion',
+                precisionData: 'PRECISION DATA',
+                precisionDesc: 'Maintains original trajectory accuracy with complete data integrity',
+                privacyFirst: 'PRIVACY FIRST',
+                privacyDesc: 'Local processing ensures your fitness data never leaves your device',
+                universalAccess: 'UNIVERSAL ACCESS',
+                universalDesc: 'Cross-platform compatibility for seamless conversion anywhere',
+                advancedConfig: 'ADVANCED CONFIG',
+                advancedDesc: 'Comprehensive parameter customization for professional athletes',
+                smartLocation: 'SMART LOCATION',
+                smartDesc: 'Intelligent weather integration for personalized training insights',
+                routePreview: '🗺️ ROUTE PREVIEW',
+                totalDistance: 'Total Distance',
+                trackPoints: 'Track Points',
+                elevationGain: 'Elevation Gain',
+                routeDetails: '📍 ROUTE DETAILS',
+                routeName: 'Name',
+                routeDesc: 'Description',
+                timeRange: 'Time Range',
+                avgSpeed: 'Average Speed',
+                startPoint: 'Start Point',
+                endPoint: 'End Point',
+                unnamedTrack: 'Unnamed Track',
+                unknown: 'Unknown'
+            }
+        };
+
+        // 检测用户语言
+        function detectLanguage() {
+            const browserLang = navigator.language || navigator.userLanguage;
+            if (browserLang.startsWith('zh')) {
+                return 'zh';
+            }
+            return 'en';
+        }
+
+        // 应用翻译
+        function applyTranslations(lang) {
+            const t = translations[lang];
+            if (!t) return;
+
+            // 更新页面标题
+            document.title = lang === 'zh' ? 'GPX转TCX转换器 - 专业运动数据转换工具' : 'GPX to TCX Converter - Professional Sports Data Tool';
+            document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+
+            // 更新页面内容
+            document.querySelector('.welcome-title').textContent = t.title;
+            document.querySelector('.welcome-subtitle').textContent = t.subtitle;
+            
+            // 更新信息项
+            const infoItems = document.querySelectorAll('.info-item');
+            if (infoItems[0]) {
+                infoItems[0].querySelector('.info-label').textContent = t.status;
+                infoItems[0].querySelector('.info-value').textContent = t.online;
+            }
+            if (infoItems[1]) {
+                infoItems[1].querySelector('.info-label').textContent = t.format;
+            }
+            if (infoItems[2]) {
+                infoItems[2].querySelector('.info-label').textContent = t.speed;
+            }
+            if (infoItems[3]) {
+                infoItems[3].querySelector('.info-label').textContent = t.developer;
+            }
+
+            // 更新警告信息
+            document.querySelector('.status-warning').textContent = t.warning;
+
+            // 更新上传区域
+            document.querySelector('.upload-text').textContent = t.uploadText;
+            document.querySelector('.upload-hint').textContent = t.uploadHint;
+
+            // 更新配置区域
+            const configTitles = document.querySelectorAll('.config-group h3');
+            if (configTitles[0]) configTitles[0].textContent = t.sportConfig;
+            if (configTitles[1]) configTitles[1].textContent = t.heartRate;
+            if (configTitles[2]) configTitles[2].textContent = t.cadenceConfig;
+            if (configTitles[3]) configTitles[3].textContent = t.powerConfig;
+            if (configTitles[4]) configTitles[4].textContent = t.deviceInfo;
+            if (configTitles[5]) configTitles[5].textContent = t.timeConfig;
+
+            // 更新表单标签
+            const labels = document.querySelectorAll('label');
+            const labelMap = {
+                '运动类型': t.activityType,
+                'Activity Type': t.activityType,
+                '目标配速 (分:秒/公里)': t.targetPace,
+                'Target Pace (min:sec/km)': t.targetPace,
+                '体重 (kg)': t.weight,
+                'Weight (kg)': t.weight,
+                '基础心率': t.baseHr,
+                'Base Heart Rate': t.baseHr,
+                '最大心率': t.maxHr,
+                'Max Heart Rate': t.maxHr,
+                '基础步频 (显示)': t.baseCadence,
+                'Base Cadence (Display)': t.baseCadence,
+                '最大步频 (显示)': t.maxCadence,
+                'Max Cadence (Display)': t.maxCadence,
+                '基础功率': t.basePower,
+                'Base Power': t.basePower,
+                '最大功率': t.maxPower,
+                'Max Power': t.maxPower,
+                '设备名称': t.deviceName,
+                'Device Name': t.deviceName,
+                '设备版本': t.deviceVersion,
+                'Device Version': t.deviceVersion,
+                '自定义开始时间 (可选)': t.startTime,
+                'Custom Start Time (Optional)': t.startTime,
+                '卡路里/公里': t.caloriesPerKm,
+                'Calories/km': t.caloriesPerKm
+            };
+
+            labels.forEach(label => {
+                const text = label.textContent.trim();
+                if (labelMap[text]) {
+                    label.textContent = labelMap[text];
+                }
+            });
+
+            // 更新选项
+            const options = document.querySelectorAll('option');
+            options.forEach(option => {
+                if (option.value === 'Running') option.textContent = t.running;
+                if (option.value === 'Cycling') option.textContent = t.cycling;
+                if (option.value === 'Walking') option.textContent = t.walking;
+            });
+
+            // 更新按钮
+            document.querySelector('#convertBtn .btn-text').textContent = t.convertBtn;
+            document.querySelector('#downloadBtn .btn-text').textContent = t.downloadTcx;
+            document.querySelector('#resetBtn .btn-text').textContent = t.reset;
+
+            // 更新功能区域
+            document.querySelector('.features h3').textContent = t.coreFeatures;
+            const featureTitles = document.querySelectorAll('.feature-title');
+            const featureDescs = document.querySelectorAll('.feature-desc');
+            
+            if (featureTitles[0]) featureTitles[0].textContent = t.instantProcessing;
+            if (featureDescs[0]) featureDescs[0].textContent = t.instantDesc;
+            if (featureTitles[1]) featureTitles[1].textContent = t.precisionData;
+            if (featureDescs[1]) featureDescs[1].textContent = t.precisionDesc;
+            if (featureTitles[2]) featureTitles[2].textContent = t.privacyFirst;
+            if (featureDescs[2]) featureDescs[2].textContent = t.privacyDesc;
+            if (featureTitles[3]) featureTitles[3].textContent = t.universalAccess;
+            if (featureDescs[3]) featureDescs[3].textContent = t.universalDesc;
+            if (featureTitles[4]) featureTitles[4].textContent = t.advancedConfig;
+            if (featureDescs[4]) featureDescs[4].textContent = t.advancedDesc;
+            if (featureTitles[5]) featureTitles[5].textContent = t.smartLocation;
+            if (featureDescs[5]) featureDescs[5].textContent = t.smartDesc;
+
+            // 更新进度和结果文本
+            const progressText = document.getElementById('progressText');
+            const resultMessage = document.getElementById('resultMessage');
+            if (progressText && progressText.textContent.includes('INITIALIZING')) {
+                progressText.textContent = t.initializing;
+            }
+            if (resultMessage && resultMessage.textContent.includes('CONVERSION')) {
+                resultMessage.textContent = t.conversionComplete;
+            }
+        }
+
+        // 获取当前语言的翻译
+        function getTranslation(key) {
+            return translations[currentLang][key] || key;
+        }
+
+        // 初始化语言
+        const currentLang = detectLanguage();
+        applyTranslations(currentLang);
+
         let selectedFile = null;
         let currentTaskId = null;
 
@@ -266,6 +545,46 @@
         const progressText = document.getElementById('progressText');
         const downloadBtn = document.getElementById('downloadBtn');
         const resetBtn = document.getElementById('resetBtn');
+
+        // 数字递增动画
+        function animateCounter(element, start, end, duration = 1000) {
+            const startTime = performance.now();
+            const range = end - start;
+            
+            function updateCounter(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // 使用缓动函数
+                const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+                const current = Math.round(start + (range * easeOutQuart));
+                
+                element.textContent = current < 1 ? '< 1s' : current + 's';
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateCounter);
+                }
+            }
+            
+            requestAnimationFrame(updateCounter);
+        }
+
+        // 页面加载完成后启动动画
+        document.addEventListener('DOMContentLoaded', () => {
+            // 数字递增动画
+            const counterElement = document.querySelector('.counter');
+            if (counterElement) {
+                setTimeout(() => {
+                    animateCounter(counterElement, 5, 0, 2000);
+                }, 1000);
+            }
+            
+            // 添加微光呼吸效果到上传区域
+            const uploadArea = document.querySelector('.file-upload');
+            if (uploadArea) {
+                uploadArea.style.animation = 'breathe 3s ease-in-out infinite';
+            }
+        });
 
         // 添加按钮涟漪效果
         function addRippleEffect(button, event) {
@@ -347,6 +666,9 @@
             convertBtn.disabled = false;
             convertBtn.classList.add('btn-ready');
             hideError();
+            
+            // 添加GPX预览功能
+            parseAndDisplayGPX(file);
         }
 
         function updateUploadUI() {
@@ -421,6 +743,18 @@
                 <div class="upload-hint">支持最大16MB的GPX文件</div>
             `;
             fileUpload.classList.remove('file-selected');
+            
+            // 隐藏GPX预览区域
+            const gpxPreview = document.getElementById('gpxPreview');
+            if (gpxPreview) {
+                gpxPreview.style.display = 'none';
+            }
+            
+            // 清理地图实例
+            if (gpxMap) {
+                gpxMap.remove();
+                gpxMap = null;
+            }
             
             // 重置按钮状态
             convertBtn.disabled = true;
@@ -548,13 +882,14 @@
         document.getElementById('startTime').value = localTimeString;
 
         // 个性化问候功能
-         const weatherDetails = document.getElementById('weatherDetails');
+         const weatherInline = document.getElementById('weatherInline');
+         const weatherSummary = document.getElementById('weatherSummary');
          const greetingError = document.getElementById('greetingError');
 
          // 页面加载时自动获取天气信息
          async function loadGreeting() {
              try {
-                 if (weatherDetails) weatherDetails.style.display = 'none';
+                 if (weatherInline) weatherInline.style.display = 'none';
                  if (greetingError) greetingError.style.display = 'none';
 
                  const response = await fetch('/greeting-info');
@@ -562,19 +897,16 @@
  
                  if (data.success) {
                      // 显示天气信息（仅当天气数据可用时）
-                     if (data.data.weather && weatherDetails) {
-                         document.getElementById('temperature').textContent = data.data.weather.temperature;
-                         document.getElementById('humidity').textContent = data.data.weather.humidity;
-                         document.getElementById('windSpeed').textContent = data.data.weather.wind_speed;
-                         document.getElementById('location').textContent = `${data.data.location.city}, ${data.data.location.country}`;
+                     if (data.data.weather && weatherInline && weatherSummary) {
+                         const weather = data.data.weather;
+                         const location = data.data.location;
                          
-                         weatherDetails.style.display = 'block';
-                         weatherDetails.classList.add('fade-in');
-                     } else {
-                         // 如果没有天气数据，隐藏天气卡片
-                         if (weatherDetails) {
-                             weatherDetails.style.display = 'none';
-                         }
+                         // 创建简洁的天气摘要
+                         const weatherText = `${weather.temperature} | ${weather.description} | ${location.city}`;
+                         weatherSummary.textContent = weatherText;
+                         
+                         weatherInline.style.display = 'flex';
+                         weatherInline.classList.add('slideIn');
                      }
                  } else {
                      throw new Error(data.error || '获取问候信息失败');
@@ -594,6 +926,218 @@
  
          // 页面加载完成后自动执行
          loadGreeting();
+    </script>
+    
+    <!-- Leaflet地图库JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- GPX路径可视化功能 -->
+    <script>
+        let gpxMap = null;
+        let gpxLayer = null;
+        
+        // GPX解析和地图显示功能
+        function parseAndDisplayGPX(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const gpxContent = e.target.result;
+                try {
+                    const parser = new DOMParser();
+                    const gpxDoc = parser.parseFromString(gpxContent, 'text/xml');
+                    
+                    // 提取轨迹点
+                    const trackPoints = extractTrackPoints(gpxDoc);
+                    if (trackPoints.length > 0) {
+                        displayGPXOnMap(trackPoints, gpxDoc);
+                        showRouteInfo(trackPoints, gpxDoc);
+                    }
+                } catch (error) {
+                    console.error('GPX解析错误:', error);
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        // 提取GPX轨迹点
+        function extractTrackPoints(gpxDoc) {
+            const points = [];
+            const trkpts = gpxDoc.querySelectorAll('trkpt');
+            
+            trkpts.forEach(point => {
+                const lat = parseFloat(point.getAttribute('lat'));
+                const lon = parseFloat(point.getAttribute('lon'));
+                const eleElement = point.querySelector('ele');
+                const timeElement = point.querySelector('time');
+                
+                if (!isNaN(lat) && !isNaN(lon)) {
+                    points.push({
+                        lat: lat,
+                        lng: lon,
+                        elevation: eleElement ? parseFloat(eleElement.textContent) : null,
+                        time: timeElement ? new Date(timeElement.textContent) : null
+                    });
+                }
+            });
+            
+            return points;
+        }
+        
+        // 在地图上显示GPX路径
+          function displayGPXOnMap(trackPoints, gpxDoc) {
+              const previewDiv = document.getElementById('gpxPreview');
+              const translation = translations[currentLang];
+              previewDiv.style.display = 'block';
+              
+              // 更新预览标题
+              const previewHeader = previewDiv.querySelector('.preview-header h4');
+              if (previewHeader) {
+                  previewHeader.textContent = translation.routePreview;
+              }
+            
+            // 初始化地图
+            if (gpxMap) {
+                gpxMap.remove();
+            }
+            
+            gpxMap = L.map('gpxMap').setView([trackPoints[0].lat, trackPoints[0].lng], 13);
+            
+            // 添加地图图层
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(gpxMap);
+            
+            // 创建路径
+            const latlngs = trackPoints.map(point => [point.lat, point.lng]);
+            gpxLayer = L.polyline(latlngs, {
+                color: '#007AFF',
+                weight: 4,
+                opacity: 0.8
+            }).addTo(gpxMap);
+            
+            // 添加起点和终点标记
+            const startPoint = trackPoints[0];
+            const endPoint = trackPoints[trackPoints.length - 1];
+            
+             L.marker([startPoint.lat, startPoint.lng], {
+                 icon: L.divIcon({
+                     html: '🏁',
+                     className: 'start-marker',
+                     iconSize: [20, 20]
+                 })
+             }).addTo(gpxMap).bindPopup(translation.startPoint);
+             
+             L.marker([endPoint.lat, endPoint.lng], {
+                 icon: L.divIcon({
+                     html: '🏆',
+                     className: 'end-marker',
+                     iconSize: [20, 20]
+                 })
+             }).addTo(gpxMap).bindPopup(translation.endPoint);
+            
+            // 调整地图视图以适应路径
+            gpxMap.fitBounds(gpxLayer.getBounds(), { padding: [20, 20] });
+        }
+        
+        // 显示路径信息
+         function showRouteInfo(trackPoints, gpxDoc) {
+             const stats = calculateRouteStats(trackPoints);
+             const routeStatsDiv = document.getElementById('routeStats');
+             const routeInfoDiv = document.getElementById('routeInfo');
+             const trans = translations[currentLang];
+             
+             // 显示统计信息
+             routeStatsDiv.innerHTML = `
+                 <div class="stat-item">
+                     <span class="stat-label">${trans.totalDistance}</span>
+                     <span class="stat-value">${stats.distance.toFixed(2)} km</span>
+                 </div>
+                 <div class="stat-item">
+                     <span class="stat-label">${trans.trackPoints}</span>
+                     <span class="stat-value">${stats.points}</span>
+                 </div>
+                 <div class="stat-item">
+                     <span class="stat-label">${trans.elevationGain}</span>
+                     <span class="stat-value">${stats.elevationGain.toFixed(0)} m</span>
+                 </div>
+             `;
+             
+             // 显示详细信息
+             const trackName = gpxDoc.querySelector('name')?.textContent || trans.unnamedTrack;
+             const trackDesc = gpxDoc.querySelector('desc')?.textContent || '';
+             
+             routeInfoDiv.innerHTML = `
+                 <div class="route-details">
+                     <h5>${trans.routeDetails}</h5>
+                     <p><strong>${trans.routeName}:</strong> ${trackName}</p>
+                     ${trackDesc ? `<p><strong>${trans.routeDesc}:</strong> ${trackDesc}</p>` : ''}
+                     <p><strong>${trans.timeRange}:</strong> ${stats.timeRange}</p>
+                     <p><strong>${trans.avgSpeed}:</strong> ${stats.avgSpeed.toFixed(1)} km/h</p>
+                 </div>
+             `;
+         }
+        
+        // 计算路径统计信息
+        function calculateRouteStats(trackPoints) {
+            let totalDistance = 0;
+            let elevationGain = 0;
+            let minTime = null;
+            let maxTime = null;
+            
+            for (let i = 1; i < trackPoints.length; i++) {
+                const prev = trackPoints[i - 1];
+                const curr = trackPoints[i];
+                
+                // 计算距离
+                const distance = calculateDistance(prev.lat, prev.lng, curr.lat, curr.lng);
+                totalDistance += distance;
+                
+                // 计算海拔增益
+                if (prev.elevation !== null && curr.elevation !== null) {
+                    const elevDiff = curr.elevation - prev.elevation;
+                    if (elevDiff > 0) {
+                        elevationGain += elevDiff;
+                    }
+                }
+                
+                // 记录时间范围
+                if (curr.time) {
+                    if (!minTime || curr.time < minTime) minTime = curr.time;
+                    if (!maxTime || curr.time > maxTime) maxTime = curr.time;
+                }
+            }
+            
+            // 计算平均速度
+            let avgSpeed = 0;
+            if (minTime && maxTime) {
+                const timeHours = (maxTime - minTime) / (1000 * 60 * 60);
+                avgSpeed = timeHours > 0 ? totalDistance / timeHours : 0;
+            }
+            
+            const timeRange = minTime && maxTime ? 
+                `${minTime.toLocaleString()} - ${maxTime.toLocaleString()}` : '未知';
+            
+            return {
+                distance: totalDistance,
+                points: trackPoints.length,
+                elevationGain: elevationGain,
+                timeRange: timeRange,
+                avgSpeed: avgSpeed
+            };
+        }
+        
+        // 计算两点间距离（Haversine公式）
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // 地球半径（公里）
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+        
+
     </script>
 </body>
 </html>

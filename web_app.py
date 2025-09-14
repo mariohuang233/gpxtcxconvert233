@@ -229,6 +229,85 @@ def get_status(task_id):
     
     return jsonify(task.to_dict())
 
+@app.route('/convert', methods=['POST'])
+def convert_file():
+    """直接转换文件（兼容性路由）"""
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': '没有选择文件'}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': '没有选择文件'}), 400
+        
+        if not allowed_file(file.filename):
+            return jsonify({'error': '只支持GPX文件格式'}), 400
+        
+        # 检查文件大小
+        file.seek(0, os.SEEK_END)
+        file_size = file.tell()
+        file.seek(0)
+        
+        if file_size > MAX_FILE_SIZE:
+            return jsonify({'error': f'文件大小超过限制 ({MAX_FILE_SIZE // (1024*1024)}MB)'}), 400
+        
+        # 生成临时文件名
+        task_id = str(uuid.uuid4())
+        filename = secure_filename(file.filename)
+        input_path = os.path.join(UPLOAD_FOLDER, f"{task_id}_{filename}")
+        file.save(input_path)
+        
+        # 生成输出文件路径
+        output_filename = filename.rsplit('.', 1)[0] + '.tcx'
+        output_path = os.path.join(OUTPUT_FOLDER, f"{task_id}_{output_filename}")
+        
+        # 创建转换器并执行转换
+        converter = GPXToTCXConverter()
+        
+        # 应用默认配置
+        converter.config.update({
+            'activity_type': 'Running',
+            'device_name': 'Forerunner 570',
+            'device_version': '12.70',
+            'base_hr': 135,
+            'max_hr': 165,
+            'base_cadence': 50,
+            'max_cadence': 70,
+            'base_power': 150,
+            'max_power': 300,
+            'calories_per_km': 60,
+            'weight': 70,
+            'target_pace': '5:30'
+        })
+        
+        # 执行转换
+        success = converter.convert(input_path, output_path)
+        
+        if success and os.path.exists(output_path):
+            # 返回转换后的文件
+            return send_file(
+                output_path,
+                as_attachment=True,
+                download_name=output_filename,
+                mimetype='application/xml'
+            )
+        else:
+            return jsonify({'error': '转换失败'}), 500
+            
+    except Exception as e:
+        logger.error(f"转换失败: {str(e)}")
+        return jsonify({'error': f'转换失败: {str(e)}'}), 500
+    finally:
+        # 清理临时文件
+        try:
+            if 'input_path' in locals() and os.path.exists(input_path):
+                os.remove(input_path)
+            if 'output_path' in locals() and os.path.exists(output_path):
+                # 延迟删除输出文件，给下载一些时间
+                threading.Timer(30.0, lambda: os.path.exists(output_path) and os.remove(output_path)).start()
+        except Exception as e:
+            logger.warning(f"清理临时文件失败: {str(e)}")
+
 @app.route('/download/<task_id>')
 def download_file(task_id):
     """下载转换后的文件"""
@@ -382,6 +461,14 @@ def health_check():
             'error': f'Health check failed: {str(e)}'
         }), 503
 
+@app.route('/1.jpg')
+def serve_background_image():
+    """提供背景图片"""
+    try:
+        return send_file('1.jpg', mimetype='image/jpeg')
+    except FileNotFoundError:
+        abort(404)
+
 @app.route('/greeting-info')
 def get_greeting_info():
     """获取用户位置和天气信息用于个性化问候"""
@@ -394,30 +481,121 @@ def get_greeting_info():
         else:
             user_ip = request.remote_addr
         
-        # 如果是本地IP，使用一个示例IP进行演示
+        # 如果是本地IP，直接使用默认位置信息
         if user_ip in ['127.0.0.1', '::1', 'localhost']:
-            user_ip = '8.8.8.8'  # 使用Google DNS作为示例
-        
-        # 调用ipstack API获取位置信息
-        ipstack_api_key = 'a67f3911868f6c642b949296b6f6ef6a'
-        ip_url = f'http://api.ipstack.com/{user_ip}?access_key={ipstack_api_key}'
-        
-        ip_response = requests.get(ip_url, timeout=10)
-        
-        if ip_response.status_code != 200:
-            return jsonify({
-                'success': False,
-                'error': f'IP API请求失败: {ip_response.status_code}'
-            })
-        
-        ip_data = ip_response.json()
-        
-        # 检查API响应是否有错误
-        if 'error' in ip_data:
-            return jsonify({
-                'success': False,
-                'error': ip_data['error']['info']
-            })
+            # 使用默认的北京位置信息
+            ip_data = {
+                'country_name': 'China',
+                'country_code': 'CN',
+                'region_name': 'Beijing',
+                'city': 'Beijing',
+                'latitude': 39.9042,
+                'longitude': 116.4074,
+                'time_zone': {'id': 'Asia/Shanghai'},
+                'connection': {'isp': 'Local Network'},
+                'continent_name': 'Asia'
+            }
+        else:
+            # 尝试多个IP地理位置API服务
+            ip_data = None
+            
+            # API服务列表（按优先级排序）
+            api_services = [
+                # ip-api.com - 免费，无需API密钥
+                {
+                    'name': 'ip-api.com',
+                    'url': f'http://ip-api.com/json/{user_ip}?fields=status,message,country,countryCode,region,regionName,city,lat,lon,timezone,isp,continent',
+                    'parser': lambda data: {
+                        'country_name': data.get('country', 'Unknown'),
+                        'country_code': data.get('countryCode', 'XX'),
+                        'region_name': data.get('regionName', 'Unknown Region'),
+                        'city': data.get('city', 'Unknown City'),
+                        'latitude': data.get('lat', 39.9042),
+                        'longitude': data.get('lon', 116.4074),
+                        'time_zone': {'id': data.get('timezone', 'UTC')},
+                        'connection': {'isp': data.get('isp', 'Unknown ISP')},
+                        'continent_name': data.get('continent', 'Unknown')
+                    } if data.get('status') == 'success' else None
+                },
+                # ipapi.co - 免费，无需API密钥
+                {
+                    'name': 'ipapi.co',
+                    'url': f'https://ipapi.co/{user_ip}/json/',
+                    'parser': lambda data: {
+                        'country_name': data.get('country_name', 'Unknown'),
+                        'country_code': data.get('country_code', 'XX'),
+                        'region_name': data.get('region', 'Unknown Region'),
+                        'city': data.get('city', 'Unknown City'),
+                        'latitude': data.get('latitude', 39.9042),
+                        'longitude': data.get('longitude', 116.4074),
+                        'time_zone': {'id': data.get('timezone', 'UTC')},
+                        'connection': {'isp': data.get('org', 'Unknown ISP')},
+                        'continent_name': data.get('continent_code', 'Unknown')
+                    } if not data.get('error') else None
+                },
+                # ipwhois.io - 免费，无需API密钥
+                {
+                    'name': 'ipwhois.io',
+                    'url': f'http://ipwhois.app/json/{user_ip}',
+                    'parser': lambda data: {
+                        'country_name': data.get('country', 'Unknown'),
+                        'country_code': data.get('country_code', 'XX'),
+                        'region_name': data.get('region', 'Unknown Region'),
+                        'city': data.get('city', 'Unknown City'),
+                        'latitude': data.get('latitude', 39.9042),
+                        'longitude': data.get('longitude', 116.4074),
+                        'time_zone': {'id': data.get('timezone', 'UTC')},
+                        'connection': {'isp': data.get('isp', 'Unknown ISP')},
+                        'continent_name': data.get('continent', 'Unknown')
+                    } if data.get('success') else None
+                },
+                # ipstack - 备用（有API密钥限制）
+                {
+                    'name': 'ipstack',
+                    'url': f'http://api.ipstack.com/{user_ip}?access_key=a67f3911868f6c642b949296b6f6ef6a',
+                    'parser': lambda data: {
+                        'country_name': data.get('country_name', 'Unknown'),
+                        'country_code': data.get('country_code', 'XX'),
+                        'region_name': data.get('region_name', 'Unknown Region'),
+                        'city': data.get('city', 'Unknown City'),
+                        'latitude': data.get('latitude', 39.9042),
+                        'longitude': data.get('longitude', 116.4074),
+                        'time_zone': data.get('time_zone', {'id': 'UTC'}),
+                        'connection': data.get('connection', {'isp': 'Unknown ISP'}),
+                        'continent_name': data.get('continent_name', 'Unknown')
+                    } if not data.get('error') and data.get('city') else None
+                }
+            ]
+            
+            # 依次尝试各个API服务
+            for service in api_services:
+                try:
+                    response = requests.get(service['url'], timeout=3)
+                    if response.status_code == 200:
+                        data = response.json()
+                        parsed_data = service['parser'](data)
+                        if parsed_data and parsed_data.get('city') != 'Unknown City':
+                            ip_data = parsed_data
+                            logger.info(f"成功使用 {service['name']} 获取位置信息")
+                            break
+                except Exception as e:
+                    logger.warning(f"{service['name']} API调用失败: {str(e)}")
+                    continue
+            
+            # 如果所有API都失败，使用默认位置
+            if not ip_data:
+                ip_data = {
+                    'country_name': 'Unknown',
+                    'country_code': 'XX',
+                    'region_name': 'Unknown Region',
+                    'city': 'Unknown City',
+                    'latitude': 39.9042,  # 默认北京坐标
+                    'longitude': 116.4074,
+                    'time_zone': {'id': 'UTC'},
+                    'connection': {'isp': 'Unknown ISP'},
+                    'continent_name': 'Unknown'
+                }
+                logger.info("所有IP地理位置API都失败，使用默认位置信息")
         
         # 获取城市名称用于天气查询
         city = ip_data.get('city', 'Beijing')
