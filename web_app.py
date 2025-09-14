@@ -382,9 +382,9 @@ def health_check():
             'error': f'Health check failed: {str(e)}'
         }), 503
 
-@app.route('/ip-info')
-def get_ip_info():
-    """获取用户IP地址信息"""
+@app.route('/greeting-info')
+def get_greeting_info():
+    """获取用户位置和天气信息用于个性化问候"""
     try:
         # 获取用户真实IP地址
         if request.headers.get('X-Forwarded-For'):
@@ -398,26 +398,73 @@ def get_ip_info():
         if user_ip in ['127.0.0.1', '::1', 'localhost']:
             user_ip = '8.8.8.8'  # 使用Google DNS作为示例
         
-        # 调用ipstack API
-        api_key = 'a67f3911868f6c642b949296b6f6ef6a'
-        api_url = f'http://api.ipstack.com/{user_ip}?access_key={api_key}'
+        # 调用ipstack API获取位置信息
+        ipstack_api_key = 'a67f3911868f6c642b949296b6f6ef6a'
+        ip_url = f'http://api.ipstack.com/{user_ip}?access_key={ipstack_api_key}'
         
-        response = requests.get(api_url, timeout=10)
+        ip_response = requests.get(ip_url, timeout=10)
         
-        if response.status_code == 200:
-            ip_data = response.json()
-            
-            # 检查API响应是否有错误
-            if 'error' in ip_data:
-                return jsonify({
-                    'success': False,
-                    'error': ip_data['error']['info']
-                })
-            
+        if ip_response.status_code != 200:
             return jsonify({
-                'success': True,
-                'ip': user_ip,
-                'data': {
+                'success': False,
+                'error': f'IP API请求失败: {ip_response.status_code}'
+            })
+        
+        ip_data = ip_response.json()
+        
+        # 检查API响应是否有错误
+        if 'error' in ip_data:
+            return jsonify({
+                'success': False,
+                'error': ip_data['error']['info']
+            })
+        
+        # 获取城市名称用于天气查询
+        city = ip_data.get('city', 'Beijing')
+        if not city or city == 'Unknown':
+            city = ip_data.get('region_name', 'Beijing')
+        
+        # 调用weatherstack API获取天气信息
+        weather_api_key = '7b16cdaa1ffe7e7bbb2f5ec913058f83'
+        weather_url = f'http://api.weatherstack.com/current?access_key={weather_api_key}&query={city}&units=m&language=zh'
+        
+        weather_response = requests.get(weather_url, timeout=10)
+        
+        if weather_response.status_code != 200:
+            # 如果天气API失败，仍然返回位置信息，天气显示为默认值
+            weather_info = {
+                'temperature': 'N/A',
+                'description': '晴朗',
+                'humidity': 'N/A',
+                'wind_speed': 'N/A'
+            }
+        else:
+            weather_data = weather_response.json()
+            
+            if 'error' in weather_data:
+                weather_info = {
+                    'temperature': 'N/A',
+                    'description': '晴朗',
+                    'humidity': 'N/A',
+                    'wind_speed': 'N/A'
+                }
+            else:
+                current = weather_data.get('current', {})
+                weather_info = {
+                    'temperature': current.get('temperature', 'N/A'),
+                    'description': current.get('weather_descriptions', ['晴朗'])[0],
+                    'humidity': current.get('humidity', 'N/A'),
+                    'wind_speed': current.get('wind_speed', 'N/A'),
+                    'wind_dir': current.get('wind_dir', 'N/A'),
+                    'pressure': current.get('pressure', 'N/A'),
+                    'visibility': current.get('visibility', 'N/A')
+                }
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'location': {
+                    'ip': user_ip,
                     'country': ip_data.get('country_name', 'Unknown'),
                     'country_code': ip_data.get('country_code', 'Unknown'),
                     'region': ip_data.get('region_name', 'Unknown'),
@@ -427,13 +474,11 @@ def get_ip_info():
                     'timezone': ip_data.get('time_zone', {}).get('id', 'Unknown'),
                     'isp': ip_data.get('connection', {}).get('isp', 'Unknown'),
                     'continent': ip_data.get('continent_name', 'Unknown')
-                }
-            })
-        else:
-            return jsonify({
-                'success': False,
-                'error': f'API请求失败: {response.status_code}'
-            })
+                },
+                'weather': weather_info,
+                'greeting': f"你好，来自{ip_data.get('city', ip_data.get('region_name', '未知地区'))}的用户，今天天气{weather_info['description']}，气温{weather_info['temperature']}°C"
+            }
+        })
             
     except requests.exceptions.Timeout:
         return jsonify({

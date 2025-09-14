@@ -1703,91 +1703,104 @@ body::before {
     }
 }
 
-/* IP信息查询区域样式 */
-.ip-info-section {
-    margin-bottom: var(--space-8);
+/* 个性化问候区域样式 */
+.greeting-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 15px;
+    margin: 2rem 0;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
 }
 
-.ip-info-content {
+.greeting-content {
+    max-width: 800px;
+    margin: 0 auto;
     text-align: center;
 }
 
-.btn-info {
-    background: var(--accent-gradient);
-    color: var(--white);
-    border: none;
-    padding: var(--space-3) var(--space-6);
-    border-radius: var(--radius-lg);
-    font-size: 0.95rem;
+.greeting-display {
+    padding: 1rem;
+}
+
+.greeting-text {
+    font-size: 1.2rem;
     font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    position: relative;
-    overflow: hidden;
-    box-shadow: var(--shadow-md);
-    margin-bottom: var(--space-6);
+    margin: 1rem 0;
+    color: #ffd700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.btn-info:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: var(--shadow-lg), 0 0 20px rgba(79, 172, 254, 0.3);
-}
-
-.btn-info:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.ip-info-result {
-    margin-top: var(--space-6);
-    padding: var(--space-6);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.95) 100%);
+.weather-details {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
     backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
 }
 
-.ip-info-grid {
+.weather-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--space-4);
+    gap: 1rem;
+    margin-top: 1rem;
 }
 
-.ip-info-item {
+.weather-item {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    border-radius: 8px;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    text-align: center;
-    padding: var(--space-3);
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-    border-radius: var(--radius-md);
-    border: 1px solid rgba(102, 126, 234, 0.1);
-    transition: all 0.3s ease;
+    gap: 0.8rem;
+    transition: transform 0.3s ease;
 }
 
-.ip-info-item:hover {
+.weather-item:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
-    border-color: rgba(102, 126, 234, 0.2);
+    background: rgba(255, 255, 255, 0.15);
 }
 
-.ip-info-label {
-    font-size: 0.875rem;
+.weather-icon {
+    font-size: 1.5rem;
+    min-width: 30px;
+}
+
+.weather-item div {
+    text-align: left;
+}
+
+.weather-item strong {
+    display: block;
+    margin-bottom: 0.3rem;
+    color: #ffd700;
+    font-size: 0.9rem;
+}
+
+.weather-item span {
+    font-size: 1.1rem;
     font-weight: 600;
-    color: var(--gray-600);
-    margin-bottom: var(--space-2);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
-.ip-info-value {
-    font-size: 1rem;
-    font-weight: 500;
-    color: var(--gray-900);
-    word-break: break-all;
+/* 移动端适配 */
+@media (max-width: 768px) {
+    .weather-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .weather-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+    
+    .weather-item div {
+        text-align: center;
+    }
+    
+    .greeting-text {
+        font-size: 1rem;
+    }
 }
 
 /* 打印样式 - 优化的打印体验 */
