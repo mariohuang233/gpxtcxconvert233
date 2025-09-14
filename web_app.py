@@ -424,32 +424,50 @@ def get_greeting_info():
         if not city or city == 'Unknown':
             city = ip_data.get('region_name', 'Beijing')
         
-        # 调用weatherstack API获取天气信息
-        weather_api_key = '7b16cdaa1ffe7e7bbb2f5ec913058f83'
-        weather_url = f'http://api.weatherstack.com/current?access_key={weather_api_key}&query={city}&units=m&language=zh'
-        
-        weather_response = requests.get(weather_url, timeout=10)
+        # 使用Open-Meteo免费天气API（无需API密钥）
+        latitude = ip_data.get('latitude')
+        longitude = ip_data.get('longitude')
         
         weather_info = None
         
-        if weather_response.status_code == 200:
-            weather_data = weather_response.json()
+        if latitude and longitude:
+            # Open-Meteo API调用
+            weather_url = f'https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,weather_code&timezone=auto'
             
-            if 'error' not in weather_data and 'current' in weather_data:
-                current = weather_data.get('current', {})
-                # 只有当所有关键数据都存在时才显示天气信息
-                if (current.get('temperature') is not None and 
-                    current.get('humidity') is not None and 
-                    current.get('wind_speed') is not None):
-                    weather_info = {
-                        'temperature': f"{current.get('temperature')}°C",
-                        'description': current.get('weather_descriptions', ['晴朗'])[0],
-                        'humidity': f"{current.get('humidity')}%",
-                        'wind_speed': f"{current.get('wind_speed')} km/h",
-                        'wind_dir': current.get('wind_dir', 'N/A'),
-                        'pressure': current.get('pressure', 'N/A'),
-                        'visibility': current.get('visibility', 'N/A')
-                    }
+            try:
+                weather_response = requests.get(weather_url, timeout=10)
+                
+                if weather_response.status_code == 200:
+                    weather_data = weather_response.json()
+                    
+                    if 'current' in weather_data:
+                        current = weather_data['current']
+                        
+                        # 天气代码映射到中文描述
+                        weather_codes = {
+                            0: '晴朗', 1: '晴朗', 2: '部分多云', 3: '多云',
+                            45: '雾', 48: '雾凇', 51: '小雨', 53: '中雨', 55: '大雨',
+                            61: '小雨', 63: '中雨', 65: '大雨', 71: '小雪', 73: '中雪', 75: '大雪',
+                            80: '阵雨', 81: '阵雨', 82: '暴雨', 95: '雷暴', 96: '雷暴', 99: '雷暴'
+                        }
+                        
+                        weather_code = current.get('weather_code', 0)
+                        weather_desc = weather_codes.get(weather_code, '晴朗')
+                        
+                        # 只有当所有关键数据都存在时才显示天气信息
+                        if (current.get('temperature_2m') is not None and 
+                            current.get('relative_humidity_2m') is not None and 
+                            current.get('wind_speed_10m') is not None):
+                            weather_info = {
+                                'temperature': f"{round(current.get('temperature_2m', 0))}°C",
+                                'description': weather_desc,
+                                'humidity': f"{current.get('relative_humidity_2m')}%",
+                                'wind_speed': f"{round(current.get('wind_speed_10m', 0))} km/h",
+                                'wind_dir': f"{current.get('wind_direction_10m', 0)}°"
+                            }
+            except Exception as e:
+                # 天气API调用失败时，weather_info保持为None
+                pass
         
         return jsonify({
             'success': True,
