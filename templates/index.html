@@ -17,9 +17,8 @@
     <script src="{{ url_for('static', filename='analytics.js') }}" defer></script>
 </head>
 <body>
-    <!-- 右上角语言选择器和统计链接 -->
+    <!-- 右上角语言选择器 -->
     <div class="language-selector-top-right">
-        <a href="/analytics" style="margin-right: 15px; color: #6b7280; text-decoration: none; font-size: 14px;" title="查看埋点统计">📊 统计</a>
         <select id="languageSelector" class="language-selector" onchange="switchLanguage(this.value)">
             <option value="zh">中文</option>
             <option value="zh-tw">繁體中文</option>
@@ -44,7 +43,7 @@
                     <span class="info-label" data-translate="format">格式</span>
                     <span class="info-value">GPX → TCX</span>
                 </div>
-                <div class="info-item">
+                <div class="info-item" id="developerInfo" style="cursor: pointer;" title="点击5次查看统计">
                     <span class="info-label" data-translate="developer">开发者</span>
                     <span class="info-value">mariohuang</span>
                 </div>

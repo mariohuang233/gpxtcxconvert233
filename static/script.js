@@ -300,4 +300,45 @@ function addConnectionBridge() {
 // 可选：启用鼠标跟随效果（注释掉以禁用）
 // initializeMouseFollowEffect();
 
+// 开发者信息点击计数功能
+let developerClickCount = 0;
+const developerInfo = document.getElementById('developerInfo');
+
+if (developerInfo) {
+    developerInfo.addEventListener('click', function() {
+        developerClickCount++;
+        
+        // 添加点击反馈效果
+        this.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            this.style.transform = 'scale(1)';
+        }, 100);
+        
+        // 更新提示文本
+        const remaining = 5 - developerClickCount;
+        if (remaining > 0) {
+            this.title = `还需点击${remaining}次查看统计`;
+        } else {
+            this.title = '正在跳转到统计页面...';
+        }
+        
+        // 点击5次后跳转到统计页面
+        if (developerClickCount >= 5) {
+            // 添加成功提示效果
+            this.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            this.style.color = 'white';
+            this.style.borderRadius = '8px';
+            this.style.padding = '5px 10px';
+            this.style.transition = 'all 0.3s ease';
+            
+            setTimeout(() => {
+                window.location.href = '/analytics';
+            }, 500);
+            
+            developerClickCount = 0; // 重置计数
+        }
+    });
+}
+
 console.log('🎨 高级动画系统已加载');
+console.log('🔍 隐藏统计功能已激活');
