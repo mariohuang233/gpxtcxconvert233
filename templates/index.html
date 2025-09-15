@@ -1119,9 +1119,17 @@
                     const province = address.state || address.province || address.region || 
                                    address.county || trans.locationError;
                     
-                    // 提取城市信息（优先级：city > town > village > municipality）
-                    const city = address.city || address.town || address.village || 
+                    // 提取城市信息 - 针对中国地址优化
+                    let city;
+                    if (address.country === '中国' || address.country === 'China') {
+                        // 对于中国地址，优先显示地级市，如果没有则显示县级市
+                        city = address.city || address.county || address.town || 
+                               address.village || address.municipality || address.suburb || trans.locationError;
+                    } else {
+                        // 其他国家保持原有逻辑
+                        city = address.city || address.town || address.village || 
                                address.municipality || address.suburb || trans.locationError;
+                    }
                     
                     // 分别更新显示
                     countryElement.textContent = country;
