@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🥷秘术 - GPX 转 TCX 转换器 - 专业运动数据转换工具</title>
+    <title data-translate="pageTitle">🥷秘术 - GPX 转 TCX 转换器 - 专业运动数据转换工具</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -11,38 +11,43 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏃</text></svg>">
+    <!-- 高级动画脚本 -->
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </head>
 <body>
+    <!-- 右上角语言选择器 -->
+    <div class="language-selector-top-right">
+        <select id="languageSelector" class="language-selector" onchange="switchLanguage(this.value)">
+            <option value="zh">中文</option>
+            <option value="zh-tw">繁體中文</option>
+            <option value="en">English</option>
+            <option value="ja">日本語</option>
+            <option value="ko">한국어</option>
+            <option value="fr">Français</option>
+            <option value="de">Deutsch</option>
+            <option value="es">Español</option>
+            <option value="pt">Português</option>
+        </select>
+    </div>
+    
     <div class="container">
         <!-- 全屏居中欢迎区域 -->
         <div class="welcome-section animate-fade-in">
-            <h1 class="welcome-title animate-scale-in">GPX 转 TCX 转换器</h1>
-            <p class="welcome-subtitle animate-fade-in animate-delay-2">专业的运动数据格式转换工具</p>
+            <h1 class="welcome-title animate-scale-in" data-translate="welcomeTitle">Run beyond imagination</h1>
+            <p class="welcome-subtitle animate-fade-in animate-delay-2" data-translate="welcomeSubtitle">Transform your journey into endless possibilities</p>
             
             <div class="welcome-info animate-slide-up animate-delay-3">
                 <div class="info-item">
-                    <span class="info-label">格式</span>
+                    <span class="info-label" data-translate="format">格式</span>
                     <span class="info-value">GPX → TCX</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">开发者</span>
+                    <span class="info-label" data-translate="developer">开发者</span>
                     <span class="info-value">mariohuang</span>
                 </div>
                 <div class="info-item" id="weatherInline" style="display: none;">
-                    <span class="info-label">天气:</span>
+                    <span class="info-label" data-translate="weather">天气:</span>
                     <span class="info-value" id="weatherSummary">--</span>
-                </div>
-                <div class="info-item language-selector-container">
-                    <span class="info-label">🌐</span>
-                    <select id="languageSelector" class="language-selector" onchange="switchLanguage(this.value)">
-                        <option value="zh">中文</option>
-                        <option value="en">English</option>
-                        <option value="ja">日本語</option>
-                        <option value="ko">한국어</option>
-                        <option value="fr">Français</option>
-                        <option value="de">Deutsch</option>
-                        <option value="es">Español</option>
-                    </select>
                 </div>
             </div>
             
@@ -70,7 +75,7 @@
                 <!-- GPX路径可视化区域 -->
                 <div class="gpx-preview" id="gpxPreview" style="display: none;">
                     <div class="preview-header">
-                        <h4>🗺️ 路径预览</h4>
+                        <h4 data-translate="routePreview">🗺️ 路径预览</h4>
                         <div class="route-stats" id="routeStats"></div>
                     </div>
                     <div class="map-container">
@@ -86,69 +91,69 @@
                 <div class="config-grid">
                     <!-- 核心配置组 - 最重要的设置 -->
                     <div class="card config-group config-primary animate-scale-in animate-delay-3">
-                        <h3>🏃‍♂️ 基础设置</h3>
+                        <h3 data-translate="sportConfig">🏃‍♂️ 基础设置</h3>
                         <div class="form-group">
-                            <label for="activityType">运动类型</label>
+                            <label for="activityType" data-translate="activityType">运动类型</label>
                             <select id="activityType" name="activity_type">
-                                <option value="Running">跑步</option>
-                                <option value="Cycling">骑行</option>
-                                <option value="Walking">步行</option>
+                                <option value="Running" data-translate="running">跑步</option>
+                                <option value="Cycling" data-translate="cycling">骑行</option>
+                                <option value="Walking" data-translate="walking">步行</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="targetPace">目标配速</label>
+                            <label for="targetPace" data-translate="targetPace">目标配速</label>
                             <input type="text" id="targetPace" name="target_pace" value="5:30" placeholder="5:30">
                         </div>
                         <div class="form-group">
-                            <label for="weight">体重 (kg)</label>
+                            <label for="weight" data-translate="weight">体重 (kg)</label>
                             <input type="number" id="weight" name="weight" value="70" min="30" max="200">
                         </div>
                         <div class="form-group">
-                            <label for="caloriesPerKm">每公里卡路里</label>
+                            <label for="caloriesPerKm" data-translate="caloriesPerKm">每公里卡路里</label>
                             <input type="number" id="caloriesPerKm" name="calories_per_km" value="60" min="30" max="150">
                         </div>
                     </div>
 
                     <div class="card config-group config-primary animate-scale-in animate-delay-4">
-                        <h3>💓 心率与时间</h3>
+                        <h3 data-translate="heartRate">💓 心率与时间</h3>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="baseHr">基础心率</label>
+                                <label for="baseHr" data-translate="baseHr">基础心率</label>
                                 <input type="number" id="baseHr" name="base_hr" value="135" min="60" max="200">
                             </div>
                             <div class="form-group">
-                                <label for="maxHr">最大心率</label>
+                                <label for="maxHr" data-translate="maxHr">最大心率</label>
                                 <input type="number" id="maxHr" name="max_hr" value="165" min="100" max="220">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="startTime">自定义开始时间</label>
+                            <label for="startTime" data-translate="startTime">自定义开始时间</label>
                             <input type="datetime-local" id="startTime" name="start_time">
                         </div>
                     </div>
 
                     <!-- 高级设置组 - 专业用户配置 -->
                     <div class="card config-group config-secondary animate-scale-in animate-delay-5">
-                        <h3>🦵 步频与功率</h3>
+                        <h3 data-translate="cadenceConfig">🦵 步频与功率</h3>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="baseCadenceDisplay">基础步频</label>
+                                <label for="baseCadenceDisplay" data-translate="baseCadence">基础步频</label>
                                 <input type="number" id="baseCadenceDisplay" value="100" min="60" max="200" onchange="updateCadenceValue('base')">
                                 <input type="hidden" id="baseCadence" name="base_cadence" value="50">
                             </div>
                             <div class="form-group">
-                                <label for="maxCadenceDisplay">最大步频</label>
+                                <label for="maxCadenceDisplay" data-translate="maxCadence">最大步频</label>
                                 <input type="number" id="maxCadenceDisplay" value="140" min="100" max="240" onchange="updateCadenceValue('max')">
                                 <input type="hidden" id="maxCadence" name="max_cadence" value="70">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="basePower">基础功率</label>
+                                <label for="basePower" data-translate="basePower">基础功率</label>
                                 <input type="number" id="basePower" name="base_power" value="150" min="50" max="500">
                             </div>
                             <div class="form-group">
-                                <label for="maxPower">最大功率</label>
+                                <label for="maxPower" data-translate="maxPower">最大功率</label>
                                 <input type="number" id="maxPower" name="max_power" value="300" min="100" max="800">
                             </div>
                         </div>
@@ -156,19 +161,19 @@
 
                     <!-- 设备信息组 - 系统配置 -->
                     <div class="card config-group config-secondary animate-scale-in animate-delay-6">
-                        <h3>📱 设备与格式</h3>
+                        <h3 data-translate="deviceInfo">📱 设备与格式</h3>
                         <div class="form-group">
-                            <label>设备名称</label>
+                            <label data-translate="deviceName">设备名称</label>
                             <input type="text" value="Forerunner 570" disabled style="background: rgba(255,255,255,0.05); color: #999; border-color: rgba(255,255,255,0.05);">
                             <input type="hidden" name="device_name" value="Forerunner 570">
                         </div>
                         <div class="form-group">
-                            <label>固件版本</label>
+                            <label data-translate="deviceVersion">固件版本</label>
                             <input type="text" value="12.70" disabled style="background: rgba(255,255,255,0.05); color: #999; border-color: rgba(255,255,255,0.05);">
                             <input type="hidden" name="device_version" value="12.70">
                         </div>
                         <div class="form-group">
-                            <label>转换格式</label>
+                            <label data-translate="format">转换格式</label>
                             <input type="text" value="GPX → TCX" disabled style="background: rgba(255,255,255,0.05); color: #999; border-color: rgba(255,255,255,0.05);">
                         </div>
                     </div>
@@ -180,7 +185,7 @@
         <div class="convert-section animate-fade-in animate-delay-9">
             <button id="convertBtn" class="btn btn-primary" disabled>
                 <span class="btn-icon">⚡</span>
-                <span class="btn-text">开始转换</span>
+                <span class="btn-text" data-translate="convertBtn">开始转换</span>
                 <div class="btn-ripple"></div>
             </button>
         </div>
@@ -191,7 +196,7 @@
                     <div class="progress-bar">
                         <div class="progress-fill" id="progressFill"></div>
                     </div>
-                    <div class="progress-text" id="progressText">正在初始化...</div>
+                    <div class="progress-text" id="progressText" data-translate="initializing">正在初始化...</div>
                 </div>
             </div>
         </div>
@@ -200,16 +205,16 @@
             <div class="card">
                 <div class="result-content">
                     <div class="result-icon" id="resultIcon">⚡</div>
-                    <div class="result-message" id="resultMessage">转换完成</div>
+                    <div class="result-message" id="resultMessage" data-translate="conversionComplete">转换完成</div>
                     <div class="result-actions">
                         <button id="downloadBtn" class="btn btn-success">
                             <span class="btn-icon">⬇</span>
-                            <span class="btn-text">下载 TCX 文件</span>
+                            <span class="btn-text" data-translate="downloadTcx">下载 TCX 文件</span>
                             <div class="btn-ripple"></div>
                         </button>
                         <button id="resetBtn" class="btn btn-secondary">
                             <span class="btn-icon">↻</span>
-                            <span class="btn-text">重新开始</span>
+                            <span class="btn-text" data-translate="reset">重新开始</span>
                             <div class="btn-ripple"></div>
                         </button>
                     </div>
@@ -219,48 +224,48 @@
 
         <div class="features animate-fade-in animate-delay-10">
             <div class="card">
-                <h3>核心功能</h3>
+                <h3 data-translate="coreFeatures">核心功能</h3>
                 <div class="feature-grid">
                 <div class="feature-item">
                     <div class="feature-icon">⚡</div>
                     <div class="feature-content">
-                        <div class="feature-title">极速转换</div>
-                        <div class="feature-desc">先进算法实现毫秒级 GPX 到 TCX 格式转换</div>
+                        <div class="feature-title" data-translate="instantProcessing">极速转换</div>
+                        <div class="feature-desc" data-translate="instantDesc">先进算法实现毫秒级 GPX 到 TCX 格式转换</div>
                     </div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">🎯</div>
                     <div class="feature-content">
-                        <div class="feature-title">精确数据</div>
-                        <div class="feature-desc">保持原始轨迹精度，确保数据完整性</div>
+                        <div class="feature-title" data-translate="precisionData">精确数据</div>
+                        <div class="feature-desc" data-translate="precisionDesc">保持原始轨迹精度，确保数据完整性</div>
                     </div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">🔒</div>
                     <div class="feature-content">
-                        <div class="feature-title">隐私保护</div>
-                        <div class="feature-desc">本地处理确保您的运动数据不会离开设备</div>
+                        <div class="feature-title" data-translate="privacyFirst">隐私保护</div>
+                        <div class="feature-desc" data-translate="privacyDesc">本地处理确保您的运动数据不会离开设备</div>
                     </div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">📱</div>
                     <div class="feature-content">
-                        <div class="feature-title">跨平台支持</div>
-                        <div class="feature-desc">多平台兼容，随时随地进行无缝转换</div>
+                        <div class="feature-title" data-translate="universalAccess">跨平台支持</div>
+                        <div class="feature-desc" data-translate="universalDesc">多平台兼容，随时随地进行无缝转换</div>
                     </div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">⚙️</div>
                     <div class="feature-content">
-                        <div class="feature-title">高级配置</div>
-                        <div class="feature-desc">为专业运动员提供全面的参数自定义选项</div>
+                        <div class="feature-title" data-translate="advancedConfig">高级配置</div>
+                        <div class="feature-desc" data-translate="advancedDesc">为专业运动员提供全面的参数自定义选项</div>
                     </div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">🌍</div>
                     <div class="feature-content">
-                        <div class="feature-title">智能定位</div>
-                        <div class="feature-desc">智能天气集成，提供个性化训练洞察</div>
+                        <div class="feature-title" data-translate="smartLocation">智能定位</div>
+                        <div class="feature-desc" data-translate="smartDesc">智能天气集成，提供个性化训练洞察</div>
                     </div>
                 </div>
             </div>
@@ -271,6 +276,9 @@
         // 多语言支持
         const translations = {
             'zh': {
+                pageTitle: '🥷秘术 - GPX 转 TCX 转换器 - 专业运动数据转换工具',
+                welcomeTitle: '超越想象而奔跑',
+                welcomeSubtitle: '将你的旅程转化为无限可能',
                 title: 'Run Beyond Imagination',
                 subtitle: '随时随地，专业运动数据转换',
                 status: '状态',
@@ -278,6 +286,7 @@
                 format: '格式',
                 speed: '速度',
                 developer: '开发者',
+                weather: '天气',
                 warning: '⚠️ 仅供测试使用，请勿用于正式比赛',
                 uploadText: '拖拽GPX文件到此处',
                 uploadHint: '支持.gpx格式 • 最大10MB • 即时处理',
@@ -303,6 +312,7 @@
                 timeConfig: '🕐 时间设置',
                 startTime: '自定义开始时间 (可选)',
                 caloriesPerKm: '卡路里/公里',
+                routePreview: '🗺️ 路径预览',
                 convertBtn: '开始转换',
                 initializing: '初始化中...',
                 conversionComplete: '转换完成',
@@ -315,6 +325,10 @@
                 precisionDesc: '保持原始轨迹精度，完整数据完整性',
                 privacyFirst: '隐私优先',
                 privacyDesc: '本地处理确保您的健身数据不会离开设备',
+                fileSelected: '已选择',
+                fileSize: '文件大小',
+                clickToSelect: '点击选择GPX文件或拖拽到此处',
+                maxFileSize: '支持最大16MB的GPX文件',
                 universalAccess: '通用访问',
                 universalDesc: '跨平台兼容性，随时随地无缝转换',
                 advancedConfig: '高级配置',
@@ -339,9 +353,27 @@
                 startPoint: '起点',
                 endPoint: '终点',
                 unnamedTrack: '未命名轨迹',
-                unknown: '未知'
+                unknown: '未知',
+                // 错误消息
+                errorInvalidFile: '请选择GPX格式的文件',
+                errorFileSize: '文件大小不能超过16MB',
+                errorNoFile: '请先选择GPX文件',
+                errorUploadFailed: '上传失败',
+                errorConversionFailed: '转换失败',
+                errorStatusFailed: '获取状态失败',
+                // 状态文本
+                converting: '转换中...',
+                preparing: '准备中...',
+                conversionCompleteMsg: '转换完成！',
+                startConvert: '开始转换',
+                errorGreetingFailed: '获取问候信息失败',
+                errorLocationFailed: '获取位置信息失败',
+                china: '中国'
             },
             'en': {
+                pageTitle: '🥷Secret Arts - GPX to TCX Converter - Professional Sports Data Conversion Tool',
+                welcomeTitle: 'Run beyond imagination',
+                welcomeSubtitle: 'Transform your journey into endless possibilities',
                 title: 'Run Beyond Imagination',
                 subtitle: 'Professional Sports Data Conversion Anytime, Anywhere',
                 status: 'Status',
@@ -349,6 +381,7 @@
                 format: 'Format',
                 speed: 'Speed',
                 developer: 'Developer',
+                weather: 'Weather',
                 warning: '⚠️ For testing only, not for official competitions',
                 uploadText: 'Drag GPX files here',
                 uploadHint: 'Supports .gpx format • Max 10MB • Instant processing',
@@ -359,6 +392,8 @@
                 walking: 'Walking',
                 targetPace: 'Target Pace (min:sec/km)',
                 weight: 'Weight (kg)',
+                caloriesPerKm: 'Calories per km',
+                routePreview: '🗺️ Route Preview',
                 heartRate: '💓 Heart Rate & Time',
                 baseHr: 'Base Heart Rate',
                 maxHr: 'Max Heart Rate',
@@ -371,6 +406,7 @@
                 deviceInfo: '📱 Device & Format',
                 deviceName: 'Device Name',
                 deviceVersion: 'Device Version',
+                format: 'Conversion Format',
                 timeConfig: '🕐 Time Settings',
                 startTime: 'Custom Start Time (optional)',
                 caloriesPerKm: 'Calories/km',
@@ -386,6 +422,10 @@
                 precisionDesc: 'Maintains original track precision and complete data integrity',
                 privacyFirst: 'Privacy First',
                 privacyDesc: 'Local processing ensures your fitness data never leaves your device',
+                fileSelected: 'Selected',
+                fileSize: 'File Size',
+                clickToSelect: 'Click to select GPX file or drag here',
+                maxFileSize: 'Supports GPX files up to 16MB',
                 universalAccess: 'Universal Access',
                 universalDesc: 'Cross-platform compatibility for seamless conversion anywhere',
                 advancedConfig: 'Advanced Configuration',
@@ -410,9 +450,27 @@
                 startPoint: 'Start Point',
                 endPoint: 'End Point',
                 unnamedTrack: 'Unnamed Track',
-                unknown: 'Unknown'
+                unknown: 'Unknown',
+                // Error messages
+                errorInvalidFile: 'Please select a GPX format file',
+                errorFileSize: 'File size cannot exceed 16MB',
+                errorNoFile: 'Please select a GPX file first',
+                errorUploadFailed: 'Upload failed',
+                errorConversionFailed: 'Conversion failed',
+                errorStatusFailed: 'Failed to get status',
+                // Status text
+                converting: 'Converting...',
+                preparing: 'Preparing...',
+                conversionCompleteMsg: 'Conversion completed!',
+                startConvert: 'Start Conversion',
+                errorGreetingFailed: 'Failed to get greeting information',
+                errorLocationFailed: 'Failed to get location information',
+                china: 'China'
             },
             'ja': {
+                pageTitle: '🥷秘術 - GPX から TCX コンバーター - プロスポーツデータ変換ツール',
+                welcomeTitle: '想像を超えて走る',
+                welcomeSubtitle: 'あなたの旅路を無限の可能性へ変える',
                 title: 'Run Beyond Imagination',
                 subtitle: 'いつでもどこでも、プロのスポーツデータ変換',
                 status: 'ステータス',
@@ -420,6 +478,7 @@
                 format: 'フォーマット',
                 speed: 'スピード',
                 developer: '開発者',
+                weather: '天気',
                 warning: '⚠️ テスト用のみ、公式競技では使用しないでください',
                 uploadText: 'GPXファイルをここにドラッグ',
                 uploadHint: '.gpx形式対応 • 最大10MB • 即座処理',
@@ -430,6 +489,8 @@
                 walking: 'ウォーキング',
                 targetPace: '目標ペース (分:秒/km)',
                 weight: '体重 (kg)',
+                caloriesPerKm: '1kmあたりのカロリー',
+                routePreview: '🗺️ ルートプレビュー',
                 heartRate: '💓 心拍数と時間',
                 baseHr: '基本心拍数',
                 maxHr: '最大心拍数',
@@ -442,6 +503,7 @@
                 deviceInfo: '📱 デバイスとフォーマット',
                 deviceName: 'デバイス名',
                 deviceVersion: 'デバイスバージョン',
+                format: '変換フォーマット',
                 timeConfig: '🕐 時間設定',
                 startTime: 'カスタム開始時間 (オプション)',
                 caloriesPerKm: 'カロリー/km',
@@ -457,6 +519,10 @@
                 precisionDesc: '元のトラック精度を維持し、完全なデータ整合性を保持',
                 privacyFirst: 'プライバシー優先',
                 privacyDesc: 'ローカル処理により、フィットネスデータがデバイスから離れることはありません',
+                fileSelected: '選択済み',
+                fileSize: 'ファイルサイズ',
+                clickToSelect: 'GPXファイルを選択またはここにドラッグ',
+                maxFileSize: '最大16MBのGPXファイルをサポート',
                 universalAccess: 'ユニバーサルアクセス',
                 universalDesc: 'クロスプラットフォーム互換性により、どこでもシームレスな変換',
                 advancedConfig: '高度な設定',
@@ -481,9 +547,27 @@
                 startPoint: 'スタート地点',
                 endPoint: 'エンド地点',
                 unnamedTrack: '名前なしトラック',
-                unknown: '不明'
+                unknown: '不明',
+                // エラーメッセージ
+                errorInvalidFile: 'GPX形式のファイルを選択してください',
+                errorFileSize: 'ファイルサイズは16MBを超えることはできません',
+                errorNoFile: '最初にGPXファイルを選択してください',
+                errorUploadFailed: 'アップロードに失敗しました',
+                errorConversionFailed: '変換に失敗しました',
+                errorStatusFailed: 'ステータスの取得に失敗しました',
+                // ステータステキスト
+                converting: '変換中...',
+                preparing: '準備中...',
+                conversionCompleteMsg: '変換完了！',
+                startConvert: '変換開始',
+                errorGreetingFailed: '挨拶情報の取得に失敗しました',
+                errorLocationFailed: '位置情報の取得に失敗しました',
+                china: '中国'
              },
              'ko': {
+                 pageTitle: '🥷비밀 기술 - GPX to TCX 변환기 - 전문 스포츠 데이터 변환 도구',
+                 welcomeTitle: '상상을 넘어 달리다',
+                 welcomeSubtitle: '당신의 여정을 무한한 가능성으로 변화시키다',
                  title: 'Run Beyond Imagination',
                  subtitle: '언제 어디서나, 전문 스포츠 데이터 변환',
                  status: '상태',
@@ -513,10 +597,12 @@
                  deviceInfo: '📱 장치 및 형식',
                  deviceName: '장치 이름',
                  deviceVersion: '장치 버전',
-                 timeConfig: '🕐 시간 설정',
+                format: '변환 형식',
+                timeConfig: '🕐 시간 설정',
                  startTime: '사용자 정의 시작 시간 (선택사항)',
                  caloriesPerKm: '칼로리/km',
-                 convertBtn: '변환 시작',
+                routePreview: '🗺️ 경로 미리보기',
+                convertBtn: '변환 시작',
                  initializing: '초기화 중...',
                  conversionComplete: '변환 완료',
                  downloadTcx: 'TCX 파일 다운로드',
@@ -527,7 +613,11 @@
                  precisionData: '정밀 데이터',
                  precisionDesc: '원본 트랙 정밀도 유지 및 완전한 데이터 무결성',
                  privacyFirst: '개인정보 우선',
-                 privacyDesc: '로컬 처리로 피트니스 데이터가 장치를 떠나지 않음',
+                privacyDesc: '로컬 처리로 피트니스 데이터가 장치를 떠나지 않음',
+                fileSelected: '선택됨',
+                fileSize: '파일 크기',
+                clickToSelect: 'GPX 파일을 선택하거나 여기로 드래그',
+                maxFileSize: '최대 16MB GPX 파일 지원',
                  universalAccess: '범용 액세스',
                  universalDesc: '크로스 플랫폼 호환성으로 어디서나 원활한 변환',
                  advancedConfig: '고급 구성',
@@ -552,9 +642,27 @@
                  startPoint: '시작점',
                  endPoint: '끝점',
                  unnamedTrack: '이름 없는 트랙',
-                 unknown: '알 수 없음'
+                 unknown: '알 수 없음',
+                 // 오류 메시지
+                 errorInvalidFile: 'GPX 형식의 파일을 선택해주세요',
+                 errorFileSize: '파일 크기는 16MB를 초과할 수 없습니다',
+                 errorNoFile: '먼저 GPX 파일을 선택해주세요',
+                 errorUploadFailed: '업로드 실패',
+                 errorConversionFailed: '변환 실패',
+                 errorStatusFailed: '상태 가져오기 실패',
+                 // 상태 텍스트
+                 converting: '변환 중...',
+                 preparing: '준비 중...',
+                 conversionCompleteMsg: '변환 완료!',
+                startConvert: '변환 시작',
+                errorGreetingFailed: '인사말 정보 가져오기 실패',
+                errorLocationFailed: '위치 정보 가져오기 실패',
+                china: '중국'
              },
              'fr': {
+                 pageTitle: '🥷Arts Secrets - Convertisseur GPX vers TCX - Outil de Conversion de Données Sportives Professionnel',
+                 welcomeTitle: 'Courir au-delà de l\'imagination',
+                 welcomeSubtitle: 'Transformez votre voyage en possibilités infinies',
                  title: 'Run Beyond Imagination',
                  subtitle: 'Conversion de données sportives professionnelles partout, à tout moment',
                  status: 'Statut',
@@ -587,7 +695,8 @@
                  timeConfig: '🕐 Paramètres de temps',
                  startTime: 'Heure de début personnalisée (optionnel)',
                  caloriesPerKm: 'Calories/km',
-                 convertBtn: 'Commencer la conversion',
+                routePreview: '🗺️ Aperçu de l\'itinéraire',
+                convertBtn: 'Commencer la conversion',
                  initializing: 'Initialisation...',
                  conversionComplete: 'Conversion terminée',
                  downloadTcx: 'Télécharger le fichier TCX',
@@ -598,7 +707,11 @@
                  precisionData: 'Données de précision',
                  precisionDesc: 'Maintient la précision de piste originale et l\'intégrité complète des données',
                  privacyFirst: 'Confidentialité d\'abord',
-                 privacyDesc: 'Le traitement local garantit que vos données de fitness ne quittent jamais votre appareil',
+                privacyDesc: 'Le traitement local garantit que vos données de fitness ne quittent jamais votre appareil',
+                fileSelected: 'Sélectionné',
+                fileSize: 'Taille du fichier',
+                clickToSelect: 'Cliquez pour sélectionner un fichier GPX ou faites glisser ici',
+                maxFileSize: 'Prend en charge les fichiers GPX jusqu\'à 16 Mo',
                  universalAccess: 'Accès universel',
                  universalDesc: 'Compatibilité multiplateforme pour une conversion transparente partout',
                  advancedConfig: 'Configuration avancée',
@@ -622,10 +735,28 @@
                  locationError: 'Échec',
                  startPoint: 'Point de départ',
                  endPoint: 'Point d\'arrivée',
-                 unnamedTrack: 'Piste sans nom',
-                 unknown: 'Inconnu'
+                unnamedTrack: 'Piste sans nom',
+                unknown: 'Inconnu',
+                // Messages d'erreur
+                errorInvalidFile: 'Veuillez sélectionner un fichier au format GPX',
+                errorFileSize: 'La taille du fichier ne peut pas dépasser 16MB',
+                errorNoFile: 'Veuillez d\'abord sélectionner un fichier GPX',
+                errorUploadFailed: 'Échec du téléchargement',
+                errorConversionFailed: 'Échec de la conversion',
+                errorStatusFailed: 'Échec de l\'obtention du statut',
+                // Texte de statut
+                converting: 'Conversion en cours...',
+                preparing: 'Préparation...',
+                conversionCompleteMsg: 'Conversion terminée!',
+                startConvert: 'Commencer la conversion',
+                errorGreetingFailed: 'Échec de l\'obtention des informations de salutation',
+                errorLocationFailed: 'Échec de l\'obtention des informations de localisation',
+                china: 'Chine'
              },
              'de': {
+                 pageTitle: '🥷Geheime Künste - GPX zu TCX Konverter - Professionelles Sportdaten-Konvertierungstool',
+                 welcomeTitle: 'Laufen jenseits der Vorstellungskraft',
+                 welcomeSubtitle: 'Verwandeln Sie Ihre Reise in endlose Möglichkeiten',
                  title: 'Run Beyond Imagination',
                  subtitle: 'Professionelle Sportdatenkonvertierung jederzeit, überall',
                  status: 'Status',
@@ -658,7 +789,8 @@
                  timeConfig: '🕐 Zeiteinstellungen',
                  startTime: 'Benutzerdefinierte Startzeit (optional)',
                  caloriesPerKm: 'Kalorien/km',
-                 convertBtn: 'Konvertierung starten',
+                routePreview: '🗺️ Routenvorschau',
+                convertBtn: 'Konvertierung starten',
                  initializing: 'Initialisierung...',
                  conversionComplete: 'Konvertierung abgeschlossen',
                  downloadTcx: 'TCX-Datei herunterladen',
@@ -669,7 +801,11 @@
                  precisionData: 'Präzisionsdaten',
                  precisionDesc: 'Erhält ursprüngliche Spurpräzision und vollständige Datenintegrität',
                  privacyFirst: 'Datenschutz zuerst',
-                 privacyDesc: 'Lokale Verarbeitung stellt sicher, dass Ihre Fitnessdaten Ihr Gerät nie verlassen',
+                privacyDesc: 'Lokale Verarbeitung stellt sicher, dass Ihre Fitnessdaten Ihr Gerät nie verlassen',
+                fileSelected: 'Ausgewählt',
+                fileSize: 'Dateigröße',
+                clickToSelect: 'Klicken Sie, um GPX-Datei auszuwählen oder hier hinziehen',
+                maxFileSize: 'Unterstützt GPX-Dateien bis zu 16 MB',
                  universalAccess: 'Universeller Zugang',
                  universalDesc: 'Plattformübergreifende Kompatibilität für nahtlose Konvertierung überall',
                  advancedConfig: 'Erweiterte Konfiguration',
@@ -693,10 +829,28 @@
                  locationError: 'Fehlgeschlagen',
                  startPoint: 'Startpunkt',
                  endPoint: 'Endpunkt',
-                 unnamedTrack: 'Unbenannte Spur',
-                 unknown: 'Unbekannt'
+                unnamedTrack: 'Unbenannte Spur',
+                unknown: 'Unbekannt',
+                // Fehlermeldungen
+                errorInvalidFile: 'Bitte wählen Sie eine GPX-Datei aus',
+                errorFileSize: 'Dateigröße darf 16MB nicht überschreiten',
+                errorNoFile: 'Bitte wählen Sie zuerst eine GPX-Datei aus',
+                errorUploadFailed: 'Upload fehlgeschlagen',
+                errorConversionFailed: 'Konvertierung fehlgeschlagen',
+                errorStatusFailed: 'Status abrufen fehlgeschlagen',
+                // Statustext
+                converting: 'Konvertierung läuft...',
+                preparing: 'Vorbereitung...',
+                conversionCompleteMsg: 'Konvertierung abgeschlossen!',
+                startConvert: 'Konvertierung starten',
+                errorGreetingFailed: 'Fehler beim Abrufen der Begrüßungsinformationen',
+                errorLocationFailed: 'Fehler beim Abrufen der Standortinformationen',
+                china: 'China'
              },
              'es': {
+                 pageTitle: '🥷Artes Secretas - Convertidor GPX a TCX - Herramienta Profesional de Conversión de Datos Deportivos',
+                 welcomeTitle: 'Correr más allá de la imaginación',
+                 welcomeSubtitle: 'Transforma tu viaje en posibilidades infinitas',
                  title: 'Run Beyond Imagination',
                  subtitle: 'Conversión de datos deportivos profesionales en cualquier momento y lugar',
                  status: 'Estado',
@@ -729,7 +883,8 @@
                  timeConfig: '🕐 Configuración de tiempo',
                  startTime: 'Hora de inicio personalizada (opcional)',
                  caloriesPerKm: 'Calorías/km',
-                 convertBtn: 'Iniciar conversión',
+                routePreview: '🗺️ Vista previa de ruta',
+                convertBtn: 'Iniciar conversión',
                  initializing: 'Inicializando...',
                  conversionComplete: 'Conversión completada',
                  downloadTcx: 'Descargar archivo TCX',
@@ -740,7 +895,11 @@
                  precisionData: 'Datos de precisión',
                  precisionDesc: 'Mantiene la precisión de pista original y la integridad completa de datos',
                  privacyFirst: 'Privacidad primero',
-                 privacyDesc: 'El procesamiento local asegura que sus datos de fitness nunca salgan de su dispositivo',
+                privacyDesc: 'El procesamiento local asegura que sus datos de fitness nunca salgan de su dispositivo',
+                fileSelected: 'Seleccionado',
+                fileSize: 'Tamaño del archivo',
+                clickToSelect: 'Haga clic para seleccionar archivo GPX o arrastre aquí',
+                maxFileSize: 'Admite archivos GPX de hasta 16 MB',
                  universalAccess: 'Acceso universal',
                  universalDesc: 'Compatibilidad multiplataforma para conversión perfecta en cualquier lugar',
                  advancedConfig: 'Configuración avanzada',
@@ -764,8 +923,211 @@
                  locationError: 'Falló',
                  startPoint: 'Punto de inicio',
                  endPoint: 'Punto final',
-                 unnamedTrack: 'Pista sin nombre',
-                 unknown: 'Desconocido'
+                unnamedTrack: 'Pista sin nombre',
+                unknown: 'Desconocido',
+                // Mensajes de error
+                errorInvalidFile: 'Por favor seleccione un archivo en formato GPX',
+                errorFileSize: 'El tamaño del archivo no puede exceder 16MB',
+                errorNoFile: 'Por favor seleccione primero un archivo GPX',
+                errorUploadFailed: 'Fallo en la carga',
+                errorConversionFailed: 'Fallo en la conversión',
+                errorStatusFailed: 'Fallo al obtener el estado',
+                // Texto de estado
+                converting: 'Convirtiendo...',
+                preparing: 'Preparando...',
+                conversionCompleteMsg: '¡Conversión completada!',
+                startConvert: 'Iniciar conversión',
+                errorGreetingFailed: 'Error al obtener información de saludo',
+                errorLocationFailed: 'Error al obtener información de ubicación',
+                china: 'China'
+             },
+             'pt': {
+                 pageTitle: '🥷Artes Secretas - Conversor GPX para TCX - Ferramenta Profissional de Conversão de Dados Esportivos',
+                 welcomeTitle: 'Correr além da imaginação',
+                 welcomeSubtitle: 'Transforme sua jornada em possibilidades infinitas',
+                 title: 'Run Beyond Imagination',
+                 subtitle: 'Conversão profissional de dados esportivos a qualquer hora, em qualquer lugar',
+                 status: 'Status',
+                 online: '● Online',
+                 format: 'Formato',
+                 speed: 'Velocidade',
+                 developer: 'Desenvolvedor',
+                 warning: '⚠️ Apenas para testes, não usar em competições oficiais',
+                 uploadText: 'Arraste arquivos GPX aqui',
+                 uploadHint: 'Suporta formato .gpx • Máx 10MB • Processamento instantâneo',
+                 sportConfig: '🏃‍♂️ Configurações de esporte',
+                 activityType: 'Tipo de atividade',
+                 running: 'Corrida',
+                 cycling: 'Ciclismo',
+                 walking: 'Caminhada',
+                 targetPace: 'Ritmo alvo (min:seg/km)',
+                 weight: 'Peso (kg)',
+                 heartRate: '💓 Frequência cardíaca e tempo',
+                 baseHr: 'FC base',
+                 maxHr: 'FC máxima',
+                 cadenceConfig: '🦵 Cadência e potência',
+                 baseCadence: 'Cadência base (exibir)',
+                 maxCadence: 'Cadência máxima (exibir)',
+                 powerConfig: '⚡ Configurações de potência',
+                 basePower: 'Potência base',
+                 maxPower: 'Potência máxima',
+                 deviceInfo: '📱 Dispositivo e formato',
+                 deviceName: 'Nome do dispositivo',
+                 deviceVersion: 'Versão do dispositivo',
+                 timeConfig: '🕐 Configurações de tempo',
+                 startTime: 'Hora de início personalizada (opcional)',
+                 caloriesPerKm: 'Calorias/km',
+                routePreview: '🗺️ Visualização da rota',
+                convertBtn: 'Iniciar conversão',
+                 initializing: 'Inicializando...',
+                 conversionComplete: 'Conversão concluída',
+                 downloadTcx: 'Baixar arquivo TCX',
+                 reset: 'Converter novamente',
+                 coreFeatures: 'Recursos principais',
+                 instantProcessing: 'Processamento instantâneo',
+                 instantDesc: 'Algoritmos avançados para conversão GPX para TCX em menos de um segundo',
+                 precisionData: 'Dados de precisão',
+                 precisionDesc: 'Mantém a precisão original da trilha e integridade completa dos dados',
+                 privacyFirst: 'Privacidade em primeiro lugar',
+                privacyDesc: 'Processamento local garante que seus dados de fitness nunca saiam do seu dispositivo',
+                fileSelected: 'Selecionado',
+                fileSize: 'Tamanho do arquivo',
+                clickToSelect: 'Clique para selecionar arquivo GPX ou arraste aqui',
+                maxFileSize: 'Suporta arquivos GPX de até 16 MB',
+                 universalAccess: 'Acesso universal',
+                 universalDesc: 'Compatibilidade multiplataforma para conversão perfeita em qualquer lugar',
+                 advancedConfig: 'Configuração avançada',
+                 advancedDesc: 'Personalização abrangente de parâmetros para atletas profissionais',
+                 smartLocation: 'Localização inteligente',
+                 smartDesc: 'Integração meteorológica inteligente para insights de treinamento personalizados',
+                 routePreview: '🗺️ Visualização da rota',
+                 totalDistance: 'Distância total',
+                 trackPoints: 'Pontos da trilha',
+                 elevationGain: 'Ganho de elevação',
+                 routeDetails: '📍 Detalhes da rota',
+                 routeName: 'Nome',
+                 routeDesc: 'Descrição',
+                 timeRange: 'Intervalo de tempo',
+                 avgSpeed: 'Velocidade média',
+                 location: 'Localização',
+                 country: 'País',
+                 province: 'Província',
+                 city: 'Cidade',
+                 loadingLocation: 'Carregando...',
+                 locationError: 'Falhou',
+                 startPoint: 'Ponto de partida',
+                 endPoint: 'Ponto final',
+                unnamedTrack: 'Trilha sem nome',
+                unknown: 'Desconhecido',
+                // Mensagens de erro
+                errorInvalidFile: 'Por favor selecione um arquivo no formato GPX',
+                errorFileSize: 'O tamanho do arquivo não pode exceder 16MB',
+                errorNoFile: 'Por favor selecione primeiro um arquivo GPX',
+                errorUploadFailed: 'Falha no upload',
+                errorConversionFailed: 'Falha na conversão',
+                errorStatusFailed: 'Falha ao obter status',
+                // Texto de status
+                converting: 'Convertendo...',
+                preparing: 'Preparando...',
+                conversionCompleteMsg: 'Conversão concluída!',
+                startConvert: 'Iniciar conversão',
+                errorGreetingFailed: 'Falha ao obter informações de saudação',
+                errorLocationFailed: 'Falha ao obter informações de localização',
+                china: 'China'
+             },
+             'zh-tw': {
+                 pageTitle: '🥷秘術 - GPX 轉 TCX 轉換器 - 專業運動數據轉換工具',
+                 welcomeTitle: '超越想像而奔跑',
+                 welcomeSubtitle: '將你的旅程轉化為無限可能',
+                 title: 'Run Beyond Imagination',
+                 subtitle: '隨時隨地，專業運動數據轉換',
+                 status: '狀態',
+                 online: '● 線上',
+                 format: '格式',
+                 speed: '速度',
+                 developer: '開發者',
+                 warning: '⚠️ 僅供測試使用，請勿用於正式比賽',
+                 uploadText: '拖拽GPX檔案到此處',
+                 uploadHint: '支援.gpx格式 • 最大10MB • 即時處理',
+                 sportConfig: '🏃‍♂️ 運動設定',
+                 activityType: '運動類型',
+                 running: '跑步',
+                 cycling: '騎行',
+                 walking: '步行',
+                 targetPace: '目標配速 (分:秒/公里)',
+                 weight: '體重 (kg)',
+                 heartRate: '💓 心率與時間',
+                 baseHr: '基礎心率',
+                 maxHr: '最大心率',
+                 cadenceConfig: '🦵 步頻與功率',
+                 baseCadence: '基礎步頻 (顯示)',
+                 maxCadence: '最大步頻 (顯示)',
+                 powerConfig: '⚡ 功率設定',
+                 basePower: '基礎功率',
+                 maxPower: '最大功率',
+                 deviceInfo: '📱 裝置與格式',
+                 deviceName: '裝置名稱',
+                 deviceVersion: '裝置版本',
+                 timeConfig: '🕐 時間設定',
+                 startTime: '自訂開始時間 (可選)',
+                 caloriesPerKm: '卡路里/公里',
+                routePreview: '🗺️ 路徑預覽',
+                convertBtn: '開始轉換',
+                 initializing: '初始化中...',
+                 conversionComplete: '轉換完成',
+                 downloadTcx: '下載TCX檔案',
+                 reset: '重新轉換',
+                 coreFeatures: '核心功能',
+                 instantProcessing: '即時處理',
+                 instantDesc: '先進演算法實現亞秒級GPX到TCX轉換',
+                 precisionData: '精確數據',
+                 precisionDesc: '保持原始軌跡精度，完整數據完整性',
+                 privacyFirst: '隱私優先',
+                privacyDesc: '本地處理確保您的健身數據不會離開裝置',
+                fileSelected: '已選擇',
+                fileSize: '檔案大小',
+                clickToSelect: '點擊選擇GPX檔案或拖拽到此處',
+                maxFileSize: '支援最大16MB的GPX檔案',
+                 universalAccess: '通用存取',
+                 universalDesc: '跨平台相容性，隨時隨地無縫轉換',
+                 advancedConfig: '進階配置',
+                 advancedDesc: '為專業運動員提供全面的參數定制',
+                 smartLocation: '智慧定位',
+                 smartDesc: '智慧天氣整合，提供個人化訓練洞察',
+                 routePreview: '🗺️ 路徑預覽',
+                 totalDistance: '總距離',
+                 trackPoints: '軌跡點',
+                 elevationGain: '海拔變化',
+                 routeDetails: '📍 軌跡詳情',
+                 routeName: '名稱',
+                 routeDesc: '描述',
+                 timeRange: '時間範圍',
+                 avgSpeed: '平均速度',
+                 location: '位置',
+                 country: '國家',
+                 province: '省份',
+                 city: '城市',
+                 loadingLocation: '獲取中...',
+                 locationError: '獲取失敗',
+                 startPoint: '起點',
+                 endPoint: '終點',
+                 unnamedTrack: '未命名軌跡',
+                unknown: '未知',
+                // 錯誤訊息
+                errorInvalidFile: '請選擇GPX格式的檔案',
+                errorFileSize: '檔案大小不能超過16MB',
+                errorNoFile: '請先選擇GPX檔案',
+                errorUploadFailed: '上傳失敗',
+                errorConversionFailed: '轉換失敗',
+                errorStatusFailed: '獲取狀態失敗',
+                // 狀態文字
+                converting: '轉換中...',
+                preparing: '準備中...',
+                conversionCompleteMsg: '轉換完成！',
+                startConvert: '開始轉換',
+                errorGreetingFailed: '獲取問候信息失敗',
+                errorLocationFailed: '獲取位置信息失敗',
+                china: '中國'
              }
         };
 
@@ -786,13 +1148,22 @@
             // 支持的语言映射
             const supportedLangs = {
                 'zh': 'zh',
+                'zh-tw': 'zh-tw',
+                'zh-hk': 'zh-tw',
+                'zh-mo': 'zh-tw',
                 'en': 'en', 
                 'ja': 'ja',
                 'ko': 'ko',
                 'fr': 'fr',
                 'de': 'de',
-                'es': 'es'
+                'es': 'es',
+                'pt': 'pt'
             };
+            
+            // 检查完整语言代码（包含地区）
+            if (supportedLangs[browserLang.toLowerCase()]) {
+                return supportedLangs[browserLang.toLowerCase()];
+            }
             
             return supportedLangs[langCode] || 'zh';
         }
@@ -819,7 +1190,7 @@
             if (!t) return;
 
             // 更新页面标题
-            document.title = lang === 'zh' ? 'GPX转TCX转换器 - 专业运动数据转换工具' : 'GPX to TCX Converter - Professional Sports Data Tool';
+            document.title = t.pageTitle;
             document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
 
             // 更新页面内容
@@ -852,41 +1223,12 @@
             if (configTitles[4]) configTitles[4].textContent = t.deviceInfo;
             if (configTitles[5]) configTitles[5].textContent = t.timeConfig;
 
-            // 更新表单标签
-            const labels = document.querySelectorAll('label');
-            const labelMap = {
-                '运动类型': t.activityType,
-                'Activity Type': t.activityType,
-                '目标配速 (分:秒/公里)': t.targetPace,
-                'Target Pace (min:sec/km)': t.targetPace,
-                '体重 (kg)': t.weight,
-                'Weight (kg)': t.weight,
-                '基础心率': t.baseHr,
-                'Base Heart Rate': t.baseHr,
-                '最大心率': t.maxHr,
-                'Max Heart Rate': t.maxHr,
-                '基础步频 (显示)': t.baseCadence,
-                'Base Cadence (Display)': t.baseCadence,
-                '最大步频 (显示)': t.maxCadence,
-                'Max Cadence (Display)': t.maxCadence,
-                '基础功率': t.basePower,
-                'Base Power': t.basePower,
-                '最大功率': t.maxPower,
-                'Max Power': t.maxPower,
-                '设备名称': t.deviceName,
-                'Device Name': t.deviceName,
-                '设备版本': t.deviceVersion,
-                'Device Version': t.deviceVersion,
-                '自定义开始时间 (可选)': t.startTime,
-                'Custom Start Time (Optional)': t.startTime,
-                '卡路里/公里': t.caloriesPerKm,
-                'Calories/km': t.caloriesPerKm
-            };
-
-            labels.forEach(label => {
-                const text = label.textContent.trim();
-                if (labelMap[text]) {
-                    label.textContent = labelMap[text];
+            // 使用data-translate属性更新所有翻译元素
+            const elementsWithTranslate = document.querySelectorAll('[data-translate]');
+            elementsWithTranslate.forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (t[key]) {
+                    element.textContent = t[key];
                 }
             });
 
@@ -940,6 +1282,7 @@
         // 初始化语言
         currentLang = detectLanguage();
         applyTranslations(currentLang);
+        updateLanguageSelector(currentLang);
 
         let selectedFile = null;
         let currentTaskId = null;
@@ -1060,13 +1403,13 @@
         function handleFile(file) {
             // 检查文件类型
             if (!file.name.toLowerCase().endsWith('.gpx')) {
-                showError('请选择GPX格式的文件');
+                showError(translations[currentLang].errorInvalidFile);
                 return;
             }
 
             // 检查文件大小 (16MB)
             if (file.size > 16 * 1024 * 1024) {
-                showError('文件大小不能超过16MB');
+                showError(translations[currentLang].errorFileSize);
                 return;
             }
 
@@ -1085,8 +1428,8 @@
             if (selectedFile) {
                 fileUpload.innerHTML = `
                     <div class="upload-icon">✅</div>
-                    <div class="upload-text">已选择: ${selectedFile.name}</div>
-                    <div class="upload-hint">文件大小: ${(selectedFile.size / 1024 / 1024).toFixed(2)} MB</div>
+                    <div class="upload-text">${translations[currentLang].fileSelected}: ${selectedFile.name}</div>
+                    <div class="upload-hint">${translations[currentLang].fileSize}: ${(selectedFile.size / 1024 / 1024).toFixed(2)} MB</div>
                 `;
             }
         }
@@ -1101,7 +1444,7 @@
             }
             
             if (!selectedFile) {
-                showError('请先选择GPX文件');
+                showError(translations[currentLang].errorNoFile);
                 return;
             }
 
@@ -1121,7 +1464,7 @@
             try {
                 convertBtn.disabled = true;
                 convertBtn.classList.add('btn-loading');
-                convertBtn.querySelector('.btn-text').textContent = '转换中...';
+                convertBtn.querySelector('.btn-text').textContent = translations[currentLang].converting;
                 convertBtn.querySelector('.btn-icon').textContent = '⏳';
                 hideError();
                 resultSection.style.display = 'none';
@@ -1138,7 +1481,7 @@
                     showProgress();
                     pollStatus();
                 } else {
-                    throw new Error(result.error || '上传失败');
+                    throw new Error(result.error || translations[currentLang].errorUploadFailed);
                 }
             } catch (error) {
                 showError(error.message);
@@ -1153,8 +1496,8 @@
             // 重置文件上传区域
             fileUpload.innerHTML = `
                 <div class="upload-icon">📁</div>
-                <div class="upload-text">点击选择GPX文件或拖拽到此处</div>
-                <div class="upload-hint">支持最大16MB的GPX文件</div>
+                <div class="upload-text">${translations[currentLang].clickToSelect}</div>
+                <div class="upload-hint">${translations[currentLang].maxFileSize}</div>
             `;
             fileUpload.classList.remove('file-selected');
             
@@ -1173,7 +1516,7 @@
             // 重置按钮状态
             convertBtn.disabled = true;
             convertBtn.classList.remove('btn-ready', 'btn-loading');
-            convertBtn.querySelector('.btn-text').textContent = '开始转换';
+            convertBtn.querySelector('.btn-text').textContent = translations[currentLang].startConvert;
             convertBtn.querySelector('.btn-icon').textContent = '🔄';
             
             // 隐藏进度和结果
@@ -1186,7 +1529,7 @@
             progressSection.style.display = 'block';
             progressSection.classList.add('fade-in');
             progressFill.style.width = '0%';
-            progressText.textContent = '准备中...';
+            progressText.textContent = translations[currentLang].preparing;
         }
 
         async function pollStatus() {
@@ -1202,13 +1545,13 @@
                     if (status.status === 'completed') {
                         showSuccess();
                     } else if (status.status === 'error') {
-                        throw new Error(status.error || '转换失败');
+                        throw new Error(status.error || translations[currentLang].errorConversionFailed);
                     } else {
                         // 继续轮询
                         setTimeout(pollStatus, 1000);
                     }
                 } else {
-                    throw new Error(status.error || '获取状态失败');
+                    throw new Error(status.error || translations[currentLang].errorStatusFailed);
                 }
             } catch (error) {
                 showError(error.message);
@@ -1236,7 +1579,7 @@
             
             resultIcon.textContent = '✅';
             resultIcon.classList.add('success-bounce');
-            resultMessage.textContent = '转换完成！';
+            resultMessage.textContent = translations[currentLang].conversionCompleteMsg;
             
             // 正确设置下载按钮的点击事件
             downloadBtn.onclick = () => {
@@ -1248,7 +1591,7 @@
         function resetUI() {
             convertBtn.disabled = false;
             convertBtn.classList.remove('btn-loading');
-            convertBtn.querySelector('.btn-text').textContent = '开始转换';
+            convertBtn.querySelector('.btn-text').textContent = translations[currentLang].startConvert;
             convertBtn.querySelector('.btn-icon').textContent = '🔄';
         }
 
@@ -1306,7 +1649,7 @@
                  if (weatherInline) weatherInline.style.display = 'none';
                  if (greetingError) greetingError.style.display = 'none';
 
-                 const response = await fetch('/greeting-info');
+                 const response = await fetch(`/greeting-info?lang=${currentLang}`);
                  const data = await response.json();
  
                  if (data.success) {
@@ -1323,11 +1666,11 @@
                          weatherInline.classList.add('slideIn');
                      }
                  } else {
-                     throw new Error(data.error || '获取问候信息失败');
+                     throw new Error(data.error || translations[currentLang].errorGreetingFailed);
                  }
              } catch (error) {
                  if (greetingError) {
-                     greetingError.textContent = `获取位置信息失败: ${error.message}`;
+                     greetingError.textContent = `${translations[currentLang].errorLocationFailed}: ${error.message}`;
                      greetingError.style.display = 'block';
                      greetingError.classList.add('shake');
                      
@@ -1545,7 +1888,7 @@
             }
             
             const timeRange = minTime && maxTime ? 
-                `${minTime.toLocaleString()} - ${maxTime.toLocaleString()}` : '未知';
+                `${minTime.toLocaleString()} - ${maxTime.toLocaleString()}` : translations[currentLang].unknown;
             
             return {
                 distance: totalDistance,
@@ -1575,15 +1918,60 @@
             const cityElement = document.getElementById('location-city');
             const trans = translations[currentLang];
             
-            try {
-                // 使用Nominatim API进行反向地理编码
-                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=zh-CN,zh,en`);
-                
-                if (!response.ok) {
-                    throw new Error('API请求失败');
-                }
-                
-                const data = await response.json();
+            // 输入验证
+            if (!lat || !lng || isNaN(lat) || isNaN(lng) || 
+                lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+                console.error('无效的坐标:', lat, lng);
+                countryElement.textContent = trans.locationError;
+                provinceElement.textContent = trans.locationError;
+                cityElement.textContent = trans.locationError;
+                return;
+            }
+            
+            // 重试机制
+            const maxRetries = 2;
+            let retryCount = 0;
+            
+            while (retryCount <= maxRetries) {
+                try {
+                    // 根据当前语言设置API语言参数
+                    const langMap = {
+                        'zh': 'zh-CN,zh',
+                        'en': 'en',
+                        'ja': 'ja',
+                        'ko': 'ko',
+                        'fr': 'fr',
+                        'de': 'de',
+                        'es': 'es',
+                        'pt': 'pt',
+                        'zh-tw': 'zh-TW,zh'
+                    };
+                    const acceptLang = langMap[currentLang] || 'en';
+                    
+                    // 使用Nominatim API进行反向地理编码，添加超时控制
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8秒超时
+                    
+                    const response = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=${acceptLang}`,
+                        { 
+                            signal: controller.signal,
+                            headers: {
+                                'User-Agent': 'GPX-TCX-Converter/1.0'
+                            }
+                        }
+                    );
+                    
+                    clearTimeout(timeoutId);
+                    
+                    if (!response.ok) {
+                        if (response.status === 429) {
+                            throw new Error('API请求频率限制，请稍后重试');
+                        }
+                        throw new Error(`API请求失败: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
                 
                 if (data && data.address) {
                     const address = data.address;
@@ -1597,10 +1985,22 @@
                     
                     // 提取城市信息 - 针对中国地址优化
                     let city;
-                    if (address.country === '中国' || address.country === 'China') {
-                        // 对于中国地址，优先显示地级市，如果没有则显示县级市
-                        city = address.city || address.county || address.town || 
-                               address.village || address.municipality || address.suburb || trans.locationError;
+                    if (address.country === translations[currentLang].china || address.country === 'China') {
+                        // 对于中国地址，优先显示地级市，避免显示区县和省份重复
+                        let cityCandidate = address.city || address.county || address.municipality || 
+                                          address.town || address.village || address.suburb;
+                        
+                        // 避免城市与省份重复
+                        if (cityCandidate && cityCandidate === province) {
+                            // 如果城市名与省份相同，尝试使用其他字段
+                            city = address.municipality || address.county || address.town || 
+                                   address.city_district || address.village || trans.locationError;
+                        } else if (cityCandidate && cityCandidate.includes('区')) {
+                            // 如果候选城市名包含'区'，尝试使用更高级别的行政区划
+                            city = address.county || address.municipality || cityCandidate || trans.locationError;
+                        } else {
+                            city = cityCandidate || trans.locationError;
+                        }
                     } else {
                         // 其他国家保持原有逻辑
                         city = address.city || address.town || address.village || 
@@ -1611,16 +2011,36 @@
                     countryElement.textContent = country;
                     provinceElement.textContent = province;
                     cityElement.textContent = city;
-                } else {
-                    countryElement.textContent = trans.locationError;
-                    provinceElement.textContent = trans.locationError;
-                    cityElement.textContent = trans.locationError;
+                    } else {
+                        throw new Error('API返回数据无效');
+                    }
+                    
+                    // 成功获取数据，退出重试循环
+                    break;
+                    
+                } catch (error) {
+                    retryCount++;
+                    console.error(`获取位置信息失败 (尝试 ${retryCount}/${maxRetries + 1}):`, error.message);
+                    
+                    if (retryCount > maxRetries) {
+                        // 所有重试都失败，显示错误信息
+                        let errorMsg = trans.locationError;
+                        if (error.name === 'AbortError') {
+                            errorMsg = '请求超时';
+                        } else if (error.message.includes('429')) {
+                            errorMsg = '请求过于频繁';
+                        }
+                        
+                        countryElement.textContent = errorMsg;
+                        provinceElement.textContent = errorMsg;
+                        cityElement.textContent = errorMsg;
+                        return;
+                    }
+                    
+                    // 等待后重试（指数退避）
+                    const delay = Math.pow(2, retryCount - 1) * 1000; // 1s, 2s, 4s...
+                    await new Promise(resolve => setTimeout(resolve, delay));
                 }
-            } catch (error) {
-                console.error('获取位置信息失败:', error);
-                countryElement.textContent = trans.locationError;
-                provinceElement.textContent = trans.locationError;
-                cityElement.textContent = trans.locationError;
             }
         }
         

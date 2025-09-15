@@ -17,15 +17,63 @@ from pathlib import Path
 import psutil
 import requests
 
+# 应用配置常量
+APP_CONFIG = {
+    'SECRET_KEY': 'gpx_to_tcx_converter_2025',
+    'MAX_CONTENT_LENGTH': 16 * 1024 * 1024,  # 16MB
+    'UPLOAD_FOLDER': 'uploads',
+    'OUTPUT_FOLDER': 'outputs',
+    'ALLOWED_EXTENSIONS': {'gpx'},
+    'DEFAULT_PORT': 8888,
+    'CLEANUP_INTERVAL': 3600,  # 1小时
+    'FILE_RETENTION_HOURS': 24  # 24小时
+}
+
+# HTTP状态码常量
+HTTP_STATUS = {
+    'OK': 200,
+    'BAD_REQUEST': 400,
+    'NOT_FOUND': 404,
+    'INTERNAL_SERVER_ERROR': 500
+}
+
+# 错误消息常量
+ERROR_MESSAGES = {
+    'NO_FILE_SELECTED': '没有选择文件',
+    'INVALID_FILE_FORMAT': '只支持GPX文件格式',
+    'FILE_TOO_LARGE': '文件大小超过限制',
+    'TASK_NOT_FOUND': '任务不存在',
+    'UPLOAD_FAILED': '上传失败',
+    'CONVERSION_FAILED': '转换失败',
+    'FILE_NOT_FOUND': '文件不存在或已被删除',
+    'CONVERSION_NOT_COMPLETED': '转换尚未完成'
+}
+
+# 默认转换器配置
+DEFAULT_CONVERTER_CONFIG = {
+    'activity_type': 'Running',
+    'device_name': 'Forerunner 570',
+    'device_version': '12.70',
+    'base_hr': 135,
+    'max_hr': 165,
+    'base_cadence': 50,
+    'max_cadence': 70,
+    'base_power': 150,
+    'max_power': 300,
+    'calories_per_km': 60,
+    'weight': 70,
+    'target_pace': '5:30'
+}
+
 app = Flask(__name__)
-app.secret_key = 'gpx_to_tcx_converter_2025'
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+app.secret_key = APP_CONFIG['SECRET_KEY']
+app.config['MAX_CONTENT_LENGTH'] = APP_CONFIG['MAX_CONTENT_LENGTH']
 
 # 配置
-UPLOAD_FOLDER = 'uploads'
-OUTPUT_FOLDER = 'outputs'
-MAX_FILE_SIZE = 16 * 1024 * 1024  # 16MB
-ALLOWED_EXTENSIONS = {'gpx'}
+UPLOAD_FOLDER = APP_CONFIG['UPLOAD_FOLDER']
+OUTPUT_FOLDER = APP_CONFIG['OUTPUT_FOLDER']
+MAX_FILE_SIZE = APP_CONFIG['MAX_CONTENT_LENGTH']
+ALLOWED_EXTENSIONS = APP_CONFIG['ALLOWED_EXTENSIONS']
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -83,20 +131,21 @@ def perform_conversion(task):
         task.progress = 20
         task.message = '正在应用配置...'
         
-        converter.config.update({
-            'activity_type': task.config.get('activity_type', 'Running'),
-            'device_name': task.config.get('device_name', 'Forerunner 570'),
-            'device_version': task.config.get('device_version', '12.70'),
-            'base_hr': int(task.config.get('base_hr', 135)),
-            'max_hr': int(task.config.get('max_hr', 165)),
-            'base_cadence': int(task.config.get('base_cadence', 50)),
-            'max_cadence': int(task.config.get('max_cadence', 70)),
-            'base_power': int(task.config.get('base_power', 150)),
-            'max_power': int(task.config.get('max_power', 300)),
-            'calories_per_km': int(task.config.get('calories_per_km', 60)),
-            'weight': int(task.config.get('weight', 70)),
-            'target_pace': task.config.get('target_pace', '5:30')
-        })
+        # 应用配置，使用默认值作为后备
+        config_updates = {}
+        for key, default_value in DEFAULT_CONVERTER_CONFIG.items():
+            value = task.config.get(key, default_value)
+            # 对数值类型进行类型转换
+            if isinstance(default_value, int) and not isinstance(value, int):
+                try:
+                    config_updates[key] = int(value)
+                except (ValueError, TypeError):
+                    config_updates[key] = default_value
+                    logger.warning(f"配置项 {key} 值无效: {value}，使用默认值: {default_value}")
+            else:
+                config_updates[key] = value
+        
+        converter.config.update(config_updates)
         
         # 处理开始时间
         start_time_str = task.config.get('start_time', '').strip()
@@ -156,14 +205,14 @@ def upload_file():
     """处理文件上传"""
     try:
         if 'file' not in request.files:
-            return jsonify({'error': '没有选择文件'}), 400
+            return jsonify({'error': ERROR_MESSAGES['NO_FILE_SELECTED']}), HTTP_STATUS['BAD_REQUEST']
         
         file = request.files['file']
         if file.filename == '':
-            return jsonify({'error': '没有选择文件'}), 400
+            return jsonify({'error': ERROR_MESSAGES['NO_FILE_SELECTED']}), HTTP_STATUS['BAD_REQUEST']
         
         if not allowed_file(file.filename):
-            return jsonify({'error': '只支持GPX文件格式'}), 400
+            return jsonify({'error': ERROR_MESSAGES['INVALID_FILE_FORMAT']}), HTTP_STATUS['BAD_REQUEST']
         
         # 检查文件大小
         file.seek(0, os.SEEK_END)
@@ -171,7 +220,8 @@ def upload_file():
         file.seek(0)
         
         if file_size > MAX_FILE_SIZE:
-            return jsonify({'error': f'文件大小超过限制 ({MAX_FILE_SIZE // (1024*1024)}MB)'}), 400
+            error_msg = f"{ERROR_MESSAGES['FILE_TOO_LARGE']} ({MAX_FILE_SIZE // (1024*1024)}MB)"
+            return jsonify({'error': error_msg}), HTTP_STATUS['BAD_REQUEST']
         
         # 生成任务ID
         task_id = str(uuid.uuid4())
@@ -218,14 +268,15 @@ def upload_file():
         })
         
     except Exception as e:
-        return jsonify({'error': f'上传失败: {str(e)}'}), 500
+        logger.error(f"文件上传失败: {str(e)}")
+        return jsonify({'error': f"{ERROR_MESSAGES['UPLOAD_FAILED']}: {str(e)}"}), HTTP_STATUS['INTERNAL_SERVER_ERROR']
 
 @app.route('/status/<task_id>')
 def get_status(task_id):
     """获取转换状态"""
     task = conversion_tasks.get(task_id)
     if not task:
-        return jsonify({'error': '任务不存在'}), 404
+        return jsonify({'error': ERROR_MESSAGES['TASK_NOT_FOUND']}), HTTP_STATUS['NOT_FOUND']
     
     return jsonify(task.to_dict())
 
@@ -234,14 +285,14 @@ def convert_file():
     """直接转换文件（兼容性路由）"""
     try:
         if 'file' not in request.files:
-            return jsonify({'error': '没有选择文件'}), 400
+            return jsonify({'error': ERROR_MESSAGES['NO_FILE_SELECTED']}), HTTP_STATUS['BAD_REQUEST']
         
         file = request.files['file']
         if file.filename == '':
-            return jsonify({'error': '没有选择文件'}), 400
+            return jsonify({'error': ERROR_MESSAGES['NO_FILE_SELECTED']}), HTTP_STATUS['BAD_REQUEST']
         
         if not allowed_file(file.filename):
-            return jsonify({'error': '只支持GPX文件格式'}), 400
+            return jsonify({'error': ERROR_MESSAGES['INVALID_FILE_FORMAT']}), HTTP_STATUS['BAD_REQUEST']
         
         # 检查文件大小
         file.seek(0, os.SEEK_END)
@@ -249,6 +300,8 @@ def convert_file():
         file.seek(0)
         
         if file_size > MAX_FILE_SIZE:
+            error_msg = f"{ERROR_MESSAGES['FILE_TOO_LARGE']} ({MAX_FILE_SIZE // (1024*1024)}MB)"
+            return jsonify({'error': error_msg}), HTTP_STATUS['BAD_REQUEST']
             return jsonify({'error': f'文件大小超过限制 ({MAX_FILE_SIZE // (1024*1024)}MB)'}), 400
         
         # 生成临时文件名
@@ -318,11 +371,11 @@ def download_file(task_id):
     
     if task.status != 'completed':
         logger.warning(f"下载请求失败: 任务 {task_id} 状态为 {task.status}")
-        return jsonify({'error': '转换尚未完成'}), 400
+        return jsonify({'error': ERROR_MESSAGES['CONVERSION_NOT_COMPLETED']}), HTTP_STATUS['BAD_REQUEST']
     
     if not os.path.exists(task.output_file):
         logger.error(f"下载请求失败: 文件 {task.output_file} 不存在")
-        return jsonify({'error': '输出文件不存在'}), 404
+        return jsonify({'error': ERROR_MESSAGES['FILE_NOT_FOUND']}), HTTP_STATUS['NOT_FOUND']
     
     # 获取原始文件名
     original_filename = os.path.basename(task.input_file).split('_', 1)[1]
@@ -343,48 +396,68 @@ def download_file(task_id):
         return jsonify({'error': '文件下载失败'}), 500
 
 def cleanup_old_files():
-    """清理旧文件和任务"""
+    """清理旧文件和任务记录"""
     try:
         current_time = datetime.now()
+        cutoff_time = current_time - timedelta(hours=APP_CONFIG['FILE_RETENTION_HOURS'])
+        
         cleaned_files = 0
         cleaned_tasks = 0
         
-        # 清理超过1小时的任务和文件
+        # 清理超过保留时间的任务和文件
         tasks_to_remove = []
         for task_id, task in list(conversion_tasks.items()):
-            if (current_time - task.created_at).total_seconds() > 3600:  # 1小时
+            if task.created_at < cutoff_time:
                 # 删除相关文件
                 for file_path in [task.input_file, task.output_file]:
                     if file_path and os.path.exists(file_path):
                         try:
                             os.remove(file_path)
                             cleaned_files += 1
-                            logger.info(f"删除过期文件: {file_path}")
-                        except Exception as e:
+                            logger.debug(f"删除过期文件: {file_path}")
+                        except (OSError, IOError) as e:
                             logger.warning(f"删除文件失败 {file_path}: {str(e)}")
+                        except Exception as e:
+                            logger.error(f"处理文件时出错 {file_path}: {str(e)}")
                 tasks_to_remove.append(task_id)
         
         # 从内存中移除任务
         for task_id in tasks_to_remove:
-            del conversion_tasks[task_id]
-            cleaned_tasks += 1
+            try:
+                del conversion_tasks[task_id]
+                cleaned_tasks += 1
+            except KeyError:
+                logger.warning(f"任务 {task_id} 已被删除")
         
-        # 清理空的上传和输出目录中的孤立文件
-        for folder in [UPLOAD_FOLDER, OUTPUT_FOLDER]:
-            if os.path.exists(folder):
+        # 清理文件夹中的孤立文件
+        folders_to_clean = [UPLOAD_FOLDER, OUTPUT_FOLDER]
+        for folder in folders_to_clean:
+            if not os.path.exists(folder):
+                continue
+                
+            try:
                 for filename in os.listdir(folder):
                     file_path = os.path.join(folder, filename)
-                    if os.path.isfile(file_path):
-                        file_age = current_time.timestamp() - os.path.getmtime(file_path)
-                        if file_age > 3600:  # 1小时
-                            try:
-                                os.remove(file_path)
-                                cleaned_files += 1
-                                logger.info(f"删除孤立文件: {file_path}")
-                            except Exception as e:
-                                logger.warning(f"删除孤立文件失败 {file_path}: {str(e)}")
+                    if not os.path.isfile(file_path):
+                        continue
+                        
+                    try:
+                        file_mtime = datetime.fromtimestamp(os.path.getmtime(file_path))
+                        if file_mtime < cutoff_time:
+                            os.remove(file_path)
+                            cleaned_files += 1
+                            logger.debug(f"删除孤立文件: {file_path}")
+                    except (OSError, IOError) as e:
+                        logger.warning(f"删除孤立文件失败 {file_path}: {str(e)}")
+                    except Exception as e:
+                        logger.error(f"处理孤立文件时出错 {file_path}: {str(e)}")
+                        
+            except (OSError, IOError) as e:
+                logger.warning(f"访问文件夹失败 {folder}: {str(e)}")
         
-        logger.info(f"清理完成: {cleaned_files} 个文件, {cleaned_tasks} 个任务")
+        if cleaned_files > 0 or cleaned_tasks > 0:
+            logger.info(f"清理完成: {cleaned_files} 个文件, {cleaned_tasks} 个任务")
+        
         return cleaned_files, cleaned_tasks
         
     except Exception as e:
@@ -473,6 +546,8 @@ def serve_background_image():
 def get_greeting_info():
     """获取用户位置和天气信息用于个性化问候"""
     try:
+        # 获取语言参数
+        lang = request.args.get('lang', 'zh')
         # 获取用户真实IP地址
         if request.headers.get('X-Forwarded-For'):
             user_ip = request.headers.get('X-Forwarded-For').split(',')[0].strip()
@@ -621,16 +696,67 @@ def get_greeting_info():
                     if 'current' in weather_data:
                         current = weather_data['current']
                         
-                        # 天气代码映射到中文描述
+                        # 多语言天气代码映射
                         weather_codes = {
-                            0: '晴朗', 1: '晴朗', 2: '部分多云', 3: '多云',
-                            45: '雾', 48: '雾凇', 51: '小雨', 53: '中雨', 55: '大雨',
-                            61: '小雨', 63: '中雨', 65: '大雨', 71: '小雪', 73: '中雪', 75: '大雪',
-                            80: '阵雨', 81: '阵雨', 82: '暴雨', 95: '雷暴', 96: '雷暴', 99: '雷暴'
+                            'zh': {
+                                0: '晴朗', 1: '晴朗', 2: '部分多云', 3: '多云',
+                                45: '雾', 48: '雾凇', 51: '小雨', 53: '中雨', 55: '大雨',
+                                61: '小雨', 63: '中雨', 65: '大雨', 71: '小雪', 73: '中雪', 75: '大雪',
+                                80: '阵雨', 81: '阵雨', 82: '暴雨', 95: '雷暴', 96: '雷暴', 99: '雷暴'
+                            },
+                            'en': {
+                                0: 'Clear', 1: 'Clear', 2: 'Partly Cloudy', 3: 'Cloudy',
+                                45: 'Fog', 48: 'Rime Fog', 51: 'Light Rain', 53: 'Moderate Rain', 55: 'Heavy Rain',
+                                61: 'Light Rain', 63: 'Moderate Rain', 65: 'Heavy Rain', 71: 'Light Snow', 73: 'Moderate Snow', 75: 'Heavy Snow',
+                                80: 'Showers', 81: 'Showers', 82: 'Heavy Showers', 95: 'Thunderstorm', 96: 'Thunderstorm', 99: 'Thunderstorm'
+                            },
+                            'ja': {
+                                0: '晴れ', 1: '晴れ', 2: '一部曇り', 3: '曇り',
+                                45: '霧', 48: '霧氷', 51: '小雨', 53: '中雨', 55: '大雨',
+                                61: '小雨', 63: '中雨', 65: '大雨', 71: '小雪', 73: '中雪', 75: '大雪',
+                                80: 'にわか雨', 81: 'にわか雨', 82: '激しい雨', 95: '雷雨', 96: '雷雨', 99: '雷雨'
+                            },
+                            'ko': {
+                                0: '맑음', 1: '맑음', 2: '부분 흐림', 3: '흐림',
+                                45: '안개', 48: '서리', 51: '가벼운 비', 53: '보통 비', 55: '강한 비',
+                                61: '가벼운 비', 63: '보통 비', 65: '강한 비', 71: '가벼운 눈', 73: '보통 눈', 75: '강한 눈',
+                                80: '소나기', 81: '소나기', 82: '폭우', 95: '뇌우', 96: '뇌우', 99: '뇌우'
+                            },
+                            'fr': {
+                                0: 'Clair', 1: 'Clair', 2: 'Partiellement nuageux', 3: 'Nuageux',
+                                45: 'Brouillard', 48: 'Givre', 51: 'Pluie légère', 53: 'Pluie modérée', 55: 'Pluie forte',
+                                61: 'Pluie légère', 63: 'Pluie modérée', 65: 'Pluie forte', 71: 'Neige légère', 73: 'Neige modérée', 75: 'Neige forte',
+                                80: 'Averses', 81: 'Averses', 82: 'Fortes averses', 95: 'Orage', 96: 'Orage', 99: 'Orage'
+                            },
+                            'de': {
+                                0: 'Klar', 1: 'Klar', 2: 'Teilweise bewölkt', 3: 'Bewölkt',
+                                45: 'Nebel', 48: 'Raureif', 51: 'Leichter Regen', 53: 'Mäßiger Regen', 55: 'Starker Regen',
+                                61: 'Leichter Regen', 63: 'Mäßiger Regen', 65: 'Starker Regen', 71: 'Leichter Schnee', 73: 'Mäßiger Schnee', 75: 'Starker Schnee',
+                                80: 'Schauer', 81: 'Schauer', 82: 'Starke Schauer', 95: 'Gewitter', 96: 'Gewitter', 99: 'Gewitter'
+                            },
+                            'es': {
+                                0: 'Despejado', 1: 'Despejado', 2: 'Parcialmente nublado', 3: 'Nublado',
+                                45: 'Niebla', 48: 'Escarcha', 51: 'Lluvia ligera', 53: 'Lluvia moderada', 55: 'Lluvia fuerte',
+                                61: 'Lluvia ligera', 63: 'Lluvia moderada', 65: 'Lluvia fuerte', 71: 'Nieve ligera', 73: 'Nieve moderada', 75: 'Nieve fuerte',
+                                80: 'Chubascos', 81: 'Chubascos', 82: 'Chubascos fuertes', 95: 'Tormenta', 96: 'Tormenta', 99: 'Tormenta'
+                            },
+                            'pt': {
+                                0: 'Limpo', 1: 'Limpo', 2: 'Parcialmente nublado', 3: 'Nublado',
+                                45: 'Nevoeiro', 48: 'Geada', 51: 'Chuva leve', 53: 'Chuva moderada', 55: 'Chuva forte',
+                                61: 'Chuva leve', 63: 'Chuva moderada', 65: 'Chuva forte', 71: 'Neve leve', 73: 'Neve moderada', 75: 'Neve forte',
+                                80: 'Aguaceiros', 81: 'Aguaceiros', 82: 'Aguaceiros fortes', 95: 'Tempestade', 96: 'Tempestade', 99: 'Tempestade'
+                            },
+                            'zh-tw': {
+                                0: '晴朗', 1: '晴朗', 2: '部分多雲', 3: '多雲',
+                                45: '霧', 48: '霧淞', 51: '小雨', 53: '中雨', 55: '大雨',
+                                61: '小雨', 63: '中雨', 65: '大雨', 71: '小雪', 73: '中雪', 75: '大雪',
+                                80: '陣雨', 81: '陣雨', 82: '暴雨', 95: '雷暴', 96: '雷暴', 99: '雷暴'
+                            }
                         }
                         
                         weather_code = current.get('weather_code', 0)
-                        weather_desc = weather_codes.get(weather_code, '晴朗')
+                        lang_codes = weather_codes.get(lang, weather_codes['zh'])
+                        weather_desc = lang_codes.get(weather_code, lang_codes.get(0, 'Clear'))
                         
                         # 只有当所有关键数据都存在时才显示天气信息
                         if (current.get('temperature_2m') is not None and 
@@ -646,6 +772,76 @@ def get_greeting_info():
             except Exception as e:
                 # 天气API调用失败时，weather_info保持为None
                 pass
+        
+        # 多语言问候语
+        greetings = {
+            'zh': {
+                'hello': '你好，来自{city}的用户！',
+                'weather_info': '今天天气{desc}，气温{temp}',
+                'welcome': '欢迎使用GPX转TCX转换器',
+                'unknown_area': '未知地区'
+            },
+            'en': {
+                'hello': 'Hello, user from {city}!',
+                'weather_info': 'Today\'s weather is {desc}, temperature {temp}',
+                'welcome': 'Welcome to GPX to TCX Converter',
+                'unknown_area': 'Unknown Area'
+            },
+            'ja': {
+                'hello': 'こんにちは、{city}からのユーザー！',
+                'weather_info': '今日の天気は{desc}、気温{temp}です',
+                'welcome': 'GPXからTCXコンバーターへようこそ',
+                'unknown_area': '不明な地域'
+            },
+            'ko': {
+                'hello': '안녕하세요, {city}에서 오신 사용자님!',
+                'weather_info': '오늘 날씨는 {desc}, 기온 {temp}입니다',
+                'welcome': 'GPX to TCX 변환기에 오신 것을 환영합니다',
+                'unknown_area': '알 수 없는 지역'
+            },
+            'fr': {
+                'hello': 'Bonjour, utilisateur de {city}!',
+                'weather_info': 'Le temps aujourd\'hui est {desc}, température {temp}',
+                'welcome': 'Bienvenue dans le convertisseur GPX vers TCX',
+                'unknown_area': 'Zone inconnue'
+            },
+            'de': {
+                'hello': 'Hallo, Benutzer aus {city}!',
+                'weather_info': 'Das heutige Wetter ist {desc}, Temperatur {temp}',
+                'welcome': 'Willkommen beim GPX zu TCX Konverter',
+                'unknown_area': 'Unbekanntes Gebiet'
+            },
+            'es': {
+                'hello': '¡Hola, usuario de {city}!',
+                'weather_info': 'El clima de hoy es {desc}, temperatura {temp}',
+                'welcome': 'Bienvenido al convertidor GPX a TCX',
+                'unknown_area': 'Área desconocida'
+            },
+            'pt': {
+                'hello': 'Olá, usuário de {city}!',
+                'weather_info': 'O tempo hoje está {desc}, temperatura {temp}',
+                'welcome': 'Bem-vindo ao conversor GPX para TCX',
+                'unknown_area': 'Área desconhecida'
+            },
+            'zh-tw': {
+                'hello': '你好，來自{city}的用戶！',
+                'weather_info': '今天天氣{desc}，氣溫{temp}',
+                'welcome': '歡迎使用GPX轉TCX轉換器',
+                'unknown_area': '未知地區'
+            }
+        }
+        
+        lang_greeting = greetings.get(lang, greetings['zh'])
+        city_name = ip_data.get('city', ip_data.get('region_name', lang_greeting['unknown_area']))
+        
+        greeting_text = lang_greeting['hello'].format(city=city_name)
+        if weather_info:
+            greeting_text += lang_greeting['weather_info'].format(
+                desc=weather_info['description'], 
+                temp=weather_info['temperature']
+            )
+        else:
+            greeting_text += lang_greeting['welcome']
         
         return jsonify({
             'success': True,
@@ -663,7 +859,7 @@ def get_greeting_info():
                     'continent': ip_data.get('continent_name', 'Unknown')
                 },
                 'weather': weather_info,
-                'greeting': f"你好，来自{ip_data.get('city', ip_data.get('region_name', '未知地区'))}的用户！" + (f"今天天气{weather_info['description']}，气温{weather_info['temperature']}" if weather_info else "欢迎使用GPX转TCX转换器")
+                'greeting': greeting_text
             }
         })
             
