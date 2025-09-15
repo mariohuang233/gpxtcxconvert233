@@ -371,7 +371,7 @@ body::before {
     animation: appleScale 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
-/* 容器内部流动效果 */
+/* 容器内部流动效果 - 更加微妙 */
 .container::before {
     content: '';
     position: absolute;
@@ -382,21 +382,22 @@ body::before {
     height: 100%;
     background: linear-gradient(to bottom,
         transparent 0%,
-        rgba(0, 208, 132, 0.1) 20%,
-        rgba(0, 208, 132, 0.15) 50%,
-        rgba(0, 208, 132, 0.1) 80%,
+        rgba(0, 208, 132, 0.05) 30%,
+        rgba(0, 208, 132, 0.08) 50%,
+        rgba(0, 208, 132, 0.05) 70%,
         transparent 100%);
-    opacity: 0.6;
+    opacity: 0.4;
     z-index: 0;
     pointer-events: none;
 }
 
-/* 模块间距优化 */
+/* 模块间距优化 - 统一间距 */
 .welcome-section,
 .upload-section,
 .config-section,
 .convert-section {
-    margin-bottom: 40px;
+    margin-bottom: 60px;
+    position: relative;
     transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
@@ -857,40 +858,9 @@ body::before {
 }
 
 /* 配置区域连接效果 */
-.config-section::after {
-    content: '';
-    position: absolute;
-    top: -20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40px;
-    height: 40px;
-    background: radial-gradient(circle, 
-        rgba(0, 208, 132, 0.12) 0%,
-        rgba(0, 208, 132, 0.06) 60%,
-        transparent 100%);
-    opacity: 0.8;
-    z-index: 1;
-}
 
-.config-section::before {
-    content: '';
-    position: absolute;
-    top: -3rem;
-    left: calc(-50vw + 50%);
-    right: calc(-50vw + 50%);
-    width: 100vw;
-    height: 280px;
-    background: linear-gradient(180deg, 
-        rgba(15, 23, 42, 0.6) 0%, 
-        rgba(15, 23, 42, 0.7) 15%,
-        rgba(20, 30, 50, 0.65) 30%,
-        rgba(15, 23, 42, 0.5) 50%,
-        rgba(15, 23, 42, 0.25) 70%,
-        rgba(15, 23, 42, 0.1) 85%,
-        transparent 100%);
-    z-index: -1;
-}
+
+
 
 .config-grid {
     display: grid;
@@ -1168,18 +1138,26 @@ input:hover, select:hover {
 .btn-primary {
     background: var(--gradient-primary);
     color: white;
-    box-shadow: 0 2px 8px rgba(0, 208, 132, 0.25);
+    box-shadow: 
+        0 4px 20px rgba(0, 208, 132, 0.15),
+        0 1px 3px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
     position: relative;
     overflow: hidden;
-
+    border: 1px solid rgba(0, 208, 132, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .btn-primary:hover:not(:disabled) {
     background: linear-gradient(135deg, #00F5A0 0%, #00D084 100%);
     box-shadow: 
-        0 8px 25px rgba(0, 208, 132, 0.4),
-        0 0 0 1px rgba(255, 255, 255, 0.08);
-    transform: translateY(-2px) scale(1.02);
+        0 8px 32px rgba(0, 208, 132, 0.3),
+        0 4px 16px rgba(0, 208, 132, 0.2),
+        0 1px 3px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transform: translateY(-3px) scale(1.02);
+    border-color: rgba(0, 208, 132, 0.4);
 }
 
 .btn-primary:active:not(:disabled) {
