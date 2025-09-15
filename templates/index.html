@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPX to TCX - Precision in Motion</title>
+    <title>🥷秘术 - GPX 转 TCX 转换器 - 专业运动数据转换工具</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -16,16 +16,16 @@
     <div class="container">
         <!-- 全屏居中欢迎区域 -->
         <div class="welcome-section animate-fade-in">
-            <h1 class="welcome-title animate-scale-in">Precision in Motion</h1>
-            <p class="welcome-subtitle animate-fade-in animate-delay-2">Transform every step into meaningful data</p>
+            <h1 class="welcome-title animate-scale-in">GPX 转 TCX 转换器</h1>
+            <p class="welcome-subtitle animate-fade-in animate-delay-2">专业的运动数据格式转换工具</p>
             
             <div class="welcome-info animate-slide-up animate-delay-3">
                 <div class="info-item">
-                    <span class="info-label">FORMAT</span>
+                    <span class="info-label">格式</span>
                     <span class="info-value">GPX → TCX</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">DEVELOPER</span>
+                    <span class="info-label">开发者</span>
                     <span class="info-value">mariohuang</span>
                 </div>
                 <div class="info-item" id="weatherInline" style="display: none;">
@@ -35,10 +35,13 @@
             </div>
             
             <div class="status-indicator status-warning animate-scale-in animate-delay-3" style="margin-top: 1.5rem;">
-                ⚠️ For testing purposes only
+                ⚠️ 仅供测试使用
             </div>
             
             <div id="greetingError" class="status-indicator status-error" style="display: none;"></div>
+            
+            <!-- 过渡连接层 -->
+            <div class="transition-bridge"></div>
         </div>
 
         <div class="status-indicator status-error" id="errorMessage" style="display: none;"></div>
@@ -69,93 +72,92 @@
         <div class="config-section animate-fade-in animate-delay-2">
             <form id="configForm">
                 <div class="config-grid">
-                    <div class="card config-group animate-scale-in animate-delay-3">
-                        <h3>🏃‍♂️ Activity</h3>
+                    <!-- 核心配置组 - 最重要的设置 -->
+                    <div class="card config-group config-primary animate-scale-in animate-delay-3">
+                        <h3>🏃‍♂️ 基础设置</h3>
                         <div class="form-group">
-                            <label for="activityType">Sport Type</label>
+                            <label for="activityType">运动类型</label>
                             <select id="activityType" name="activity_type">
-                                <option value="Running">Running</option>
-                                <option value="Cycling">Cycling</option>
-                                <option value="Walking">Walking</option>
+                                <option value="Running">跑步</option>
+                                <option value="Cycling">骑行</option>
+                                <option value="Walking">步行</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="targetPace">Target Pace</label>
+                            <label for="targetPace">目标配速</label>
                             <input type="text" id="targetPace" name="target_pace" value="5:30" placeholder="5:30">
                         </div>
                         <div class="form-group">
-                            <label for="weight">Weight (kg)</label>
+                            <label for="weight">体重 (kg)</label>
                             <input type="number" id="weight" name="weight" value="70" min="30" max="200">
+                        </div>
+                        <div class="form-group">
+                            <label for="caloriesPerKm">每公里卡路里</label>
+                            <input type="number" id="caloriesPerKm" name="calories_per_km" value="60" min="30" max="150">
                         </div>
                     </div>
 
-                    <div class="card config-group animate-scale-in animate-delay-4">
-                        <h3>💓 Heart Rate</h3>
+                    <div class="card config-group config-primary animate-scale-in animate-delay-4">
+                        <h3>💓 心率与时间</h3>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="baseHr">Base BPM</label>
+                                <label for="baseHr">基础心率</label>
                                 <input type="number" id="baseHr" name="base_hr" value="135" min="60" max="200">
                             </div>
                             <div class="form-group">
-                                <label for="maxHr">Max BPM</label>
+                                <label for="maxHr">最大心率</label>
                                 <input type="number" id="maxHr" name="max_hr" value="165" min="100" max="220">
                             </div>
                         </div>
+                        <div class="form-group">
+                            <label for="startTime">自定义开始时间</label>
+                            <input type="datetime-local" id="startTime" name="start_time">
+                        </div>
                     </div>
 
-                    <div class="card config-group animate-scale-in animate-delay-5">
-                        <h3>🦵 Cadence</h3>
+                    <!-- 高级设置组 - 专业用户配置 -->
+                    <div class="card config-group config-secondary animate-scale-in animate-delay-5">
+                        <h3>🦵 步频与功率</h3>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="baseCadenceDisplay">Base SPM</label>
+                                <label for="baseCadenceDisplay">基础步频</label>
                                 <input type="number" id="baseCadenceDisplay" value="100" min="60" max="200" onchange="updateCadenceValue('base')">
                                 <input type="hidden" id="baseCadence" name="base_cadence" value="50">
                             </div>
                             <div class="form-group">
-                                <label for="maxCadenceDisplay">Max SPM</label>
+                                <label for="maxCadenceDisplay">最大步频</label>
                                 <input type="number" id="maxCadenceDisplay" value="140" min="100" max="240" onchange="updateCadenceValue('max')">
                                 <input type="hidden" id="maxCadence" name="max_cadence" value="70">
                             </div>
                         </div>
-                    </div>
-
-                    <div class="card config-group animate-scale-in animate-delay-6">
-                        <h3>⚡ Power</h3>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="basePower">Base Watts</label>
+                                <label for="basePower">基础功率</label>
                                 <input type="number" id="basePower" name="base_power" value="150" min="50" max="500">
                             </div>
                             <div class="form-group">
-                                <label for="maxPower">Max Watts</label>
+                                <label for="maxPower">最大功率</label>
                                 <input type="number" id="maxPower" name="max_power" value="300" min="100" max="800">
                             </div>
                         </div>
                     </div>
 
-                    <div class="card config-group animate-scale-in animate-delay-7">
-                        <h3>📱 Device</h3>
+                    <!-- 设备信息组 - 系统配置 -->
+                    <div class="card config-group config-secondary animate-scale-in animate-delay-6">
+                        <h3>📱 设备与格式</h3>
                         <div class="form-group">
-                            <label>Device Name</label>
-                            <input type="text" value="Forerunner 570" disabled style="background: #f5f5f5; color: #666;">
+                            <label>设备名称</label>
+                            <input type="text" value="Forerunner 570" disabled style="background: rgba(255,255,255,0.05); color: #999; border-color: rgba(255,255,255,0.05);">
                             <input type="hidden" name="device_name" value="Forerunner 570">
                         </div>
                         <div class="form-group">
-                            <label>Firmware</label>
-                            <input type="text" value="12.70" disabled style="background: #f5f5f5; color: #666;">
+                            <label>固件版本</label>
+                            <input type="text" value="12.70" disabled style="background: rgba(255,255,255,0.05); color: #999; border-color: rgba(255,255,255,0.05);">
                             <input type="hidden" name="device_version" value="12.70">
                         </div>
-                    </div>
-
-                    <div class="card config-group animate-scale-in animate-delay-8">
-                        <h3>🕐 Timing</h3>
                         <div class="form-group">
-                            <label for="startTime">Custom Start Time</label>
-                            <input type="datetime-local" id="startTime" name="start_time">
-                        </div>
-                        <div class="form-group">
-                            <label for="caloriesPerKm">Calories per KM</label>
-                            <input type="number" id="caloriesPerKm" name="calories_per_km" value="60" min="30" max="150">
+                            <label>转换格式</label>
+                            <input type="text" value="GPX → TCX" disabled style="background: rgba(255,255,255,0.05); color: #999; border-color: rgba(255,255,255,0.05);">
                         </div>
                     </div>
                 </div>
@@ -166,7 +168,7 @@
         <div class="convert-section animate-fade-in animate-delay-9">
             <button id="convertBtn" class="btn btn-primary" disabled>
                 <span class="btn-icon">⚡</span>
-                <span class="btn-text">INITIALIZE CONVERSION</span>
+                <span class="btn-text">开始转换</span>
                 <div class="btn-ripple"></div>
             </button>
         </div>
@@ -177,7 +179,7 @@
                     <div class="progress-bar">
                         <div class="progress-fill" id="progressFill"></div>
                     </div>
-                    <div class="progress-text" id="progressText">INITIALIZING...</div>
+                    <div class="progress-text" id="progressText">正在初始化...</div>
                 </div>
             </div>
         </div>
@@ -186,16 +188,16 @@
             <div class="card">
                 <div class="result-content">
                     <div class="result-icon" id="resultIcon">⚡</div>
-                    <div class="result-message" id="resultMessage">CONVERSION COMPLETE</div>
+                    <div class="result-message" id="resultMessage">转换完成</div>
                     <div class="result-actions">
                         <button id="downloadBtn" class="btn btn-success">
                             <span class="btn-icon">⬇</span>
-                            <span class="btn-text">DOWNLOAD TCX</span>
+                            <span class="btn-text">下载 TCX 文件</span>
                             <div class="btn-ripple"></div>
                         </button>
                         <button id="resetBtn" class="btn btn-secondary">
                             <span class="btn-icon">↻</span>
-                            <span class="btn-text">RESET</span>
+                            <span class="btn-text">重新开始</span>
                             <div class="btn-ripple"></div>
                         </button>
                     </div>
@@ -205,48 +207,48 @@
 
         <div class="features animate-fade-in animate-delay-10">
             <div class="card">
-                <h3>CORE FEATURES</h3>
+                <h3>核心功能</h3>
                 <div class="feature-grid">
                 <div class="feature-item">
                     <div class="feature-icon">⚡</div>
                     <div class="feature-content">
-                        <div class="feature-title">INSTANT PROCESSING</div>
-                        <div class="feature-desc">Advanced algorithms deliver sub-second GPX to TCX conversion</div>
+                        <div class="feature-title">极速转换</div>
+                        <div class="feature-desc">先进算法实现毫秒级 GPX 到 TCX 格式转换</div>
                     </div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">🎯</div>
                     <div class="feature-content">
-                        <div class="feature-title">PRECISION DATA</div>
-                        <div class="feature-desc">Maintains original trajectory accuracy with complete data integrity</div>
+                        <div class="feature-title">精确数据</div>
+                        <div class="feature-desc">保持原始轨迹精度，确保数据完整性</div>
                     </div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">🔒</div>
                     <div class="feature-content">
-                        <div class="feature-title">PRIVACY FIRST</div>
-                        <div class="feature-desc">Local processing ensures your fitness data never leaves your device</div>
+                        <div class="feature-title">隐私保护</div>
+                        <div class="feature-desc">本地处理确保您的运动数据不会离开设备</div>
                     </div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">📱</div>
                     <div class="feature-content">
-                        <div class="feature-title">UNIVERSAL ACCESS</div>
-                        <div class="feature-desc">Cross-platform compatibility for seamless conversion anywhere</div>
+                        <div class="feature-title">跨平台支持</div>
+                        <div class="feature-desc">多平台兼容，随时随地进行无缝转换</div>
                     </div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">⚙️</div>
                     <div class="feature-content">
-                        <div class="feature-title">ADVANCED CONFIG</div>
-                        <div class="feature-desc">Comprehensive parameter customization for professional athletes</div>
+                        <div class="feature-title">高级配置</div>
+                        <div class="feature-desc">为专业运动员提供全面的参数自定义选项</div>
                     </div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">🌍</div>
                     <div class="feature-content">
-                        <div class="feature-title">SMART LOCATION</div>
-                        <div class="feature-desc">Intelligent weather integration for personalized training insights</div>
+                        <div class="feature-title">智能定位</div>
+                        <div class="feature-desc">智能天气集成，提供个性化训练洞察</div>
                     </div>
                 </div>
             </div>
@@ -257,8 +259,8 @@
         // 多语言支持
         const translations = {
             'zh': {
-                title: 'Run Beyond Data',
-                subtitle: '将您的跑步数据转化为强大洞察',
+                title: 'Run Beyond Imagination',
+                subtitle: '随时随地，专业运动数据转换',
                 status: '状态',
                 online: '● 在线',
                 format: '格式',
@@ -274,16 +276,16 @@
                 walking: '步行',
                 targetPace: '目标配速 (分:秒/公里)',
                 weight: '体重 (kg)',
-                heartRate: '💓 心率设置',
+                heartRate: '💓 心率与时间',
                 baseHr: '基础心率',
                 maxHr: '最大心率',
-                cadenceConfig: '🦵 步频设置',
+                cadenceConfig: '🦵 步频与功率',
                 baseCadence: '基础步频 (显示)',
                 maxCadence: '最大步频 (显示)',
                 powerConfig: '⚡ 功率设置',
                 basePower: '基础功率',
                 maxPower: '最大功率',
-                deviceInfo: '📱 设备信息',
+                deviceInfo: '📱 设备与格式',
                 deviceName: '设备名称',
                 deviceVersion: '设备版本',
                 timeConfig: '🕐 时间设置',
@@ -321,85 +323,17 @@
                 unnamedTrack: '未命名轨迹',
                 unknown: '未知'
             },
-            'en': {
-                title: 'Run Beyond Data',
-                subtitle: 'Transform your runs into powerful insights',
-                status: 'STATUS',
-                online: '● ONLINE',
-                format: 'FORMAT',
-                speed: 'SPEED',
-                developer: 'DEVELOPER',
-                warning: '⚠️ For testing only, not for official competitions',
-                uploadText: 'DROP GPX FILE HERE',
-                uploadHint: 'Supports .gpx format • Max 10MB • Instant processing',
-                sportConfig: '🏃‍♂️ SPORT CONFIG',
-                activityType: 'Activity Type',
-                running: 'Running',
-                cycling: 'Cycling',
-                walking: 'Walking',
-                targetPace: 'Target Pace (min:sec/km)',
-                weight: 'Weight (kg)',
-                heartRate: '💓 HEART RATE',
-                baseHr: 'Base Heart Rate',
-                maxHr: 'Max Heart Rate',
-                cadenceConfig: '🦵 CADENCE CONFIG',
-                baseCadence: 'Base Cadence (Display)',
-                maxCadence: 'Max Cadence (Display)',
-                powerConfig: '⚡ POWER CONFIG',
-                basePower: 'Base Power',
-                maxPower: 'Max Power',
-                deviceInfo: '📱 DEVICE INFO',
-                deviceName: 'Device Name',
-                deviceVersion: 'Device Version',
-                timeConfig: '🕐 TIME CONFIG',
-                startTime: 'Custom Start Time (Optional)',
-                caloriesPerKm: 'Calories/km',
-                convertBtn: 'INITIALIZE CONVERSION',
-                initializing: 'INITIALIZING...',
-                conversionComplete: 'CONVERSION COMPLETE',
-                downloadTcx: 'DOWNLOAD TCX',
-                reset: 'RESET',
-                coreFeatures: 'CORE FEATURES',
-                instantProcessing: 'INSTANT PROCESSING',
-                instantDesc: 'Advanced algorithms deliver sub-second GPX to TCX conversion',
-                precisionData: 'PRECISION DATA',
-                precisionDesc: 'Maintains original trajectory accuracy with complete data integrity',
-                privacyFirst: 'PRIVACY FIRST',
-                privacyDesc: 'Local processing ensures your fitness data never leaves your device',
-                universalAccess: 'UNIVERSAL ACCESS',
-                universalDesc: 'Cross-platform compatibility for seamless conversion anywhere',
-                advancedConfig: 'ADVANCED CONFIG',
-                advancedDesc: 'Comprehensive parameter customization for professional athletes',
-                smartLocation: 'SMART LOCATION',
-                smartDesc: 'Intelligent weather integration for personalized training insights',
-                routePreview: '🗺️ ROUTE PREVIEW',
-                totalDistance: 'Total Distance',
-                trackPoints: 'Track Points',
-                elevationGain: 'Elevation Gain',
-                routeDetails: '📍 ROUTE DETAILS',
-                routeName: 'Name',
-                routeDesc: 'Description',
-                timeRange: 'Time Range',
-                avgSpeed: 'Average Speed',
-                startPoint: 'Start Point',
-                endPoint: 'End Point',
-                unnamedTrack: 'Unnamed Track',
-                unknown: 'Unknown'
-            }
+            // 移除英文翻译，统一使用中文界面
         };
 
-        // 检测用户语言
+        // 统一使用中文界面
         function detectLanguage() {
-            const browserLang = navigator.language || navigator.userLanguage;
-            if (browserLang.startsWith('zh')) {
-                return 'zh';
-            }
-            return 'en';
+            return 'zh';
         }
 
         // 应用翻译
         function applyTranslations(lang) {
-            const t = translations[lang];
+            const t = translations[lang] || translations['zh'];
             if (!t) return;
 
             // 更新页面标题
@@ -413,18 +347,12 @@
             // 更新信息项
             const infoItems = document.querySelectorAll('.info-item');
             if (infoItems[0]) {
-                infoItems[0].querySelector('.info-label').textContent = t.status;
-                infoItems[0].querySelector('.info-value').textContent = t.online;
+                infoItems[0].querySelector('.info-label').textContent = t.format;
             }
             if (infoItems[1]) {
-                infoItems[1].querySelector('.info-label').textContent = t.format;
+                infoItems[1].querySelector('.info-label').textContent = t.developer;
             }
-            if (infoItems[2]) {
-                infoItems[2].querySelector('.info-label').textContent = t.speed;
-            }
-            if (infoItems[3]) {
-                infoItems[3].querySelector('.info-label').textContent = t.developer;
-            }
+            // 天气信息项保持原有标签
 
             // 更新警告信息
             document.querySelector('.status-warning').textContent = t.warning;
@@ -514,10 +442,10 @@
             // 更新进度和结果文本
             const progressText = document.getElementById('progressText');
             const resultMessage = document.getElementById('resultMessage');
-            if (progressText && progressText.textContent.includes('INITIALIZING')) {
+            if (progressText && (progressText.textContent.includes('INITIALIZING') || progressText.textContent.includes('正在初始化'))) {
                 progressText.textContent = t.initializing;
             }
-            if (resultMessage && resultMessage.textContent.includes('CONVERSION')) {
+            if (resultMessage && (resultMessage.textContent.includes('CONVERSION') || resultMessage.textContent.includes('转换完成'))) {
                 resultMessage.textContent = t.conversionComplete;
             }
         }
@@ -686,6 +614,10 @@
         resetBtn.addEventListener('click', resetConversion);
 
         async function startConversion() {
+            if (convertBtn.disabled) {
+                return;
+            }
+            
             if (!selectedFile) {
                 showError('请先选择GPX文件');
                 return;
