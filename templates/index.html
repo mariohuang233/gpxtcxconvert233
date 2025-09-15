@@ -1174,6 +1174,9 @@
                 localStorage.setItem('preferred-language', lang);
                 applyTranslations(lang);
                 updateLanguageSelector(lang);
+                
+                // 重新加载天气信息以应用新语言
+                loadGreeting();
             }
         }
         
@@ -1205,7 +1208,10 @@
             if (infoItems[1]) {
                 infoItems[1].querySelector('.info-label').textContent = t.developer;
             }
-            // 天气信息项保持原有标签
+            // 更新天气信息标签
+            if (infoItems[2]) {
+                infoItems[2].querySelector('.info-label').textContent = t.weather + ':';
+            }
 
             // 更新警告信息
             document.querySelector('.status-warning').textContent = t.warning;
