@@ -16,6 +16,7 @@ import logging
 from pathlib import Path
 import psutil
 import requests
+from collections import defaultdict
 
 # 应用配置常量
 APP_CONFIG = {
@@ -86,6 +87,22 @@ for folder in [UPLOAD_FOLDER, OUTPUT_FOLDER]:
 
 # 存储转换任务状态
 conversion_tasks = {}
+
+# 存储埋点数据
+analytics_data = {
+    'page_views': [],
+    'user_sessions': defaultdict(list),
+    'convert_button_stats': {
+        'exposures': [],
+        'clicks': []
+    },
+    'daily_stats': defaultdict(lambda: {
+        'pv': 0,
+        'uv': set(),
+        'convert_exposures': 0,
+        'convert_clicks': 0
+    })
+}
 
 def allowed_file(filename):
     """检查文件扩展名是否允许"""
@@ -199,6 +216,11 @@ def perform_conversion(task):
 def index():
     """主页"""
     return render_template('index.html')
+
+@app.route('/analytics')
+def analytics_dashboard():
+    """埋点统计页面"""
+    return render_template('analytics.html')
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -878,6 +900,97 @@ def get_greeting_info():
             'success': False,
             'error': f'服务器错误: {str(e)}'
         })
+
+@app.route('/api/analytics', methods=['POST'])
+def receive_analytics():
+    """接收埋点数据"""
+    try:
+        data = request.get_json()
+        if not data or 'events' not in data:
+            return jsonify({'error': '无效的数据格式'}), 400
+        
+        events = data['events']
+        current_date = datetime.now().strftime('%Y-%m-%d')
+        
+        for event in events:
+            event_type = event.get('type')
+            user_id = event.get('userId')
+            session_id = event.get('sessionId')
+            timestamp = event.get('timestamp')
+            
+            # 记录用户会话
+            if user_id and session_id:
+                analytics_data['user_sessions'][user_id].append({
+                    'session_id': session_id,
+                    'event': event,
+                    'timestamp': timestamp
+                })
+            
+            # 处理不同类型的事件
+            if event_type == 'page_view':
+                analytics_data['page_views'].append(event)
+                analytics_data['daily_stats'][current_date]['pv'] += 1
+                if user_id:
+                    analytics_data['daily_stats'][current_date]['uv'].add(user_id)
+                    
+            elif event_type == 'convert_button_exposure':
+                analytics_data['convert_button_stats']['exposures'].append(event)
+                analytics_data['daily_stats'][current_date]['convert_exposures'] += 1
+                
+            elif event_type == 'convert_button_click':
+                analytics_data['convert_button_stats']['clicks'].append(event)
+                analytics_data['daily_stats'][current_date]['convert_clicks'] += 1
+        
+        logger.info(f"接收到 {len(events)} 个埋点事件")
+        return jsonify({'status': 'success', 'received': len(events)})
+        
+    except Exception as e:
+        logger.error(f"处理埋点数据失败: {str(e)}")
+        return jsonify({'error': '处理数据失败'}), 500
+
+@app.route('/api/analytics/stats')
+def get_analytics_stats():
+    """获取埋点统计数据"""
+    try:
+        # 计算总体统计
+        total_pv = len(analytics_data['page_views'])
+        total_uv = len(analytics_data['user_sessions'])
+        total_exposures = len(analytics_data['convert_button_stats']['exposures'])
+        total_clicks = len(analytics_data['convert_button_stats']['clicks'])
+        
+        # 计算转换率
+        exposure_to_click_rate = (total_clicks / total_exposures * 100) if total_exposures > 0 else 0
+        pv_to_click_rate = (total_clicks / total_pv * 100) if total_pv > 0 else 0
+        
+        # 获取最近7天的数据
+        recent_days = []
+        for i in range(7):
+            date = (datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d')
+            day_stats = analytics_data['daily_stats'][date]
+            recent_days.append({
+                'date': date,
+                'pv': day_stats['pv'],
+                'uv': len(day_stats['uv']),
+                'convert_exposures': day_stats['convert_exposures'],
+                'convert_clicks': day_stats['convert_clicks']
+            })
+        
+        return jsonify({
+            'total_stats': {
+                'pv': total_pv,
+                'uv': total_uv,
+                'convert_exposures': total_exposures,
+                'convert_clicks': total_clicks,
+                'exposure_to_click_rate': round(exposure_to_click_rate, 2),
+                'pv_to_click_rate': round(pv_to_click_rate, 2)
+            },
+            'recent_days': recent_days[::-1],  # 倒序，最新的在前
+            'last_updated': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"获取统计数据失败: {str(e)}")
+        return jsonify({'error': '获取统计失败'}), 500
 
 # 定时清理任务
 def schedule_cleanup():
