@@ -698,15 +698,20 @@ cleanup_thread = threading.Thread(target=schedule_cleanup, daemon=True)
 cleanup_thread.start()
 
 if __name__ == '__main__':
-    # 确保必要的目录存在
+    # 创建必要的目录
     os.makedirs('templates', exist_ok=True)
     os.makedirs('static', exist_ok=True)
-
+    
+    # 获取端口号，优先使用环境变量PORT，否则使用8888
+    port = int(os.environ.get('PORT', 8888))
+    
     print("🌐 GPX转TCX Web应用启动中...")
-    print("📁 本地访问: http://localhost:8888")
-    print("🌍 网络访问: http://你的IP地址:8888")
+    print(f"📁 本地访问: http://localhost:{port}")
+    print(f"🌍 网络访问: http://你的IP地址:{port}")
     print("🔧 支持功能: 文件上传、实时转换、配置自定义")
     print("👥 同事可通过网络地址访问此应用")
     print("⚠️  仅用于测试场景，不能作为比赛作弊用途")
-
-    app.run(debug=True, host='0.0.0.0', port=8888)
+    
+    # 在生产环境中关闭debug模式
+    debug_mode = os.environ.get('FLASK_ENV') != 'production'
+    app.run(debug=debug_mode, host='0.0.0.0', port=port)
