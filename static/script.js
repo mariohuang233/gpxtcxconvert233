@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeInteractiveEffects();
     initializeScrollAnimations();
     initializeParallaxEffects();
+    
+    // 添加连接桥梁元素
+    addConnectionBridge();
 });
 
 // 初始化动画系统
@@ -243,6 +246,55 @@ function initializeMouseFollowEffect() {
         element.addEventListener('mouseenter', () => cursor.classList.add('hover'));
         element.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
     });
+}
+
+// 添加连接桥梁元素的创建逻辑
+function addConnectionBridge() {
+    const welcomeSection = document.querySelector('.welcome-section');
+    if (welcomeSection) {
+        // 创建连接桥梁元素
+        const bridge = document.createElement('div');
+        bridge.className = 'connection-bridge';
+        welcomeSection.appendChild(bridge);
+        
+        // 添加交互式连接点
+        const connectionDots = document.createElement('div');
+        connectionDots.className = 'connection-dots';
+        connectionDots.innerHTML = `
+            <div class="dot dot-1"></div>
+            <div class="dot dot-2"></div>
+            <div class="dot dot-3"></div>
+        `;
+        welcomeSection.appendChild(connectionDots);
+        
+        // 添加连接点样式
+        const style = document.createElement('style');
+        style.textContent = `
+            .connection-dots {
+                position: absolute;
+                bottom: -30px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                gap: 8px;
+                z-index: 5;
+            }
+            .dot {
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: rgba(0, 208, 132, 0.6);
+                animation: dotPulse 2s ease-in-out infinite;
+            }
+            .dot-2 { animation-delay: 0.3s; }
+            .dot-3 { animation-delay: 0.6s; }
+            @keyframes dotPulse {
+                0%, 100% { opacity: 0.3; transform: scale(1); }
+                50% { opacity: 1; transform: scale(1.2); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
 }
 
 // 可选：启用鼠标跟随效果（注释掉以禁用）
