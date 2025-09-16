@@ -1,0 +1,97 @@
+{
+  "timestamp": "2025-09-16T17:22:08.181869",
+  "test_type": "API Fallback Test",
+  "results": [
+    {
+      "scenario": "正常城市查询",
+      "status": "success",
+      "response_time": 1.58,
+      "data_quality": "完整",
+      "weather": {
+        "description": "小雨",
+        "humidity": 46,
+        "temperature": "21°C",
+        "wind_speed": 3.611111111111111
+      },
+      "location": {
+        "city": "Beijing",
+        "country": "China",
+        "province": "Beijing"
+      }
+    },
+    {
+      "scenario": "英文城市查询",
+      "status": "success",
+      "response_time": 2.49,
+      "data_quality": "完整",
+      "weather": {
+        "description": "Partly cloudy",
+        "humidity": 89,
+        "temperature": "28°C",
+        "wind_speed": 2.7777777777777777
+      },
+      "location": {
+        "city": "Shikinejima",
+        "country": "Japan",
+        "province": "Tokyo"
+      }
+    },
+    {
+      "scenario": "GPS坐标查询",
+      "status": "success",
+      "response_time": 2.64,
+      "data_quality": "完整",
+      "weather": {
+        "description": "晴朗",
+        "humidity": 56,
+        "temperature": "34°C",
+        "wind_speed": 3.0555555555555554
+      },
+      "location": {
+        "city": "Shanghaishih",
+        "country": "China",
+        "province": "Shanghai"
+      }
+    },
+    {
+      "scenario": "无效城市名",
+      "status": "success",
+      "response_time": 4.16,
+      "data_quality": "完整",
+      "weather": {
+        "description": "多云",
+        "humidity": 57,
+        "temperature": "16°C",
+        "wind_speed": 5.0
+      },
+      "location": {
+        "city": "Hong Kong",
+        "country": "Hong Kong S.A.R.",
+        "province": "Hong Kong"
+      }
+    },
+    {
+      "scenario": "IP自动定位",
+      "status": "success",
+      "response_time": 2.96,
+      "data_quality": "完整",
+      "weather": {
+        "description": "晴朗",
+        "humidity": 59,
+        "temperature": "33°C",
+        "wind_speed": 6.666666666666666
+      },
+      "location": {
+        "city": "Hong Kong",
+        "country": "Hong Kong",
+        "province": ""
+      }
+    }
+  ],
+  "summary": {
+    "total_tests": 5,
+    "successful_tests": 5,
+    "success_rate": 100.0,
+    "avg_response_time": 2.766
+  }
+}

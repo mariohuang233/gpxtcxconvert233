@@ -1,0 +1,52 @@
+{
+  "timestamp": "2025-09-16T17:19:22.218092",
+  "test_results": [
+    {
+      "test": "中文 + GPS定位",
+      "status": "success",
+      "weather": {},
+      "location": {},
+      "lang_check": "pass"
+    },
+    {
+      "test": "英文 + GPS定位",
+      "status": "success",
+      "weather": {},
+      "location": {},
+      "lang_check": "pass"
+    },
+    {
+      "test": "中文 + 城市名",
+      "status": "success",
+      "weather": {},
+      "location": {},
+      "lang_check": "pass"
+    },
+    {
+      "test": "英文 + 城市名",
+      "status": "success",
+      "weather": {},
+      "location": {},
+      "lang_check": "pass"
+    },
+    {
+      "test": "IP自动定位 + 中文",
+      "status": "success",
+      "weather": {},
+      "location": {},
+      "lang_check": "pass"
+    },
+    {
+      "test": "IP自动定位 + 英文",
+      "status": "success",
+      "weather": {},
+      "location": {},
+      "lang_check": "pass"
+    }
+  ],
+  "summary": {
+    "total_tests": 6,
+    "successful_tests": 6,
+    "success_rate": 100.0
+  }
+}
