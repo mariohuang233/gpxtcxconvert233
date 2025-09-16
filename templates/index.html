@@ -57,8 +57,8 @@
                 <div class="info-item" id="weatherInline" style="display: none;">
                     <span class="info-label" data-translate="weather">天气:</span>
                     <span class="info-value" id="weatherSummary">--</span>
-                    <button class="location-toggle" id="locationToggle" onclick="toggleLocationMethod()" title="切换定位方式">
-                        <span id="locationIcon">🌐</span>
+                    <button class="location-toggle" id="locationToggle" onclick="refreshLocationAndWeather()" title="刷新定位和天气信息">
+                        <span id="locationIcon">🔄</span>
                     </button>
                 </div>
             </div>
@@ -2188,26 +2188,52 @@
          let useGPSLocation = true; // 默认使用GPS定位
          let currentPosition = null;
 
-         // 切换定位方式
-         function toggleLocationMethod() {
-             useGPSLocation = !useGPSLocation;
+         // 刷新定位和天气信息
+         async function refreshLocationAndWeather() {
              const locationIcon = document.getElementById('locationIcon');
              const locationToggle = document.getElementById('locationToggle');
              
-             if (useGPSLocation) {
-                 locationIcon.textContent = '📍';
-                 locationToggle.title = '使用GPS定位 (点击切换到IP定位)';
-             } else {
-                 locationIcon.textContent = '🌐';
-                 locationToggle.title = '使用IP定位 (点击切换到GPS定位)';
-             }
+             // 显示刷新动画
+             locationIcon.textContent = '⏳';
+             locationToggle.title = '正在刷新...';
+             locationToggle.disabled = true;
              
-             // 重新加载天气信息
-             loadGreeting();
+             try {
+                 // 清除当前位置缓存，强制重新获取
+                 currentPosition = null;
+                 
+                 // 重新加载天气信息（强制刷新）
+                 await loadGreeting(true);
+                 
+                 // 刷新成功，显示成功图标
+                 locationIcon.textContent = '✅';
+                 locationToggle.title = '刷新成功！';
+                 
+                 // 2秒后恢复刷新图标
+                 setTimeout(() => {
+                     locationIcon.textContent = '🔄';
+                     locationToggle.title = '刷新定位和天气信息';
+                     locationToggle.disabled = false;
+                 }, 2000);
+                 
+             } catch (error) {
+                 console.error('刷新失败:', error);
+                 
+                 // 显示错误图标
+                 locationIcon.textContent = '❌';
+                 locationToggle.title = '刷新失败，请重试';
+                 
+                 // 3秒后恢复刷新图标
+                 setTimeout(() => {
+                     locationIcon.textContent = '🔄';
+                     locationToggle.title = '刷新定位和天气信息';
+                     locationToggle.disabled = false;
+                 }, 3000);
+             }
          }
 
          // 获取GPS位置
-         function getCurrentPosition() {
+         function getCurrentPosition(forceRefresh = false) {
              return new Promise((resolve, reject) => {
                  if (!navigator.geolocation) {
                      reject(new Error('浏览器不支持GPS定位'));
@@ -2240,7 +2266,7 @@
                      {
                          enableHighAccuracy: true,
                          timeout: 10000,
-                         maximumAge: 300000 // 5分钟缓存
+                         maximumAge: forceRefresh ? 0 : 300000 // 强制刷新时不使用缓存，否则5分钟缓存
                      }
                  );
              });
@@ -2278,7 +2304,7 @@
          });
 
          // 页面加载时自动获取天气信息
-         async function loadGreeting() {
+         async function loadGreeting(forceRefresh = false) {
              try {
                  if (weatherInline) weatherInline.style.display = 'none';
                  if (greetingError) greetingError.style.display = 'none';
@@ -2288,7 +2314,7 @@
                  // 如果使用GPS定位，先获取GPS坐标
                  if (useGPSLocation) {
                      try {
-                         const position = await getCurrentPosition();
+                         const position = await getCurrentPosition(forceRefresh);
                          currentPosition = position;
                          requestUrl += `&lat=${position.latitude}&lng=${position.longitude}&gps=true`;
                      } catch (gpsError) {
