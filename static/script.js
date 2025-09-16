@@ -19,26 +19,36 @@ function initializeAnimations() {
     interactiveElements.forEach((element, index) => {
         element.classList.add('interactive-element');
         
-        // 添加延迟动画
-        setTimeout(() => {
-            element.style.opacity = '1';
-            element.style.transform = 'translateY(0)';
-        }, index * 100);
+        // 添加延迟动画 - 性能优化
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                element.style.opacity = '1';
+                element.style.transform = 'translateY(0)';
+            }, index * 50); // 减少延迟时间
+        });
     });
 }
 
 // 初始化交互效果
 function initializeInteractiveEffects() {
-    // 磁性按钮效果
+    // 磁性按钮效果 - 性能优化版
     const buttons = document.querySelectorAll('.btn-primary');
     buttons.forEach(button => {
-        button.addEventListener('mouseenter', function(e) {
-            this.style.transform = 'translateY(-2px) scale(1.02)';
-        });
+        // 使用节流优化鼠标事件 - 减少频率
+        const throttledMouseEnter = throttle(function(e) {
+            requestAnimationFrame(() => {
+                this.style.transform = 'translateY(-1px) scale(1.01) translateZ(0)';
+            });
+        }, 32); // 30fps 减少频率
         
-        button.addEventListener('mouseleave', function(e) {
-            this.style.transform = 'translateY(0) scale(1)';
-        });
+        const throttledMouseLeave = throttle(function(e) {
+            requestAnimationFrame(() => {
+                this.style.transform = 'translateY(0) scale(1) translateZ(0)';
+            });
+        }, 32);
+        
+        button.addEventListener('mouseenter', throttledMouseEnter);
+        button.addEventListener('mouseleave', throttledMouseLeave);
         
         // 点击波纹效果
         button.addEventListener('click', function(e) {
@@ -70,16 +80,23 @@ function initializeInteractiveEffects() {
         });
     });
     
-    // 卡片悬停效果增强
+    // 卡片悬停效果增强 - 性能优化
     const cards = document.querySelectorAll('.card');
     cards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-4px) scale(1.01)';
-        });
+        const throttledEnter = throttle(function() {
+            requestAnimationFrame(() => {
+                this.style.transform = 'translateY(-3px) scale(1.005) translateZ(0)';
+            });
+        }, 32);
         
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0) scale(1)';
-        });
+        const throttledLeave = throttle(function() {
+            requestAnimationFrame(() => {
+                this.style.transform = 'translateY(0) scale(1) translateZ(0)';
+            });
+        }, 32);
+        
+        card.addEventListener('mouseenter', throttledEnter);
+        card.addEventListener('mouseleave', throttledLeave);
     });
     
     // 输入框焦点效果
@@ -107,13 +124,15 @@ function initializeScrollAnimations() {
             if (entry.isIntersecting) {
                 entry.target.classList.add('animate-in');
                 
-                // 添加延迟动画
+                // 添加延迟动画 - 性能优化
                 const children = entry.target.querySelectorAll('.form-group, .info-item, .btn-primary');
                 children.forEach((child, index) => {
-                    setTimeout(() => {
-                        child.style.opacity = '1';
-                        child.style.transform = 'translateY(0)';
-                    }, index * 100);
+                    requestAnimationFrame(() => {
+                        setTimeout(() => {
+                            child.style.opacity = '1';
+                            child.style.transform = 'translateY(0)';
+                        }, index * 50); // 减少延迟时间
+                    });
                 });
             }
         });
@@ -125,31 +144,42 @@ function initializeScrollAnimations() {
     });
 }
 
-// 视差效果
+// 视差效果 - 性能优化版
 function initializeParallaxEffects() {
+    const parallaxElements = document.querySelectorAll('.welcome-section');
     let ticking = false;
     
-    function updateParallax() {
+    // 优化滚动视差效果 - 减少视差强度
+    const updateParallax = () => {
         const scrolled = window.pageYOffset;
-        const parallaxElements = document.querySelectorAll('.welcome-section');
+        const rate = scrolled * -0.2; // 减少视差强度
         
         parallaxElements.forEach(element => {
-            const speed = 0.5;
-            const yPos = -(scrolled * speed);
-            element.style.transform = `translateY(${yPos}px)`;
+            element.style.transform = `translateY(${rate}px) translateZ(0)`;
         });
-        
         ticking = false;
-    }
+    };
     
-    function requestTick() {
+    window.addEventListener('scroll', () => {
         if (!ticking) {
             requestAnimationFrame(updateParallax);
             ticking = true;
         }
-    }
+    }, { passive: true });
     
-    window.addEventListener('scroll', requestTick);
+    // 优化鼠标跟随效果
+    const updateMouseEffect = throttle((e) => {
+        const mouseX = e.clientX / window.innerWidth;
+        const mouseY = e.clientY / window.innerHeight;
+        
+        parallaxElements.forEach(element => {
+            const moveX = (mouseX - 0.5) * 20;
+            const moveY = (mouseY - 0.5) * 20;
+            element.style.transform = `translateY(${window.pageYOffset * -0.5}px) translate(${moveX}px, ${moveY}px)`;
+        });
+    }, 16);
+    
+    document.addEventListener('mousemove', updateMouseEffect, { passive: true });
 }
 
 // 添加CSS动画关键帧
@@ -163,7 +193,7 @@ style.textContent = `
     }
     
     .animate-in {
-        animation: slideInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        animation: slideInUp 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
     }
     
     /* 平滑滚动 */

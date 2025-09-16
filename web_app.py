@@ -106,8 +106,66 @@ analytics_data = {
 }
 
 def allowed_file(filename):
-    """检查文件扩展名是否允许"""
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    """检查文件是否为允许的格式"""
+    if not filename or not isinstance(filename, str):
+        return False
+    
+    if '.' not in filename:
+        return False
+    
+    try:
+        extension = filename.rsplit('.', 1)[1].lower()
+        return extension in ALLOWED_EXTENSIONS
+    except (IndexError, AttributeError):
+        return False
+
+def validate_file_size(file):
+    """验证文件大小"""
+    if not file:
+        return False, ERROR_MESSAGES['NO_FILE_SELECTED']
+    
+    # 检查文件大小
+    file.seek(0, 2)  # 移动到文件末尾
+    size = file.tell()
+    file.seek(0)  # 重置文件指针
+    
+    if size > MAX_FILE_SIZE:
+        return False, ERROR_MESSAGES['FILE_TOO_LARGE']
+    
+    if size == 0:
+        return False, '文件为空'
+    
+    return True, None
+
+def sanitize_config(config):
+    """清理和验证配置参数"""
+    sanitized = DEFAULT_CONVERTER_CONFIG.copy()
+    
+    if not isinstance(config, dict):
+        return sanitized
+    
+    # 验证数值类型参数
+    numeric_fields = ['base_hr', 'max_hr', 'base_cadence', 'max_cadence', 
+                     'base_power', 'max_power', 'calories_per_km', 'weight']
+    
+    for field in numeric_fields:
+        if field in config:
+            try:
+                value = float(config[field])
+                if value > 0:  # 确保为正数
+                    sanitized[field] = value
+            except (ValueError, TypeError):
+                pass  # 使用默认值
+    
+    # 验证字符串类型参数
+    string_fields = ['activity_type', 'sub_sport', 'device_name', 'device_version', 'target_pace']
+    
+    for field in string_fields:
+        if field in config and isinstance(config[field], str):
+            # 防止XSS攻击，清理字符串
+            sanitized[field] = config[field].strip()[:100]  # 限制长度
+    
+    return sanitized
 
 class ConversionTask:
     """转换任务类"""
@@ -237,13 +295,11 @@ def upload_file():
         if not allowed_file(file.filename):
             return jsonify({'error': ERROR_MESSAGES['INVALID_FILE_FORMAT']}), HTTP_STATUS['BAD_REQUEST']
         
-        # 检查文件大小
-        file.seek(0, os.SEEK_END)
-        file_size = file.tell()
-        file.seek(0)
-        
-        if file_size > MAX_FILE_SIZE:
-            error_msg = f"{ERROR_MESSAGES['FILE_TOO_LARGE']} ({MAX_FILE_SIZE // (1024*1024)}MB)"
+        # 验证文件大小
+        is_valid, error_msg = validate_file_size(file)
+        if not is_valid:
+            if error_msg == ERROR_MESSAGES['FILE_TOO_LARGE']:
+                error_msg = f"{error_msg} ({MAX_FILE_SIZE // (1024*1024)}MB)"
             return jsonify({'error': error_msg}), HTTP_STATUS['BAD_REQUEST']
         
         # 生成任务ID
@@ -258,21 +314,9 @@ def upload_file():
         output_filename = filename.rsplit('.', 1)[0] + '.tcx'
         output_path = os.path.join(OUTPUT_FOLDER, f"{task_id}_{output_filename}")
         
-        # 获取配置
-        activity_type = request.form.get('activity_type', 'Running')
-        # 将跑步子类型映射到TCX格式
-        if activity_type.startswith('Running_'):
-            # 所有跑步子类型在TCX中都使用'Running'，子类型信息保存在扩展字段中
-            tcx_sport = 'Running'
-            sub_sport = activity_type.split('_')[1] if '_' in activity_type else 'Generic'
-        else:
-            tcx_sport = activity_type
-            sub_sport = 'Generic'
-        
-        config = {
-            'activity_type': tcx_sport,
-            'sub_sport': sub_sport,
-            'original_activity_type': activity_type,
+        # 获取并验证配置
+        raw_config = {
+            'activity_type': request.form.get('activity_type', 'Running'),
             'device_name': request.form.get('device_name', 'Forerunner 570'),
             'device_version': request.form.get('device_version', '12.70'),
             'base_hr': request.form.get('base_hr', '135'),
@@ -286,6 +330,25 @@ def upload_file():
             'target_pace': request.form.get('target_pace', '5:30'),
             'start_time': request.form.get('start_time', '')
         }
+        
+        # 清理和验证配置
+        config = sanitize_config(raw_config)
+        
+        # 处理活动类型映射
+        activity_type = config['activity_type']
+        if activity_type.startswith('Running_'):
+            # 所有跑步子类型在TCX中都使用'Running'，子类型信息保存在扩展字段中
+            tcx_sport = 'Running'
+            sub_sport = activity_type.split('_')[1] if '_' in activity_type else 'Generic'
+        else:
+            tcx_sport = activity_type
+            sub_sport = 'Generic'
+        
+        config.update({
+            'activity_type': tcx_sport,
+            'sub_sport': sub_sport,
+            'original_activity_type': activity_type
+        })
         
         # 创建转换任务
         task = ConversionTask(task_id, input_path, output_path, config)
@@ -329,15 +392,12 @@ def convert_file():
         if not allowed_file(file.filename):
             return jsonify({'error': ERROR_MESSAGES['INVALID_FILE_FORMAT']}), HTTP_STATUS['BAD_REQUEST']
         
-        # 检查文件大小
-        file.seek(0, os.SEEK_END)
-        file_size = file.tell()
-        file.seek(0)
-        
-        if file_size > MAX_FILE_SIZE:
-            error_msg = f"{ERROR_MESSAGES['FILE_TOO_LARGE']} ({MAX_FILE_SIZE // (1024*1024)}MB)"
+        # 验证文件大小
+        is_valid, error_msg = validate_file_size(file)
+        if not is_valid:
+            if error_msg == ERROR_MESSAGES['FILE_TOO_LARGE']:
+                error_msg = f"{error_msg} ({MAX_FILE_SIZE // (1024*1024)}MB)"
             return jsonify({'error': error_msg}), HTTP_STATUS['BAD_REQUEST']
-            return jsonify({'error': f'文件大小超过限制 ({MAX_FILE_SIZE // (1024*1024)}MB)'}), 400
         
         # 生成临时文件名
         task_id = str(uuid.uuid4())
@@ -579,401 +639,124 @@ def serve_background_image():
 
 @app.route('/greeting-info')
 def get_greeting_info():
-    """获取用户位置和天气信息用于个性化问候"""
+    """获取装逼问候语"""
     try:
-        # 获取语言参数
+        # 获取并验证语言参数
         lang = request.args.get('lang', 'zh')
+        if not isinstance(lang, str) or lang not in ['zh', 'en']:
+            lang = 'zh'  # 默认中文
         
-        # 初始化user_ip变量
-        user_ip = 'Unknown'
-        
-        # 检查是否使用GPS定位
-        use_gps = request.args.get('gps', 'false').lower() == 'true'
-        gps_lat = request.args.get('lat')
-        gps_lng = request.args.get('lng')
-        
-        if use_gps and gps_lat and gps_lng:
-            # 使用GPS坐标
-            try:
-                latitude = float(gps_lat)
-                longitude = float(gps_lng)
-                
-                # GPS定位时设置特殊的IP标识
-                user_ip = f'GPS:{latitude},{longitude}'
-                
-                # 使用反向地理编码获取位置信息
-                location_data = None
-                
-                # 尝试使用Nominatim反向地理编码（免费）
-                try:
-                    geocode_url = f'https://nominatim.openstreetmap.org/reverse?format=json&lat={latitude}&lon={longitude}&accept-language={lang}'
-                    headers = {'User-Agent': 'GPX-TCX-Converter/1.0'}
-                    geocode_response = requests.get(geocode_url, headers=headers, timeout=5)
-                    
-                    if geocode_response.status_code == 200:
-                        geocode_data = geocode_response.json()
-                        address = geocode_data.get('address', {})
-                        
-                        location_data = {
-                            'country_name': address.get('country', 'Unknown'),
-                            'country_code': address.get('country_code', 'XX').upper(),
-                            'region_name': address.get('state', address.get('province', 'Unknown Region')),
-                            'city': address.get('city', address.get('town', address.get('village', 'Unknown City'))),
-                            'latitude': latitude,
-                            'longitude': longitude,
-                            'time_zone': {'id': 'UTC'},  # GPS模式下使用UTC
-                            'connection': {'isp': 'GPS Location'},
-                            'continent_name': 'Unknown'
-                        }
-                        logger.info(f"成功使用GPS坐标获取位置信息: {location_data['city']}")
-                except Exception as e:
-                    logger.warning(f"反向地理编码失败: {str(e)}")
-                
-                # 如果反向地理编码失败，使用基本GPS信息
-                if not location_data:
-                    location_data = {
-                        'country_name': 'Unknown',
-                        'country_code': 'XX',
-                        'region_name': 'GPS Location',
-                        'city': f'GPS ({latitude:.4f}, {longitude:.4f})',
-                        'latitude': latitude,
-                        'longitude': longitude,
-                        'time_zone': {'id': 'UTC'},
-                        'connection': {'isp': 'GPS Location'},
-                        'continent_name': 'Unknown'
-                    }
-                
-                ip_data = location_data
-                
-            except (ValueError, TypeError) as e:
-                logger.error(f"GPS坐标解析失败: {str(e)}")
-                # 回退到IP定位
-                use_gps = False
-        
-        if not use_gps:
-            # 使用IP定位（原有逻辑）
-            # 获取用户真实IP地址
-            if request.headers.get('X-Forwarded-For'):
-                user_ip = request.headers.get('X-Forwarded-For').split(',')[0].strip()
-            elif request.headers.get('X-Real-IP'):
-                user_ip = request.headers.get('X-Real-IP')
-            else:
-                user_ip = request.remote_addr
-            
-            # 如果是本地IP，直接使用默认位置信息
-            if user_ip in ['127.0.0.1', '::1', 'localhost'] or user_ip.startswith('192.168.') or user_ip.startswith('10.') or user_ip.startswith('172.'):
-                # 使用默认的北京位置信息
-                ip_data = {
-                    'country_name': 'China',
-                    'country_code': 'CN',
-                    'region_name': 'Beijing',
-                    'city': 'Beijing',
-                    'latitude': 39.9042,
-                    'longitude': 116.4074,
-                    'time_zone': {'id': 'Asia/Shanghai'},
-                    'connection': {'isp': 'Local Network'},
-                    'continent_name': 'Asia'
-                }
-                logger.info(f"检测到本地/内网IP {user_ip}，使用默认北京位置")
-            else:
-                # 尝试多个IP地理位置API服务
-                ip_data = None
-            
-            # API服务列表（按优先级排序）
-            api_services = [
-                # ip-api.com - 免费，无需API密钥
-                {
-                    'name': 'ip-api.com',
-                    'url': f'http://ip-api.com/json/{user_ip}?fields=status,message,country,countryCode,region,regionName,city,lat,lon,timezone,isp,continent',
-                    'parser': lambda data: {
-                        'country_name': data.get('country', 'Unknown'),
-                        'country_code': data.get('countryCode', 'XX'),
-                        'region_name': data.get('regionName', 'Unknown Region'),
-                        'city': data.get('city', 'Unknown City'),
-                        'latitude': data.get('lat', 39.9042),
-                        'longitude': data.get('lon', 116.4074),
-                        'time_zone': {'id': data.get('timezone', 'UTC')},
-                        'connection': {'isp': data.get('isp', 'Unknown ISP')},
-                        'continent_name': data.get('continent', 'Unknown')
-                    } if data.get('status') == 'success' else None
-                },
-                # ipapi.co - 免费，无需API密钥
-                {
-                    'name': 'ipapi.co',
-                    'url': f'https://ipapi.co/{user_ip}/json/',
-                    'parser': lambda data: {
-                        'country_name': data.get('country_name', 'Unknown'),
-                        'country_code': data.get('country_code', 'XX'),
-                        'region_name': data.get('region', 'Unknown Region'),
-                        'city': data.get('city', 'Unknown City'),
-                        'latitude': data.get('latitude', 39.9042),
-                        'longitude': data.get('longitude', 116.4074),
-                        'time_zone': {'id': data.get('timezone', 'UTC')},
-                        'connection': {'isp': data.get('org', 'Unknown ISP')},
-                        'continent_name': data.get('continent_code', 'Unknown')
-                    } if not data.get('error') else None
-                },
-                # ipwhois.io - 免费，无需API密钥
-                {
-                    'name': 'ipwhois.io',
-                    'url': f'http://ipwhois.app/json/{user_ip}',
-                    'parser': lambda data: {
-                        'country_name': data.get('country', 'Unknown'),
-                        'country_code': data.get('country_code', 'XX'),
-                        'region_name': data.get('region', 'Unknown Region'),
-                        'city': data.get('city', 'Unknown City'),
-                        'latitude': data.get('latitude', 39.9042),
-                        'longitude': data.get('longitude', 116.4074),
-                        'time_zone': {'id': data.get('timezone', 'UTC')},
-                        'connection': {'isp': data.get('isp', 'Unknown ISP')},
-                        'continent_name': data.get('continent', 'Unknown')
-                    } if data.get('success') else None
-                },
-                # ipstack - 备用（有API密钥限制）
-                {
-                    'name': 'ipstack',
-                    'url': f'http://api.ipstack.com/{user_ip}?access_key=a67f3911868f6c642b949296b6f6ef6a',
-                    'parser': lambda data: {
-                        'country_name': data.get('country_name', 'Unknown'),
-                        'country_code': data.get('country_code', 'XX'),
-                        'region_name': data.get('region_name', 'Unknown Region'),
-                        'city': data.get('city', 'Unknown City'),
-                        'latitude': data.get('latitude', 39.9042),
-                        'longitude': data.get('longitude', 116.4074),
-                        'time_zone': data.get('time_zone', {'id': 'UTC'}),
-                        'connection': data.get('connection', {'isp': 'Unknown ISP'}),
-                        'continent_name': data.get('continent_name', 'Unknown')
-                    } if not data.get('error') and data.get('city') else None
-                }
+        # 装逼问候语库
+        cool_greetings = {
+            'zh': [
+                "代码如诗，转换如艺术 ✨",
+                "优雅地处理每一个数据点 🎯",
+                "让数据在格式间自由流淌 🌊",
+                "精准转换，完美呈现 💎",
+                "技术与美学的完美融合 🎨",
+                "每一次转换都是一次创作 🚀",
+                "数据的魔法师，为您服务 ⚡",
+                "简约而不简单的转换体验 🌟"
+            ],
+            'en': [
+                "Code as poetry, conversion as art ✨",
+                "Elegantly handling every data point 🎯",
+                "Let data flow freely between formats 🌊",
+                "Precision conversion, perfect presentation 💎",
+                "Perfect fusion of technology and aesthetics 🎨",
+                "Every conversion is a creation 🚀",
+                "Data magician at your service ⚡",
+                "Simple yet sophisticated conversion experience 🌟"
             ]
-            
-            # 只有在ip_data为None时才尝试API服务
-            if ip_data is None:
-                # 依次尝试各个API服务
-                for service in api_services:
-                    try:
-                        response = requests.get(service['url'], timeout=3)
-                        if response.status_code == 200:
-                            data = response.json()
-                            parsed_data = service['parser'](data)
-                            if parsed_data and parsed_data.get('city') != 'Unknown City':
-                                ip_data = parsed_data
-                                logger.info(f"成功使用 {service['name']} 获取位置信息")
-                                break
-                    except Exception as e:
-                        logger.warning(f"{service['name']} API调用失败: {str(e)}")
-                        continue
-            
-            # 如果所有API都失败，使用默认位置
-            if not ip_data:
-                ip_data = {
-                    'country_name': 'Unknown',
-                    'country_code': 'XX',
-                    'region_name': 'Unknown Region',
-                    'city': 'Unknown City',
-                    'latitude': 39.9042,  # 默认北京坐标
-                    'longitude': 116.4074,
-                    'time_zone': {'id': 'UTC'},
-                    'connection': {'isp': 'Unknown ISP'},
-                    'continent_name': 'Unknown'
-                }
-                logger.info("所有IP地理位置API都失败，使用默认位置信息")
-        
-        # 获取城市名称用于天气查询
-        city = ip_data.get('city', 'Beijing')
-        if not city or city == 'Unknown':
-            city = ip_data.get('region_name', 'Beijing')
-        
-        # 使用Open-Meteo免费天气API（无需API密钥）
-        latitude = ip_data.get('latitude')
-        longitude = ip_data.get('longitude')
-        
-        weather_info = None
-        
-        if latitude and longitude:
-            # Open-Meteo API调用
-            weather_url = f'https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,weather_code&timezone=auto'
-            
-            try:
-                weather_response = requests.get(weather_url, timeout=10)
-                
-                if weather_response.status_code == 200:
-                    weather_data = weather_response.json()
-                    
-                    if 'current' in weather_data:
-                        current = weather_data['current']
-                        
-                        # 简化的多语言天气代码映射
-                        weather_codes = {
-                            'zh': {
-                                0: '晴朗', 1: '晴朗', 2: '部分多云', 3: '多云',
-                                45: '雾', 48: '雾凇', 51: '小雨', 53: '中雨', 55: '大雨',
-                                61: '小雨', 63: '中雨', 65: '大雨', 71: '小雪', 73: '中雪', 75: '大雪',
-                                80: '阵雨', 81: '阵雨', 82: '暴雨', 95: '雷暴', 96: '雷暴', 99: '雷暴'
-                            },
-                            'en': {
-                                0: 'Clear', 1: 'Clear', 2: 'Partly Cloudy', 3: 'Cloudy',
-                                45: 'Fog', 48: 'Rime Fog', 51: 'Light Rain', 53: 'Moderate Rain', 55: 'Heavy Rain',
-                                61: 'Light Rain', 63: 'Moderate Rain', 65: 'Heavy Rain', 71: 'Light Snow', 73: 'Moderate Snow', 75: 'Heavy Snow',
-                                80: 'Showers', 81: 'Showers', 82: 'Heavy Showers', 95: 'Thunderstorm', 96: 'Thunderstorm', 99: 'Thunderstorm'
-                            },
-                            'ja': {
-                                0: '晴れ', 1: '晴れ', 2: '一部曇り', 3: '曇り',
-                                45: '霧', 48: '霧氷', 51: '小雨', 53: '中雨', 55: '大雨',
-                                61: '小雨', 63: '中雨', 65: '大雨', 71: '小雪', 73: '中雪', 75: '大雪',
-                                80: 'にわか雨', 81: 'にわか雨', 82: '激しい雨', 95: '雷雨', 96: '雷雨', 99: '雷雨'
-                            },
-                            'ko': {
-                                0: '맑음', 1: '맑음', 2: '부분 흐림', 3: '흐림',
-                                45: '안개', 48: '서리', 51: '가벼운 비', 53: '보통 비', 55: '강한 비',
-                                61: '가벼운 비', 63: '보통 비', 65: '강한 비', 71: '가벼운 눈', 73: '보통 눈', 75: '강한 눈',
-                                80: '소나기', 81: '소나기', 82: '폭우', 95: '뇌우', 96: '뇌우', 99: '뇌우'
-                            }
-                        }
-                        
-                        # 获取当前语言的天气描述，如果不支持则使用中文
-                        weather_code = current.get('weather_code', 0)
-                        lang_codes = weather_codes.get(lang, weather_codes['zh'])
-                        weather_desc = lang_codes.get(weather_code, lang_codes.get(0, 'Clear'))
-                        
-                        # 只有当所有关键数据都存在时才显示天气信息
-                        if (current.get('temperature_2m') is not None and 
-                            current.get('relative_humidity_2m') is not None and 
-                            current.get('wind_speed_10m') is not None):
-                            weather_info = {
-                                'temperature': f"{round(current.get('temperature_2m', 0))}°C",
-                                'description': weather_desc,
-                                'humidity': f"{current.get('relative_humidity_2m')}%",
-                                'wind_speed': f"{round(current.get('wind_speed_10m', 0))} km/h",
-                                'wind_dir': f"{current.get('wind_direction_10m', 0)}°"
-                            }
-            except Exception as e:
-                # 天气API调用失败时，weather_info保持为None
-                logger.warning(f"天气API调用失败: {str(e)}")
-                pass
-        
-        # 多语言问候语
-        greetings = {
-            'zh': {
-                'hello': '你好，来自{city}的用户！',
-                'weather_info': '今天天气{desc}，气温{temp}',
-                'welcome': '欢迎使用GPX转TCX转换器',
-                'unknown_area': '未知地区'
-            },
-            'en': {
-                'hello': 'Hello, user from {city}!',
-                'weather_info': 'Today\'s weather is {desc}, temperature {temp}',
-                'welcome': 'Welcome to GPX to TCX Converter',
-                'unknown_area': 'Unknown Area'
-            },
-            'ja': {
-                'hello': 'こんにちは、{city}からのユーザー！',
-                'weather_info': '今日の天気は{desc}、気温{temp}です',
-                'welcome': 'GPXからTCXコンバーターへようこそ',
-                'unknown_area': '不明な地域'
-            },
-            'ko': {
-                'hello': '안녕하세요, {city}에서 오신 사용자님!',
-                'weather_info': '오늘 날씨는 {desc}, 기온 {temp}입니다',
-                'welcome': 'GPX to TCX 변환기에 오신 것을 환영합니다',
-                'unknown_area': '알 수 없는 지역'
-            },
-            'fr': {
-                'hello': 'Bonjour, utilisateur de {city}!',
-                'weather_info': 'Le temps aujourd\'hui est {desc}, température {temp}',
-                'welcome': 'Bienvenue dans le convertisseur GPX vers TCX',
-                'unknown_area': 'Zone inconnue'
-            },
-            'de': {
-                'hello': 'Hallo, Benutzer aus {city}!',
-                'weather_info': 'Das heutige Wetter ist {desc}, Temperatur {temp}',
-                'welcome': 'Willkommen beim GPX zu TCX Konverter',
-                'unknown_area': 'Unbekanntes Gebiet'
-            },
-            'es': {
-                'hello': '¡Hola, usuario de {city}!',
-                'weather_info': 'El clima de hoy es {desc}, temperatura {temp}',
-                'welcome': 'Bienvenido al convertidor GPX a TCX',
-                'unknown_area': 'Área desconocida'
-            },
-            'pt': {
-                'hello': 'Olá, usuário de {city}!',
-                'weather_info': 'O tempo hoje está {desc}, temperatura {temp}',
-                'welcome': 'Bem-vindo ao conversor GPX para TCX',
-                'unknown_area': 'Área desconhecida'
-            },
-            'zh-tw': {
-                'hello': '你好，來自{city}的用戶！',
-                'weather_info': '今天天氣{desc}，氣溫{temp}',
-                'welcome': '歡迎使用GPX轉TCX轉換器',
-                'unknown_area': '未知地區'
-            }
         }
         
-        lang_greeting = greetings.get(lang, greetings['zh'])
-        city_name = ip_data.get('city', ip_data.get('region_name', lang_greeting['unknown_area']))
+        # 根据时间选择不同的问候语
+        import random
+        from datetime import datetime
         
-        greeting_text = lang_greeting['hello'].format(city=city_name)
-        if weather_info:
-            greeting_text += lang_greeting['weather_info'].format(
-                desc=weather_info['description'], 
-                temp=weather_info['temperature']
-            )
-        else:
-            greeting_text += lang_greeting['welcome']
+        # 使用当前时间作为随机种子，确保同一时间段显示相同问候语
+        current_hour = datetime.now().hour
+        random.seed(current_hour)
+        
+        greetings_list = cool_greetings.get(lang, cool_greetings['zh'])
+        greeting_text = random.choice(greetings_list)
         
         return jsonify({
             'success': True,
             'data': {
-                'location': {
-                    'ip': user_ip,
-                    'country': ip_data.get('country_name', 'Unknown'),
-                    'country_code': ip_data.get('country_code', 'Unknown'),
-                    'region': ip_data.get('region_name', 'Unknown'),
-                    'city': ip_data.get('city', 'Unknown'),
-                    'latitude': ip_data.get('latitude', 0),
-                    'longitude': ip_data.get('longitude', 0),
-                    'timezone': ip_data.get('time_zone', {}).get('id', 'Unknown'),
-                    'isp': ip_data.get('connection', {}).get('isp', 'Unknown'),
-                    'continent': ip_data.get('continent_name', 'Unknown')
-                },
-                'weather': weather_info,
                 'greeting': greeting_text
             }
         })
-            
-    except requests.exceptions.Timeout:
-        return jsonify({
-            'success': False,
-            'error': 'API请求超时'
-        })
-    except requests.exceptions.RequestException as e:
-        return jsonify({
-            'success': False,
-            'error': f'网络请求错误: {str(e)}'
-        })
+        
     except Exception as e:
+        logger.error(f"获取问候语信息时发生错误: {str(e)}")
         return jsonify({
             'success': False,
-            'error': f'服务器错误: {str(e)}'
-        })
+            'error': '获取问候语信息失败'
+        }), HTTP_STATUS['INTERNAL_SERVER_ERROR']
 
 @app.route('/api/analytics', methods=['POST'])
 def receive_analytics():
-    """接收埋点数据"""
+    """接收埋点数据 - 增强版"""
     try:
+        # 验证请求内容类型
+        if not request.is_json:
+            return jsonify({'error': '请求必须是JSON格式'}), HTTP_STATUS['BAD_REQUEST']
+        
         data = request.get_json()
-        if not data or 'events' not in data:
-            return jsonify({'error': '无效的数据格式'}), 400
+        if not data or not isinstance(data, dict):
+            return jsonify({'error': '无效的JSON数据'}), HTTP_STATUS['BAD_REQUEST']
+        
+        # 验证必需字段
+        if 'events' not in data:
+            return jsonify({'error': '缺少events字段'}), HTTP_STATUS['BAD_REQUEST']
         
         events = data['events']
+        if not isinstance(events, list):
+            return jsonify({'error': 'events必须是数组'}), HTTP_STATUS['BAD_REQUEST']
+        
+        if len(events) == 0:
+            return jsonify({'error': 'events不能为空'}), HTTP_STATUS['BAD_REQUEST']
+        
+        if len(events) > 100:  # 限制批量大小
+            return jsonify({'error': '单次最多处理100个事件'}), HTTP_STATUS['BAD_REQUEST']
+        
         current_date = datetime.now().strftime('%Y-%m-%d')
+        processed_events = 0
         
         for event in events:
+            if not isinstance(event, dict):
+                continue  # 跳过无效事件
+            
             event_type = event.get('type')
             user_id = event.get('userId')
             session_id = event.get('sessionId')
             timestamp = event.get('timestamp')
+            
+            # 验证事件类型
+            valid_event_types = ['page_view', 'convert_button_exposure', 'convert_button_click']
+            if event_type not in valid_event_types:
+                continue  # 跳过无效事件类型
+            
+            # 清理和验证用户ID
+            if user_id and isinstance(user_id, str):
+                user_id = user_id.strip()[:50]  # 限制长度
+            else:
+                user_id = 'anonymous'
+            
+            # 清理和验证会话ID
+            if session_id and isinstance(session_id, str):
+                session_id = session_id.strip()[:50]  # 限制长度
+            
+            # 验证时间戳
+            if timestamp and isinstance(timestamp, str):
+                try:
+                    # 验证时间戳格式
+                    datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                except ValueError:
+                    timestamp = datetime.now().isoformat()  # 使用当前时间
+            else:
+                timestamp = datetime.now().isoformat()
             
             # 记录用户会话
             if user_id and session_id:
@@ -997,13 +780,17 @@ def receive_analytics():
             elif event_type == 'convert_button_click':
                 analytics_data['convert_button_stats']['clicks'].append(event)
                 analytics_data['daily_stats'][current_date]['convert_clicks'] += 1
+            
+            processed_events += 1
         
-        logger.info(f"接收到 {len(events)} 个埋点事件")
-        return jsonify({'status': 'success', 'received': len(events)})
+        logger.info(f"接收到 {len(events)} 个埋点事件，成功处理 {processed_events} 个")
+        return jsonify({'status': 'success', 'received': len(events), 'processed': processed_events})
         
+    except json.JSONDecodeError:
+        return jsonify({'error': 'JSON解析错误'}), HTTP_STATUS['BAD_REQUEST']
     except Exception as e:
         logger.error(f"处理埋点数据失败: {str(e)}")
-        return jsonify({'error': '处理数据失败'}), 500
+        return jsonify({'error': '服务器内部错误'}), HTTP_STATUS['INTERNAL_SERVER_ERROR']
 
 @app.route('/api/analytics/stats')
 def get_analytics_stats():

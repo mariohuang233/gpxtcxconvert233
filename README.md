@@ -1,11 +1,22 @@
-# GPX to TCX Converter Web Application
+# 🥷 秘术 - GPX转TCX转换器
 
 **作者：mariohuang**  
 **声明：本应用仅用于测试场景，不能作为比赛作弊用途**
 
+[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
+[![Flask](https://img.shields.io/badge/Flask-2.3+-green.svg)](https://flask.palletsprojects.com)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Deploy](https://img.shields.io/badge/Deploy-Railway-purple.svg)](https://railway.app)
+
 ## 🏃‍♂️ 项目简介
 
-这是一个现代化的Web应用程序，用于将GPX格式的GPS轨迹文件转换为TCX格式，特别适用于跑步、骑行等运动数据的格式转换。应用提供了直观的Web界面，支持文件上传、实时转换进度显示和结果下载。
+这是一个现代化的Web应用程序，专门用于将GPX格式的GPS轨迹文件转换为TCX格式。采用Apple风格的暗黑主题设计，提供专业级的运动数据转换服务，特别适用于跑步、骑行等运动数据的格式转换和优化。
+
+### 🎯 核心价值
+- **专业转换**: 高精度的GPX到TCX格式转换
+- **数据增强**: 智能补充心率、步频、功率等运动数据
+- **用户体验**: Apple风格界面设计，操作简洁直观
+- **性能优化**: 高效的文件处理和转换算法
 
 ## ✨ 主要特性
 

@@ -17,9 +17,13 @@
     <script src="{{ url_for('static', filename='analytics.js') }}" defer></script>
 </head>
 <body>
+    <!-- 跳转到主内容的链接，提升可访问性 -->
+    <a href="#main-content" class="skip-link" aria-label="跳转到主内容">跳转到主内容</a>
+    
     <!-- 右上角语言选择器 -->
-    <div class="language-selector-top-right">
-        <select id="languageSelector" class="language-selector" onchange="switchLanguage(this.value)">
+    <nav class="language-selector-top-right" role="navigation" aria-label="语言选择">
+        <label for="languageSelector" class="sr-only">选择语言</label>
+        <select id="languageSelector" class="language-selector" onchange="switchLanguage(this.value)" aria-label="选择界面语言">
             <option value="zh">中文</option>
             <option value="zh-tw">繁體中文</option>
             <option value="en">English</option>
@@ -31,12 +35,13 @@
             <option value="pt">Português</option>
             <option value="it">Italiano</option>
             <option value="ar">العربية</option>
+            <option value="ru">Русский</option>
         </select>
-    </div>
+    </nav>
     
     <div class="container">
         <!-- 全屏居中欢迎区域 -->
-        <div class="welcome-section animate-fade-in">
+        <header class="welcome-section animate-fade-in" role="banner">
             <h1 class="welcome-title animate-scale-in" data-translate="welcomeTitle">Run beyond imagination</h1>
             <p class="welcome-subtitle animate-fade-in animate-delay-2" data-translate="welcomeSubtitle">Transform your journey into endless possibilities</p>
             
@@ -66,16 +71,20 @@
             
             <!-- 过渡连接层 -->
             <div class="transition-bridge"></div>
-        </div>
+            <!-- 连接桥梁 -->
+            <div class="connection-bridge"></div>
+        </header>
 
-        <div class="status-indicator status-error" id="errorMessage" style="display: none;"></div>
+        <main id="main-content" role="main">
+            <div class="status-indicator status-error" id="errorMessage" style="display: none;" role="alert" aria-live="polite"></div>
 
-        <div class="upload-section animate-slide-up animate-delay-4">
-            <div class="file-upload" id="fileUpload">
-                <div class="upload-icon">⚡</div>
-                <div class="upload-text">Drop your GPX file</div>
-                <div class="upload-hint">Seamless conversion • Instant results • Professional grade</div>
-                <input type="file" id="fileInput" accept=".gpx" style="display: none;" />
+            <section class="upload-section animate-slide-up animate-delay-4" aria-labelledby="upload-heading">
+
+            <div class="file-upload" id="fileUpload" role="button" tabindex="0" aria-label="点击或拖拽上传GPX文件" aria-describedby="upload-hint">
+                <div class="upload-icon" aria-hidden="true">⚡</div>
+                <div class="upload-text" id="upload-heading">Drop your GPX file</div>
+                <div class="upload-hint" id="upload-hint">Seamless conversion • Instant results • Professional grade</div>
+                <input type="file" id="fileInput" accept=".gpx" style="display: none;" aria-label="选择GPX文件" />
             </div>
             
             <!-- GPX路径可视化区域 -->
@@ -91,49 +100,50 @@
                 </div>
         </div>
 
-        <div class="config-section animate-fade-in animate-delay-2">
-            <form id="configForm">
-                <div class="config-grid">
-                    <!-- 核心配置组 - 最重要的设置 -->
-                    <div class="card config-group config-primary animate-scale-in animate-delay-3">
-                        <h3 data-translate="sportConfig">🏃‍♂️ 基础设置</h3>
-                        <div class="form-group" style="display: none;">
-                            <label for="activityType" data-translate="activityType">运动类型</label>
-                            <select id="activityType" name="activity_type">
-                                <option value="Running" data-translate="running">跑步 (通用)</option>
-                                <option value="Running_Street" data-translate="runningStreet">路跑</option>
-                                <option value="Running_Trail" data-translate="runningTrail">越野跑</option>
-                                <option value="Running_Track" data-translate="runningTrack">田径跑道</option>
-                                <option value="Running_Treadmill" data-translate="runningTreadmill">跑步机</option>
-                                <option value="Running_Indoor" data-translate="runningIndoor">室内跑步</option>
-                                <option value="Cycling" data-translate="cycling">骑行</option>
-                                <option value="Walking" data-translate="walking">步行</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="targetPace" data-translate="targetPace">目标配速</label>
-                            <input type="text" id="targetPace" name="target_pace" value="5:30" placeholder="5:30">
-                        </div>
-                        <div class="form-group">
-                            <label for="weight" data-translate="weight">体重 (kg)</label>
-                            <div class="number-input-container">
-                                <div class="number-btn decrease" onclick="adjustNumber('weight', -1)">−</div>
-                                <input type="number" id="weight" name="weight" value="70" min="30" max="200">
-                                <div class="number-btn increase" onclick="adjustNumber('weight', 1)">+</div>
+            <section class="config-section animate-fade-in animate-delay-2" aria-labelledby="config-heading">
+                <h2 id="config-heading" class="sr-only">转换配置设置</h2>
+                <form id="configForm" role="form" aria-label="GPX转TCX转换配置">
+                    <div class="config-grid">
+                        <!-- 核心配置组 - 最重要的设置 -->
+                        <fieldset class="card config-group config-primary animate-scale-in animate-delay-3">
+                            <legend data-translate="sportConfig">🏃‍♂️ 基础设置</legend>
+                            <div class="form-group" style="display: none;">
+                                <label for="activityType" data-translate="activityType">运动类型</label>
+                                <select id="activityType" name="activity_type">
+                                    <option value="Running" data-translate="running">跑步 (通用)</option>
+                                    <option value="Running_Street" data-translate="runningStreet">路跑</option>
+                                    <option value="Running_Trail" data-translate="runningTrail">越野跑</option>
+                                    <option value="Running_Track" data-translate="runningTrack">田径跑道</option>
+                                    <option value="Running_Treadmill" data-translate="runningTreadmill">跑步机</option>
+                                    <option value="Running_Indoor" data-translate="runningIndoor">室内跑步</option>
+                                    <option value="Cycling" data-translate="cycling">骑行</option>
+                                    <option value="Walking" data-translate="walking">步行</option>
+                                </select>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="caloriesPerKm" data-translate="caloriesPerKm">每公里卡路里</label>
-                            <div class="number-input-container">
-                                <div class="number-btn decrease" onclick="adjustNumber('caloriesPerKm', -5)">−</div>
-                                <input type="number" id="caloriesPerKm" name="calories_per_km" value="60" min="30" max="150">
-                                <div class="number-btn increase" onclick="adjustNumber('caloriesPerKm', 5)">+</div>
+                            <div class="form-group">
+                                <label for="targetPace" data-translate="targetPace">目标配速</label>
+                                <input type="text" id="targetPace" name="target_pace" value="5:30" placeholder="5:30">
                             </div>
-                        </div>
-                    </div>
+                            <div class="form-group">
+                                <label for="weight" data-translate="weight">体重 (kg)</label>
+                                <div class="number-input-container">
+                                    <div class="number-btn decrease" onclick="adjustNumber('weight', -1)">−</div>
+                                    <input type="number" id="weight" name="weight" value="70" min="30" max="200">
+                                    <div class="number-btn increase" onclick="adjustNumber('weight', 1)">+</div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="caloriesPerKm" data-translate="caloriesPerKm">每公里卡路里</label>
+                                <div class="number-input-container">
+                                    <div class="number-btn decrease" onclick="adjustNumber('caloriesPerKm', -5)">−</div>
+                                    <input type="number" id="caloriesPerKm" name="calories_per_km" value="60" min="30" max="150">
+                                    <div class="number-btn increase" onclick="adjustNumber('caloriesPerKm', 5)">+</div>
+                                </div>
+                            </div>
+                        </fieldset>
 
-                    <div class="card config-group config-primary animate-scale-in animate-delay-4">
-                        <h3 data-translate="heartRate">💓 心率与时间</h3>
+                    <fieldset class="card config-group config-primary animate-scale-in animate-delay-4">
+                        <legend data-translate="heartRate">💓 心率与时间</legend>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="baseHr" data-translate="baseHr">基础心率</label>
@@ -156,11 +166,11 @@
                             <label for="startTime" data-translate="startTime">自定义开始时间</label>
                             <input type="datetime-local" id="startTime" name="start_time">
                         </div>
-                    </div>
+                    </fieldset>
 
                     <!-- 高级设置组 - 专业用户配置 -->
-                    <div class="card config-group config-secondary animate-scale-in animate-delay-5">
-                        <h3 data-translate="cadenceConfig">🦵 步频与功率</h3>
+                    <fieldset class="card config-group config-secondary animate-scale-in animate-delay-5">
+                        <legend data-translate="cadenceConfig">🦵 步频与功率</legend>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="baseCadenceDisplay" data-translate="baseCadence">基础步频</label>
@@ -199,11 +209,11 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </fieldset>
 
                     <!-- 设备信息组 - 系统配置 -->
-                    <div class="card config-group config-secondary animate-scale-in animate-delay-6">
-                        <h3 data-translate="deviceInfo">📱 设备与格式</h3>
+                    <fieldset class="card config-group config-secondary animate-scale-in animate-delay-6">
+                        <legend data-translate="deviceInfo">📱 设备与格式</legend>
                         <div class="form-group">
                             <label data-translate="deviceName">设备名称</label>
                             <input type="text" value="Forerunner 570" disabled style="background: rgba(255,255,255,0.05); color: #999; border-color: rgba(255,255,255,0.05);">
@@ -218,7 +228,7 @@
                             <label data-translate="format">转换格式</label>
                             <input type="text" value="GPX → TCX" disabled style="background: rgba(255,255,255,0.05); color: #999; border-color: rgba(255,255,255,0.05);">
                         </div>
-                    </div>
+                    </fieldset>
                 </div>
                 </div>
             </form>
@@ -1498,6 +1508,100 @@
                  securityInfo: 'معلومات الأمان',
                  copyrightText: '© 2024 GPX إلى TCX المهنية',
                  dataSecurityGuarantee: 'ضمان أمان البيانات'
+             },
+             'ru': {
+                 title: 'Конвертер GPX в TCX',
+                 welcome: 'Добро пожаловать в конвертер GPX в TCX',
+                 status: 'Статус',
+                 weather: 'Погода',
+                 uploadText: 'Перетащите файл GPX сюда или нажмите для выбора',
+                 uploadHint: 'Поддерживаются только файлы .gpx, максимум 16MB',
+                 sportConfig: 'Настройки спорта',
+                 heartRate: 'Частота пульса',
+                 cadenceConfig: 'Настройки каденса',
+                 powerConfig: 'Настройки мощности',
+                 deviceInfo: 'Информация об устройстве',
+                 timeConfig: 'Настройки времени',
+                 coreFeatures: 'Основные функции',
+                 instantProcessing: 'Мгновенная обработка',
+                 instantDesc: 'Быстрое преобразование файлов с сохранением точности данных',
+                 precisionData: 'Точные данные',
+                 precisionDesc: 'Продвинутый алгоритм обеспечивает точность спортивных данных',
+                 privacyFirst: 'Конфиденциальность прежде всего',
+                 privacyDesc: 'Все операции локальные, ваши данные не сохраняются',
+                 fileSelected: 'Выбрано',
+                 fileSize: 'Размер файла',
+                 clickToSelect: 'Нажмите для выбора файла GPX или перетащите его сюда',
+                 maxFileSize: 'Поддерживает файлы GPX до 16 МБ',
+                 universalAccess: 'Универсальный доступ',
+                 universalDesc: 'Кроссплатформенная совместимость для бесшовного преобразования где угодно',
+                 advancedConfig: 'Расширенная конфигурация',
+                 advancedDesc: 'Полная настройка параметров для профессиональных спортсменов',
+                 smartLocation: 'Умное местоположение',
+                 smartDesc: 'Интеграция умной погоды для персонализированных тренировочных инсайтов',
+                 routePreview: '🗺️ Предварительный просмотр маршрута',
+                 totalDistance: 'Общее расстояние',
+                 trackPoints: 'Точки трека',
+                 elevationGain: 'Набор высоты',
+                 routeDetails: '📍 Детали маршрута',
+                 routeName: 'Название',
+                 routeDesc: 'Описание',
+                 timeRange: 'Временной диапазон',
+                 avgSpeed: 'Средняя скорость',
+                 location: 'Местоположение',
+                 country: 'Страна',
+                 province: 'Область',
+                 city: 'Город',
+                 loadingLocation: 'Загрузка...',
+                 locationError: 'Ошибка',
+                 startPoint: 'Начальная точка',
+                 endPoint: 'Конечная точка',
+                 unnamedTrack: 'Безымянный трек',
+                 unknown: 'Неизвестно',
+                 errorInvalidFile: 'Выберите файл в формате GPX',
+                 errorFileSize: 'Размер файла не может превышать 16 МБ',
+                 errorNoFile: 'Сначала выберите файл GPX',
+                 errorUploadFailed: 'Ошибка загрузки',
+                 errorConversionFailed: 'Ошибка конвертации',
+                 errorStatusFailed: 'Не удалось получить статус',
+                 converting: 'Конвертация...',
+                 preparing: 'Подготовка...',
+                 conversionCompleteMsg: 'Конвертация завершена!',
+                 startConvert: 'Начать конвертацию',
+                 errorGreetingFailed: 'Не удалось получить информацию о приветствии',
+                 errorLocationFailed: 'Не удалось получить информацию о местоположении',
+                 china: 'Китай',
+                 enterpriseSecurity: 'Корпоративная безопасность',
+                 privacyPolicy: 'Политика конфиденциальности',
+                 termsOfService: 'Условия обслуживания',
+                 securityInfo: 'Информация о безопасности',
+                 copyrightText: '© 2024 Профессиональный GPX в TCX',
+                 dataSecurityGuarantee: 'Гарантия безопасности данных',
+                 running: 'Бег (Общий)',
+                 runningStreet: 'Уличный бег',
+                 runningTrail: 'Трейл-бег',
+                 runningTrack: 'Бег по дорожке',
+                 runningTreadmill: 'Беговая дорожка',
+                 runningIndoor: 'Бег в помещении',
+                 cycling: 'Велоспорт',
+                 walking: 'Ходьба',
+                 convertBtn: 'Конвертировать в TCX',
+                 downloadTcx: 'Скачать файл TCX',
+                 reset: 'Сброс',
+                 error: 'Ошибка',
+                 success: 'Успешно',
+                 processing: 'Обработка',
+                 completed: 'Завершено',
+                 failed: 'Неудачно',
+                 uploadFailed: 'Ошибка загрузки',
+                 conversionFailed: 'Ошибка конвертации',
+                 downloadFailed: 'Ошибка скачивания',
+                 fileTooBig: 'Файл слишком большой',
+                 invalidFile: 'Недопустимый файл',
+                 networkError: 'Ошибка сети',
+                 serverError: 'Ошибка сервера',
+                 unknownError: 'Неизвестная ошибка',
+                 footer: '© 2025 Конвертер GPX в TCX. Все права защищены.'
              }
         };
 
@@ -1529,7 +1633,8 @@
                 'es': 'es',
                 'pt': 'pt',
                 'it': 'it',
-                'ar': 'ar'
+                'ar': 'ar',
+                'ru': 'ru'
             };
             
             // 检查完整语言代码（包含地区）
@@ -1669,10 +1774,7 @@
             return translations[currentLang][key] || key;
         }
 
-        // 初始化语言
-        currentLang = detectLanguage();
-        applyTranslations(currentLang);
-        updateLanguageSelector(currentLang);
+        // 语言初始化已移至DOMContentLoaded事件中
 
         let selectedFile = null;
         let currentTaskId = null;
@@ -1714,6 +1816,11 @@
 
         // 页面加载完成后启动动画
         document.addEventListener('DOMContentLoaded', () => {
+            // 首先初始化语言设置
+            currentLang = detectLanguage();
+            applyTranslations(currentLang);
+            updateLanguageSelector(currentLang);
+            
             // 数字递增动画
             const counterElement = document.querySelector('.counter');
             if (counterElement) {
@@ -2210,6 +2317,8 @@
                  const data = await response.json();
  
                  if (data.success) {
+                     console.log('问候语API调用成功，但已移除问候语显示功能');
+                     
                      // 显示天气信息（仅当天气数据可用时）
                      if (data.data.weather && weatherInline && weatherSummary) {
                          const weather = data.data.weather;
@@ -2232,20 +2341,15 @@
                      throw new Error(data.error || translations[currentLang].errorGreetingFailed);
                  }
              } catch (error) {
-                 if (greetingError) {
-                     greetingError.textContent = `${translations[currentLang].errorLocationFailed}: ${error.message}`;
-                     greetingError.style.display = 'block';
-                     greetingError.classList.add('shake');
-                     
-                     setTimeout(() => {
-                         greetingError.classList.remove('shake');
-                     }, 600);
-                 }
+                 console.error('问候语API调用失败:', error);
              }
          }
  
          // 页面加载完成后自动执行
-         loadGreeting();
+         // 确保使用当前语言设置
+         setTimeout(() => {
+             loadGreeting();
+         }, 100);
     </script>
     
     <!-- Leaflet地图库JavaScript -->
