@@ -2139,6 +2139,37 @@
              });
          }
 
+         // 响应式天气信息格式化
+         function formatWeatherText(weather, location, locationSource) {
+             const isMobile = window.innerWidth <= 768;
+             let weatherText;
+             
+             if (isMobile) {
+                 // 移动端使用更紧凑的格式
+                 weatherText = `${locationSource} ${weather.temperature} ${weather.description}`;
+                 // 如果城市名称较短，添加城市信息
+                 if (location.city && location.city.length <= 8) {
+                     weatherText += ` · ${location.city}`;
+                 }
+             } else {
+                 // 桌面端使用完整格式
+                 weatherText = `${locationSource} ${weather.temperature} | ${weather.description} | ${location.city}`;
+             }
+             
+             return weatherText;
+         }
+         
+         // 存储当前天气数据用于响应式更新
+         let currentWeatherData = null;
+         
+         // 窗口大小变化时重新格式化天气信息
+         window.addEventListener('resize', function() {
+             if (currentWeatherData && weatherSummary) {
+                 const { weather, location, locationSource } = currentWeatherData;
+                 weatherSummary.textContent = formatWeatherText(weather, location, locationSource);
+             }
+         });
+
          // 页面加载时自动获取天气信息
          async function loadGreeting() {
              try {
@@ -2186,7 +2217,12 @@
                          
                          // 创建简洁的天气摘要，包含定位方式标识
                          const locationSource = useGPSLocation && currentPosition ? '📍' : '🌐';
-                         const weatherText = `${locationSource} ${weather.temperature} | ${weather.description} | ${location.city}`;
+                         
+                         // 存储天气数据用于响应式更新
+                         currentWeatherData = { weather, location, locationSource };
+                         
+                         // 使用响应式格式化函数
+                         const weatherText = formatWeatherText(weather, location, locationSource);
                          weatherSummary.textContent = weatherText;
                          
                          weatherInline.style.display = 'flex';

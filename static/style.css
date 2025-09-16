@@ -2259,6 +2259,20 @@ input:hover, select:hover {
         position: relative;
         z-index: 1;
         margin-bottom: var(--space-sm);
+        /* 多语言文字长度适配 */
+        min-width: 0;
+        flex: 1;
+    }
+    
+    .info-item .info-value {
+        /* 长文本处理 */
+        word-break: break-word;
+        overflow-wrap: break-word;
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.85em;
     }
     
     .status-indicator {
@@ -2266,11 +2280,35 @@ input:hover, select:hover {
         z-index: 2;
         margin-top: var(--space-lg);
         margin-bottom: var(--space-xl);
+        /* 多语言文字适配 */
+        word-break: break-word;
+        overflow-wrap: break-word;
+        text-align: center;
+        font-size: 0.9em;
+        line-height: 1.4;
     }
     
     /* 确保天气模块不会浮动覆盖其他元素 */
     #weatherInline {
         position: static !important;
         float: none !important;
+        /* 天气信息特殊处理 */
+        max-width: 100%;
+    }
+    
+    #weatherInline .info-value {
+        /* 天气信息可以换行显示 */
+        white-space: normal !important;
+        font-size: 0.8em;
+        line-height: 1.3;
+        overflow: visible;
+        text-overflow: initial;
+    }
+    
+    /* 移动端进一步优化 */
+    .welcome-info {
+        gap: 0.6rem;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 }
