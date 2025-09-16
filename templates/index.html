@@ -1835,12 +1835,12 @@
                 uploadArea.style.animation = 'breathe 3s ease-in-out infinite';
             }
             
-            // 初始化定位按钮状态（默认GPS定位）
+            // 初始化刷新按钮状态
             const locationIcon = document.getElementById('locationIcon');
             const locationToggle = document.getElementById('locationToggle');
             if (locationIcon && locationToggle) {
-                locationIcon.textContent = '📍';
-                locationToggle.title = '使用GPS定位 (点击切换到IP定位)';
+                locationIcon.textContent = '🔄';
+                locationToggle.title = '刷新定位和天气信息';
             }
         });
 
@@ -2332,10 +2332,7 @@
                          
                          // 自动切换回IP定位
                          useGPSLocation = false;
-                         const locationIcon = document.getElementById('locationIcon');
-                         const locationToggle = document.getElementById('locationToggle');
-                         locationIcon.textContent = '🌐';
-                         locationToggle.title = '使用IP定位 (点击切换到GPS定位)';
+                         // 注意：不修改刷新按钮的图标，保持🔄
                      }
                  }
 
