@@ -661,7 +661,7 @@ def get_greeting_info():
                 user_ip = request.remote_addr
             
             # 如果是本地IP，直接使用默认位置信息
-            if user_ip in ['127.0.0.1', '::1', 'localhost']:
+            if user_ip in ['127.0.0.1', '::1', 'localhost'] or user_ip.startswith('192.168.') or user_ip.startswith('10.') or user_ip.startswith('172.'):
                 # 使用默认的北京位置信息
                 ip_data = {
                     'country_name': 'China',
@@ -674,6 +674,7 @@ def get_greeting_info():
                     'connection': {'isp': 'Local Network'},
                     'continent_name': 'Asia'
                 }
+                logger.info(f"检测到本地/内网IP {user_ip}，使用默认北京位置")
             else:
                 # 尝试多个IP地理位置API服务
                 ip_data = None
@@ -746,20 +747,22 @@ def get_greeting_info():
                 }
             ]
             
-            # 依次尝试各个API服务
-            for service in api_services:
-                try:
-                    response = requests.get(service['url'], timeout=3)
-                    if response.status_code == 200:
-                        data = response.json()
-                        parsed_data = service['parser'](data)
-                        if parsed_data and parsed_data.get('city') != 'Unknown City':
-                            ip_data = parsed_data
-                            logger.info(f"成功使用 {service['name']} 获取位置信息")
-                            break
-                except Exception as e:
-                    logger.warning(f"{service['name']} API调用失败: {str(e)}")
-                    continue
+            # 只有在ip_data为None时才尝试API服务
+            if ip_data is None:
+                # 依次尝试各个API服务
+                for service in api_services:
+                    try:
+                        response = requests.get(service['url'], timeout=3)
+                        if response.status_code == 200:
+                            data = response.json()
+                            parsed_data = service['parser'](data)
+                            if parsed_data and parsed_data.get('city') != 'Unknown City':
+                                ip_data = parsed_data
+                                logger.info(f"成功使用 {service['name']} 获取位置信息")
+                                break
+                    except Exception as e:
+                        logger.warning(f"{service['name']} API调用失败: {str(e)}")
+                        continue
             
             # 如果所有API都失败，使用默认位置
             if not ip_data:
@@ -781,34 +784,15 @@ def get_greeting_info():
         if not city or city == 'Unknown':
             city = ip_data.get('region_name', 'Beijing')
         
-        # 使用OpenWeatherMap API获取多语言天气描述
+        # 使用Open-Meteo免费天气API（无需API密钥）
         latitude = ip_data.get('latitude')
         longitude = ip_data.get('longitude')
         
         weather_info = None
         
         if latitude and longitude:
-            # OpenWeatherMap API密钥（需要注册获取）
-            # 注意：这里使用的是示例密钥，实际使用时需要替换为有效的API密钥
-            api_key = 'YOUR_OPENWEATHERMAP_API_KEY'  # 需要替换为实际的API密钥
-            
-            # 语言代码映射（OpenWeatherMap支持的语言代码）
-            lang_mapping = {
-                'zh': 'zh_cn',
-                'zh-tw': 'zh_tw', 
-                'en': 'en',
-                'ja': 'ja',
-                'ko': 'kr',
-                'fr': 'fr',
-                'de': 'de',
-                'es': 'es',
-                'pt': 'pt'
-            }
-            
-            owm_lang = lang_mapping.get(lang, 'en')
-            
-            # OpenWeatherMap Current Weather API调用
-            weather_url = f'https://api.openweathermap.org/data/2.5/weather?lat={latitude}&lon={longitude}&appid={api_key}&units=metric&lang={owm_lang}'
+            # Open-Meteo API调用
+            weather_url = f'https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,weather_code&timezone=auto'
             
             try:
                 weather_response = requests.get(weather_url, timeout=10)
@@ -816,24 +800,56 @@ def get_greeting_info():
                 if weather_response.status_code == 200:
                     weather_data = weather_response.json()
                     
-                    if 'main' in weather_data and 'weather' in weather_data:
-                        main = weather_data['main']
-                        weather = weather_data['weather'][0] if weather_data['weather'] else {}
-                        wind = weather_data.get('wind', {})
+                    if 'current' in weather_data:
+                        current = weather_data['current']
+                        
+                        # 简化的多语言天气代码映射
+                        weather_codes = {
+                            'zh': {
+                                0: '晴朗', 1: '晴朗', 2: '部分多云', 3: '多云',
+                                45: '雾', 48: '雾凇', 51: '小雨', 53: '中雨', 55: '大雨',
+                                61: '小雨', 63: '中雨', 65: '大雨', 71: '小雪', 73: '中雪', 75: '大雪',
+                                80: '阵雨', 81: '阵雨', 82: '暴雨', 95: '雷暴', 96: '雷暴', 99: '雷暴'
+                            },
+                            'en': {
+                                0: 'Clear', 1: 'Clear', 2: 'Partly Cloudy', 3: 'Cloudy',
+                                45: 'Fog', 48: 'Rime Fog', 51: 'Light Rain', 53: 'Moderate Rain', 55: 'Heavy Rain',
+                                61: 'Light Rain', 63: 'Moderate Rain', 65: 'Heavy Rain', 71: 'Light Snow', 73: 'Moderate Snow', 75: 'Heavy Snow',
+                                80: 'Showers', 81: 'Showers', 82: 'Heavy Showers', 95: 'Thunderstorm', 96: 'Thunderstorm', 99: 'Thunderstorm'
+                            },
+                            'ja': {
+                                0: '晴れ', 1: '晴れ', 2: '一部曇り', 3: '曇り',
+                                45: '霧', 48: '霧氷', 51: '小雨', 53: '中雨', 55: '大雨',
+                                61: '小雨', 63: '中雨', 65: '大雨', 71: '小雪', 73: '中雪', 75: '大雪',
+                                80: 'にわか雨', 81: 'にわか雨', 82: '激しい雨', 95: '雷雨', 96: '雷雨', 99: '雷雨'
+                            },
+                            'ko': {
+                                0: '맑음', 1: '맑음', 2: '부분 흐림', 3: '흐림',
+                                45: '안개', 48: '서리', 51: '가벼운 비', 53: '보통 비', 55: '강한 비',
+                                61: '가벼운 비', 63: '보통 비', 65: '강한 비', 71: '가벼운 눈', 73: '보통 눈', 75: '강한 눈',
+                                80: '소나기', 81: '소나기', 82: '폭우', 95: '뇌우', 96: '뇌우', 99: '뇌우'
+                            }
+                        }
+                        
+                        # 获取当前语言的天气描述，如果不支持则使用中文
+                        weather_code = current.get('weather_code', 0)
+                        lang_codes = weather_codes.get(lang, weather_codes['zh'])
+                        weather_desc = lang_codes.get(weather_code, lang_codes.get(0, 'Clear'))
                         
                         # 只有当所有关键数据都存在时才显示天气信息
-                        if (main.get('temp') is not None and 
-                            main.get('humidity') is not None and 
-                            weather.get('description')):
+                        if (current.get('temperature_2m') is not None and 
+                            current.get('relative_humidity_2m') is not None and 
+                            current.get('wind_speed_10m') is not None):
                             weather_info = {
-                                'temperature': f"{round(main.get('temp', 0))}°C",
-                                'description': weather.get('description', 'Clear'),  # 直接使用API返回的多语言描述
-                                'humidity': f"{main.get('humidity')}%",
-                                'wind_speed': f"{round(wind.get('speed', 0) * 3.6)} km/h",  # 转换m/s到km/h
-                                'wind_dir': f"{wind.get('deg', 0)}°"
+                                'temperature': f"{round(current.get('temperature_2m', 0))}°C",
+                                'description': weather_desc,
+                                'humidity': f"{current.get('relative_humidity_2m')}%",
+                                'wind_speed': f"{round(current.get('wind_speed_10m', 0))} km/h",
+                                'wind_dir': f"{current.get('wind_direction_10m', 0)}°"
                             }
             except Exception as e:
                 # 天气API调用失败时，weather_info保持为None
+                logger.warning(f"天气API调用失败: {str(e)}")
                 pass
         
         # 多语言问候语
