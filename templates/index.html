@@ -97,7 +97,12 @@
                         <div class="form-group">
                             <label for="activityType" data-translate="activityType">运动类型</label>
                             <select id="activityType" name="activity_type">
-                                <option value="Running" data-translate="running">跑步</option>
+                                <option value="Running" data-translate="running">跑步 (通用)</option>
+                                <option value="Running_Street" data-translate="runningStreet">路跑</option>
+                                <option value="Running_Trail" data-translate="runningTrail">越野跑</option>
+                                <option value="Running_Track" data-translate="runningTrack">田径跑道</option>
+                                <option value="Running_Treadmill" data-translate="runningTreadmill">跑步机</option>
+                                <option value="Running_Indoor" data-translate="runningIndoor">室内跑步</option>
                                 <option value="Cycling" data-translate="cycling">骑行</option>
                                 <option value="Walking" data-translate="walking">步行</option>
                             </select>
@@ -294,7 +299,12 @@
                 uploadHint: '支持.gpx格式 • 最大10MB • 即时处理',
                 sportConfig: '🏃‍♂️ 运动设置',
                 activityType: '运动类型',
-                running: '跑步',
+                running: '跑步 (通用)',
+                runningStreet: '路跑',
+                runningTrail: '越野跑',
+                runningTrack: '田径跑道',
+                runningTreadmill: '跑步机',
+                runningIndoor: '室内跑步',
                 cycling: '骑行',
                 walking: '步行',
                 targetPace: '目标配速 (分:秒/公里)',
@@ -389,7 +399,12 @@
                 uploadHint: 'Supports .gpx format • Max 10MB • Instant processing',
                 sportConfig: '🏃‍♂️ Sport Settings',
                 activityType: 'Activity Type',
-                running: 'Running',
+                running: 'Running (Generic)',
+                runningStreet: 'Street Running',
+                runningTrail: 'Trail Running',
+                runningTrack: 'Track Running',
+                runningTreadmill: 'Treadmill Running',
+                runningIndoor: 'Indoor Running',
                 cycling: 'Cycling',
                 walking: 'Walking',
                 targetPace: 'Target Pace (min:sec/km)',
@@ -486,7 +501,12 @@
                 uploadHint: '.gpx形式対応 • 最大10MB • 即座処理',
                 sportConfig: '🏃‍♂️ スポーツ設定',
                 activityType: 'アクティビティタイプ',
-                running: 'ランニング',
+                running: 'ランニング (一般)',
+                runningStreet: 'ロードランニング',
+                runningTrail: 'トレイルランニング',
+                runningTrack: 'トラックランニング',
+                runningTreadmill: 'トレッドミルランニング',
+                runningIndoor: '室内ランニング',
                 cycling: 'サイクリング',
                 walking: 'ウォーキング',
                 targetPace: '目標ペース (分:秒/km)',
@@ -583,9 +603,14 @@
                  uploadHint: '.gpx 형식 지원 • 최대 10MB • 즉시 처리',
                  sportConfig: '🏃‍♂️ 스포츠 설정',
                  activityType: '활동 유형',
-                 running: '달리기',
-                 cycling: '사이클링',
-                 walking: '걷기',
+                 running: '달리기 (일반)',
+                runningStreet: '도로 달리기',
+                runningTrail: '트레일 달리기',
+                runningTrack: '트랙 달리기',
+                runningTreadmill: '러닝머신 달리기',
+                runningIndoor: '실내 달리기',
+                cycling: '사이클링',
+                walking: '걷기',
                  targetPace: '목표 페이스 (분:초/km)',
                  weight: '체중 (kg)',
                  heartRate: '💓 심박수 및 시간',
@@ -679,9 +704,14 @@
                  uploadHint: 'Supporte le format .gpx • Max 10MB • Traitement instantané',
                  sportConfig: '🏃‍♂️ Paramètres Sport',
                  activityType: 'Type d\'activité',
-                 running: 'Course',
-                 cycling: 'Cyclisme',
-                 walking: 'Marche',
+                 running: 'Course (Générique)',
+                runningStreet: 'Course sur route',
+                runningTrail: 'Course de trail',
+                runningTrack: 'Course sur piste',
+                runningTreadmill: 'Course sur tapis',
+                runningIndoor: 'Course en salle',
+                cycling: 'Cyclisme',
+                walking: 'Marche',
                  targetPace: 'Allure cible (min:sec/km)',
                  weight: 'Poids (kg)',
                  heartRate: '💓 Fréquence cardiaque et temps',
@@ -774,9 +804,14 @@
                  uploadHint: 'Unterstützt .gpx-Format • Max 10MB • Sofortverarbeitung',
                  sportConfig: '🏃‍♂️ Sport-Einstellungen',
                  activityType: 'Aktivitätstyp',
-                 running: 'Laufen',
-                 cycling: 'Radfahren',
-                 walking: 'Gehen',
+                 running: 'Laufen (Allgemein)',
+                runningStreet: 'Straßenlauf',
+                runningTrail: 'Traillauf',
+                runningTrack: 'Bahnlauf',
+                runningTreadmill: 'Laufband',
+                runningIndoor: 'Hallenlauf',
+                cycling: 'Radfahren',
+                walking: 'Gehen',
                  targetPace: 'Ziel-Tempo (min:sek/km)',
                  weight: 'Gewicht (kg)',
                  heartRate: '💓 Herzfrequenz & Zeit',
@@ -869,9 +904,14 @@
                  uploadHint: 'Soporta formato .gpx • Máx 10MB • Procesamiento instantáneo',
                  sportConfig: '🏃‍♂️ Configuración de deporte',
                  activityType: 'Tipo de actividad',
-                 running: 'Correr',
-                 cycling: 'Ciclismo',
-                 walking: 'Caminar',
+                 running: 'Correr (Genérico)',
+                runningStreet: 'Correr en calle',
+                runningTrail: 'Trail running',
+                runningTrack: 'Correr en pista',
+                runningTreadmill: 'Cinta de correr',
+                runningIndoor: 'Correr en interior',
+                cycling: 'Ciclismo',
+                walking: 'Caminar',
                  targetPace: 'Ritmo objetivo (min:seg/km)',
                  weight: 'Peso (kg)',
                  heartRate: '💓 Frecuencia cardíaca y tiempo',
@@ -964,9 +1004,14 @@
                  uploadHint: 'Suporta formato .gpx • Máx 10MB • Processamento instantâneo',
                  sportConfig: '🏃‍♂️ Configurações de esporte',
                  activityType: 'Tipo de atividade',
-                 running: 'Corrida',
-                 cycling: 'Ciclismo',
-                 walking: 'Caminhada',
+                 running: 'Corrida (Genérica)',
+                runningStreet: 'Corrida de rua',
+                runningTrail: 'Corrida de trilha',
+                runningTrack: 'Corrida de pista',
+                runningTreadmill: 'Esteira',
+                runningIndoor: 'Corrida indoor',
+                cycling: 'Ciclismo',
+                walking: 'Caminhada',
                  targetPace: 'Ritmo alvo (min:seg/km)',
                  weight: 'Peso (kg)',
                  heartRate: '💓 Frequência cardíaca e tempo',
@@ -1059,9 +1104,14 @@
                  uploadHint: '支援.gpx格式 • 最大10MB • 即時處理',
                  sportConfig: '🏃‍♂️ 運動設定',
                  activityType: '運動類型',
-                 running: '跑步',
-                 cycling: '騎行',
-                 walking: '步行',
+                 running: '跑步 (通用)',
+                runningStreet: '路跑',
+                runningTrail: '越野跑',
+                runningTrack: '田徑跑道',
+                runningTreadmill: '跑步機',
+                runningIndoor: '室內跑步',
+                cycling: '騎行',
+                walking: '步行',
                  targetPace: '目標配速 (分:秒/公里)',
                  weight: '體重 (kg)',
                  heartRate: '💓 心率與時間',
@@ -1250,6 +1300,11 @@
             const options = document.querySelectorAll('option');
             options.forEach(option => {
                 if (option.value === 'Running') option.textContent = t.running;
+                if (option.value === 'Running_Street') option.textContent = t.runningStreet;
+                if (option.value === 'Running_Trail') option.textContent = t.runningTrail;
+                if (option.value === 'Running_Track') option.textContent = t.runningTrack;
+                if (option.value === 'Running_Treadmill') option.textContent = t.runningTreadmill;
+                if (option.value === 'Running_Indoor') option.textContent = t.runningIndoor;
                 if (option.value === 'Cycling') option.textContent = t.cycling;
                 if (option.value === 'Walking') option.textContent = t.walking;
             });

@@ -629,6 +629,9 @@ class GPXToTCXConverter:
         avg_power = int(sum(all_powers) / len(all_powers)) if all_powers else self.config.get('min_power', 150)
         max_power = max(all_powers) if all_powers else self.config.get('max_power', 300)
         
+        # 获取子运动类型信息
+        sub_sport = self.config.get('sub_sport', 'Generic')
+        
         # TCX文件尾部（模拟Garmin设备）
         tcx_content += f'''
         </Track>
@@ -639,6 +642,7 @@ class GPXToTCXConverter:
             <ns3:MaxRunCadence>{max_cadence}</ns3:MaxRunCadence>
             <ns3:AvgWatts>{avg_power}</ns3:AvgWatts>
             <ns3:MaxWatts>{max_power}</ns3:MaxWatts>
+            <ns3:SubSport>{escape(sub_sport)}</ns3:SubSport>
           </ns3:LX>
         </Extensions>
       </Lap>

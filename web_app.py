@@ -258,8 +258,20 @@ def upload_file():
         output_path = os.path.join(OUTPUT_FOLDER, f"{task_id}_{output_filename}")
         
         # 获取配置
+        activity_type = request.form.get('activity_type', 'Running')
+        # 将跑步子类型映射到TCX格式
+        if activity_type.startswith('Running_'):
+            # 所有跑步子类型在TCX中都使用'Running'，子类型信息保存在扩展字段中
+            tcx_sport = 'Running'
+            sub_sport = activity_type.split('_')[1] if '_' in activity_type else 'Generic'
+        else:
+            tcx_sport = activity_type
+            sub_sport = 'Generic'
+        
         config = {
-            'activity_type': request.form.get('activity_type', 'Running'),
+            'activity_type': tcx_sport,
+            'sub_sport': sub_sport,
+            'original_activity_type': activity_type,
             'device_name': request.form.get('device_name', 'Forerunner 570'),
             'device_version': request.form.get('device_version', '12.70'),
             'base_hr': request.form.get('base_hr', '135'),
