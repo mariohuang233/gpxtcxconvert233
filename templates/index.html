@@ -2144,11 +2144,30 @@
     <style>
     .apple-footer {
         position: relative;
-        margin-top: var(--space-2xl);
-        padding: var(--space-xl) 0;
-        background: rgba(28, 28, 30, 0.95);
+        margin-top: 0;
+        padding: var(--space-2xl) 0 0 0;
+        background: linear-gradient(180deg, 
+            rgba(28, 28, 30, 0) 0%,
+            rgba(28, 28, 30, 0.3) 30%,
+            rgba(28, 28, 30, 0.8) 70%,
+            rgba(28, 28, 30, 0.95) 100%);
         backdrop-filter: blur(20px);
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-top: none;
+    }
+    
+    .apple-footer::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, 
+            transparent 0%,
+            rgba(255, 255, 255, 0.1) 20%,
+            rgba(255, 255, 255, 0.2) 50%,
+            rgba(255, 255, 255, 0.1) 80%,
+            transparent 100%);
     }
     
     .footer-glass-card {
