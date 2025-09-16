@@ -358,7 +358,6 @@ body::before {
 
 /* 主容器 */
 .container {
-    min-height: 100vh;
     padding: 0;
     position: relative;
     max-width: none;
