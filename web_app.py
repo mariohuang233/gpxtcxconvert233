@@ -738,51 +738,158 @@ def get_weather_data(lat=None, lon=None, city=None, lang='zh'):
             logger.info("✅ 使用缓存的天气数据")
             return cached_data
     
-    # 天气描述翻译映射
+    # 多语言天气描述翻译映射
     weather_translations = {
-        'clear': '晴朗', 'sunny': '晴朗', 'clear sky': '晴朗',
-        'partly cloudy': '多云', 'cloudy': '多云', 'few clouds': '少云',
-        'scattered clouds': '多云', 'broken clouds': '多云',
-        'overcast': '阴天', 'overcast clouds': '阴天',
-        'light rain': '小雨', 'moderate rain': '中雨', 'heavy rain': '大雨',
-        'rain': '雨', 'shower rain': '阵雨', 'light shower': '小阵雨',
-        'thunderstorm': '雷雨', 'thunderstorm with rain': '雷阵雨',
-        'snow': '雪', 'light snow': '小雪', 'heavy snow': '大雪',
-        'mist': '薄雾', 'fog': '雾', 'haze': '霾', 'dust': '浮尘',
-        'drizzle': '毛毛雨', 'freezing rain': '冻雨'
+        'zh': {
+            'clear': '晴朗', 'sunny': '晴朗', 'clear sky': '晴朗',
+            'partly cloudy': '多云', 'cloudy': '多云', 'few clouds': '少云',
+            'scattered clouds': '多云', 'broken clouds': '多云',
+            'overcast': '阴天', 'overcast clouds': '阴天',
+            'light rain': '小雨', 'moderate rain': '中雨', 'heavy rain': '大雨',
+            'rain': '雨', 'shower rain': '阵雨', 'light shower': '小阵雨',
+            'thunderstorm': '雷雨', 'thunderstorm with rain': '雷阵雨',
+            'snow': '雪', 'light snow': '小雪', 'heavy snow': '大雪',
+            'mist': '薄雾', 'fog': '雾', 'haze': '霾', 'dust': '浮尘',
+            'drizzle': '毛毛雨', 'freezing rain': '冻雨'
+        },
+        'zh-tw': {
+            'clear': '晴朗', 'sunny': '晴朗', 'clear sky': '晴朗',
+            'partly cloudy': '多雲', 'cloudy': '多雲', 'few clouds': '少雲',
+            'scattered clouds': '多雲', 'broken clouds': '多雲',
+            'overcast': '陰天', 'overcast clouds': '陰天',
+            'light rain': '小雨', 'moderate rain': '中雨', 'heavy rain': '大雨',
+            'rain': '雨', 'shower rain': '陣雨', 'light shower': '小陣雨',
+            'thunderstorm': '雷雨', 'thunderstorm with rain': '雷陣雨',
+            'snow': '雪', 'light snow': '小雪', 'heavy snow': '大雪',
+            'mist': '薄霧', 'fog': '霧', 'haze': '霾', 'dust': '浮塵',
+            'drizzle': '毛毛雨', 'freezing rain': '凍雨'
+        },
+        'ja': {
+            'clear': '晴れ', 'sunny': '晴れ', 'clear sky': '快晴',
+            'partly cloudy': '曇り', 'cloudy': '曇り', 'few clouds': '薄曇り',
+            'scattered clouds': '曇り', 'broken clouds': '曇り',
+            'overcast': '曇天', 'overcast clouds': '曇天',
+            'light rain': '小雨', 'moderate rain': '雨', 'heavy rain': '大雨',
+            'rain': '雨', 'shower rain': 'にわか雨', 'light shower': '小雨',
+            'thunderstorm': '雷雨', 'thunderstorm with rain': '雷雨',
+            'snow': '雪', 'light snow': '小雪', 'heavy snow': '大雪',
+            'mist': '霧', 'fog': '霧', 'haze': 'かすみ', 'dust': '砂塵',
+            'drizzle': '霧雨', 'freezing rain': '凍雨'
+        },
+        'ko': {
+            'clear': '맑음', 'sunny': '맑음', 'clear sky': '맑음',
+            'partly cloudy': '구름많음', 'cloudy': '흐림', 'few clouds': '구름조금',
+            'scattered clouds': '구름많음', 'broken clouds': '구름많음',
+            'overcast': '흐림', 'overcast clouds': '흐림',
+            'light rain': '가벼운 비', 'moderate rain': '비', 'heavy rain': '폭우',
+            'rain': '비', 'shower rain': '소나기', 'light shower': '가벼운 소나기',
+            'thunderstorm': '뇌우', 'thunderstorm with rain': '뇌우',
+            'snow': '눈', 'light snow': '가벼운 눈', 'heavy snow': '폭설',
+            'mist': '안개', 'fog': '안개', 'haze': '연무', 'dust': '먼지',
+            'drizzle': '이슬비', 'freezing rain': '얼음비'
+        },
+        'fr': {
+            'clear': 'Clair', 'sunny': 'Ensoleillé', 'clear sky': 'Ciel dégagé',
+            'partly cloudy': 'Partiellement nuageux', 'cloudy': 'Nuageux', 'few clouds': 'Quelques nuages',
+            'scattered clouds': 'Nuages épars', 'broken clouds': 'Nuages fragmentés',
+            'overcast': 'Couvert', 'overcast clouds': 'Ciel couvert',
+            'light rain': 'Pluie légère', 'moderate rain': 'Pluie modérée', 'heavy rain': 'Forte pluie',
+            'rain': 'Pluie', 'shower rain': 'Averse', 'light shower': 'Averse légère',
+            'thunderstorm': 'Orage', 'thunderstorm with rain': 'Orage avec pluie',
+            'snow': 'Neige', 'light snow': 'Neige légère', 'heavy snow': 'Forte neige',
+            'mist': 'Brume', 'fog': 'Brouillard', 'haze': 'Brume de chaleur', 'dust': 'Poussière',
+            'drizzle': 'Bruine', 'freezing rain': 'Pluie verglaçante'
+        },
+        'de': {
+            'clear': 'Klar', 'sunny': 'Sonnig', 'clear sky': 'Klarer Himmel',
+            'partly cloudy': 'Teilweise bewölkt', 'cloudy': 'Bewölkt', 'few clouds': 'Wenige Wolken',
+            'scattered clouds': 'Vereinzelte Wolken', 'broken clouds': 'Aufgelockerte Bewölkung',
+            'overcast': 'Bedeckt', 'overcast clouds': 'Bedeckter Himmel',
+            'light rain': 'Leichter Regen', 'moderate rain': 'Mäßiger Regen', 'heavy rain': 'Starker Regen',
+            'rain': 'Regen', 'shower rain': 'Schauer', 'light shower': 'Leichter Schauer',
+            'thunderstorm': 'Gewitter', 'thunderstorm with rain': 'Gewitter mit Regen',
+            'snow': 'Schnee', 'light snow': 'Leichter Schnee', 'heavy snow': 'Starker Schnee',
+            'mist': 'Nebel', 'fog': 'Nebel', 'haze': 'Dunst', 'dust': 'Staub',
+            'drizzle': 'Nieselregen', 'freezing rain': 'Gefrierender Regen'
+        },
+        'es': {
+            'clear': 'Despejado', 'sunny': 'Soleado', 'clear sky': 'Cielo despejado',
+            'partly cloudy': 'Parcialmente nublado', 'cloudy': 'Nublado', 'few clouds': 'Pocas nubes',
+            'scattered clouds': 'Nubes dispersas', 'broken clouds': 'Nubes fragmentadas',
+            'overcast': 'Nublado', 'overcast clouds': 'Cielo nublado',
+            'light rain': 'Lluvia ligera', 'moderate rain': 'Lluvia moderada', 'heavy rain': 'Lluvia fuerte',
+            'rain': 'Lluvia', 'shower rain': 'Chubascos', 'light shower': 'Chubasco ligero',
+            'thunderstorm': 'Tormenta', 'thunderstorm with rain': 'Tormenta con lluvia',
+            'snow': 'Nieve', 'light snow': 'Nieve ligera', 'heavy snow': 'Nieve fuerte',
+            'mist': 'Neblina', 'fog': 'Niebla', 'haze': 'Calima', 'dust': 'Polvo',
+            'drizzle': 'Llovizna', 'freezing rain': 'Lluvia helada'
+        },
+        'pt': {
+            'clear': 'Limpo', 'sunny': 'Ensolarado', 'clear sky': 'Céu limpo',
+            'partly cloudy': 'Parcialmente nublado', 'cloudy': 'Nublado', 'few clouds': 'Poucas nuvens',
+            'scattered clouds': 'Nuvens dispersas', 'broken clouds': 'Nuvens fragmentadas',
+            'overcast': 'Encoberto', 'overcast clouds': 'Céu encoberto',
+            'light rain': 'Chuva leve', 'moderate rain': 'Chuva moderada', 'heavy rain': 'Chuva forte',
+            'rain': 'Chuva', 'shower rain': 'Pancadas de chuva', 'light shower': 'Pancada leve',
+            'thunderstorm': 'Tempestade', 'thunderstorm with rain': 'Tempestade com chuva',
+            'snow': 'Neve', 'light snow': 'Neve leve', 'heavy snow': 'Neve forte',
+            'mist': 'Névoa', 'fog': 'Nevoeiro', 'haze': 'Neblina', 'dust': 'Poeira',
+            'drizzle': 'Garoa', 'freezing rain': 'Chuva congelante'
+        },
+        'it': {
+            'clear': 'Sereno', 'sunny': 'Soleggiato', 'clear sky': 'Cielo sereno',
+            'partly cloudy': 'Parzialmente nuvoloso', 'cloudy': 'Nuvoloso', 'few clouds': 'Poche nuvole',
+            'scattered clouds': 'Nuvole sparse', 'broken clouds': 'Nuvole frammentate',
+            'overcast': 'Coperto', 'overcast clouds': 'Cielo coperto',
+            'light rain': 'Pioggia leggera', 'moderate rain': 'Pioggia moderata', 'heavy rain': 'Pioggia forte',
+            'rain': 'Pioggia', 'shower rain': 'Rovesci', 'light shower': 'Rovescio leggero',
+            'thunderstorm': 'Temporale', 'thunderstorm with rain': 'Temporale con pioggia',
+            'snow': 'Neve', 'light snow': 'Neve leggera', 'heavy snow': 'Neve forte',
+            'mist': 'Foschia', 'fog': 'Nebbia', 'haze': 'Foschia', 'dust': 'Polvere',
+            'drizzle': 'Pioggerella', 'freezing rain': 'Pioggia gelata'
+        },
+        'ar': {
+            'clear': 'صافي', 'sunny': 'مشمس', 'clear sky': 'سماء صافية',
+            'partly cloudy': 'غائم جزئياً', 'cloudy': 'غائم', 'few clouds': 'غيوم قليلة',
+            'scattered clouds': 'غيوم متناثرة', 'broken clouds': 'غيوم متقطعة',
+            'overcast': 'ملبد بالغيوم', 'overcast clouds': 'سماء ملبدة',
+            'light rain': 'مطر خفيف', 'moderate rain': 'مطر متوسط', 'heavy rain': 'مطر غزير',
+            'rain': 'مطر', 'shower rain': 'زخات مطر', 'light shower': 'زخة خفيفة',
+            'thunderstorm': 'عاصفة رعدية', 'thunderstorm with rain': 'عاصفة رعدية مع مطر',
+            'snow': 'ثلج', 'light snow': 'ثلج خفيف', 'heavy snow': 'ثلج كثيف',
+            'mist': 'ضباب خفيف', 'fog': 'ضباب', 'haze': 'ضباب دخاني', 'dust': 'غبار',
+            'drizzle': 'رذاذ', 'freezing rain': 'مطر متجمد'
+        },
+        'ru': {
+            'clear': 'Ясно', 'sunny': 'Солнечно', 'clear sky': 'Ясное небо',
+            'partly cloudy': 'Переменная облачность', 'cloudy': 'Облачно', 'few clouds': 'Малооблачно',
+            'scattered clouds': 'Рассеянные облака', 'broken clouds': 'Разорванные облака',
+            'overcast': 'Пасмурно', 'overcast clouds': 'Пасмурное небо',
+            'light rain': 'Легкий дождь', 'moderate rain': 'Умеренный дождь', 'heavy rain': 'Сильный дождь',
+            'rain': 'Дождь', 'shower rain': 'Ливень', 'light shower': 'Легкий ливень',
+            'thunderstorm': 'Гроза', 'thunderstorm with rain': 'Гроза с дождем',
+            'snow': 'Снег', 'light snow': 'Легкий снег', 'heavy snow': 'Сильный снег',
+            'mist': 'Дымка', 'fog': 'Туман', 'haze': 'Мгла', 'dust': 'Пыль',
+            'drizzle': 'Морось', 'freezing rain': 'Ледяной дождь'
+        }
     }
     
     def translate_weather_desc(desc, target_lang):
-        """翻译天气描述 - 支持中英文双向翻译"""
+        """翻译天气描述 - 支持多语言翻译"""
         if not desc:
             return desc
             
         desc_lower = desc.lower().strip()
         
-        if target_lang == 'zh':
-            # 英文转中文
-            return weather_translations.get(desc_lower, desc)
-        else:
-            # target_lang == 'en' 或其他语言，确保返回英文
-            # 如果输入是中文，转换为英文；如果已经是英文，直接返回
-            
-            # 中文到英文的反向映射
-            zh_to_en = {
-                '晴朗': 'Clear', '多云': 'Partly Cloudy', '少云': 'Few Clouds',
-                '阴天': 'Overcast', '小雨': 'Light Rain', '中雨': 'Moderate Rain', 
-                '大雨': 'Heavy Rain', '雨': 'Rain', '阵雨': 'Shower Rain',
-                '小阵雨': 'Light Shower', '雷雨': 'Thunderstorm', '雷阵雨': 'Thunderstorm with Rain',
-                '雪': 'Snow', '小雪': 'Light Snow', '大雪': 'Heavy Snow',
-                '薄雾': 'Mist', '雾': 'Fog', '霾': 'Haze', '浮尘': 'Dust',
-                '毛毛雨': 'Drizzle', '冻雨': 'Freezing Rain'
-            }
-            
-            # 如果是中文描述，转换为英文
-            if desc in zh_to_en:
-                return zh_to_en[desc]
-            
-            # 如果是英文描述，标准化格式（首字母大写）
+        # 获取目标语言的翻译映射
+        lang_translations = weather_translations.get(target_lang, weather_translations.get('zh', {}))
+        
+        # 如果目标语言是英文，直接返回原描述（标准化格式）
+        if target_lang == 'en':
             return desc.title()
+        
+        # 翻译天气描述
+        return lang_translations.get(desc_lower, desc)
     
     # 方案1: 免费的wttr.in API (无需API密钥)
     def get_weather_from_wttr():
@@ -1073,7 +1180,8 @@ def get_greeting_info():
     try:
         # 获取并验证语言参数
         lang = request.args.get('lang', 'zh')
-        if not isinstance(lang, str) or lang not in ['zh', 'en']:
+        supported_languages = ['zh', 'zh-tw', 'en', 'ja', 'ko', 'fr', 'de', 'es', 'pt', 'it', 'ar', 'ru']
+        if not isinstance(lang, str) or lang not in supported_languages:
             lang = 'zh'  # 默认中文
         
         # 获取位置参数 - GPS优先定位策略
@@ -1094,7 +1202,7 @@ def get_greeting_info():
         else:
             logger.info(f"📍 使用GPS定位: {lat}, {lon}")
         
-        # 装逼问候语库
+        # 多语言问候语库
         cool_greetings = {
             'zh': [
                 "代码如诗，转换如艺术 ✨",
@@ -1106,6 +1214,16 @@ def get_greeting_info():
                 "数据的魔法师，为您服务 ⚡",
                 "简约而不简单的转换体验 🌟"
             ],
+            'zh-tw': [
+                "程式如詩，轉換如藝術 ✨",
+                "優雅地處理每一個資料點 🎯",
+                "讓資料在格式間自由流淌 🌊",
+                "精準轉換，完美呈現 💎",
+                "技術與美學的完美融合 🎨",
+                "每一次轉換都是一次創作 🚀",
+                "資料的魔法師，為您服務 ⚡",
+                "簡約而不簡單的轉換體驗 🌟"
+            ],
             'en': [
                 "Code as poetry, conversion as art ✨",
                 "Elegantly handling every data point 🎯",
@@ -1115,6 +1233,96 @@ def get_greeting_info():
                 "Every conversion is a creation 🚀",
                 "Data magician at your service ⚡",
                 "Simple yet sophisticated conversion experience 🌟"
+            ],
+            'ja': [
+                "コードは詩、変換は芸術 ✨",
+                "すべてのデータポイントを優雅に処理 🎯",
+                "データをフォーマット間で自由に流す 🌊",
+                "精密変換、完璧なプレゼンテーション 💎",
+                "技術と美学の完璧な融合 🎨",
+                "すべての変換は創造です 🚀",
+                "データの魔法使い、あなたのために ⚡",
+                "シンプルで洗練された変換体験 🌟"
+            ],
+            'ko': [
+                "코드는 시, 변환은 예술 ✨",
+                "모든 데이터 포인트를 우아하게 처리 🎯",
+                "데이터가 형식 간에 자유롭게 흐르도록 🌊",
+                "정밀 변환, 완벽한 프레젠테이션 💎",
+                "기술과 미학의 완벽한 융합 🎨",
+                "모든 변환은 창조입니다 🚀",
+                "데이터 마법사, 당신을 위해 ⚡",
+                "간단하면서도 정교한 변환 경험 🌟"
+            ],
+            'fr': [
+                "Le code comme poésie, la conversion comme art ✨",
+                "Gérer élégamment chaque point de données 🎯",
+                "Laisser les données circuler librement entre les formats 🌊",
+                "Conversion précise, présentation parfaite 💎",
+                "Fusion parfaite de la technologie et de l'esthétique 🎨",
+                "Chaque conversion est une création 🚀",
+                "Magicien des données, à votre service ⚡",
+                "Expérience de conversion simple mais sophistiquée 🌟"
+            ],
+            'de': [
+                "Code als Poesie, Konvertierung als Kunst ✨",
+                "Jeden Datenpunkt elegant handhaben 🎯",
+                "Daten frei zwischen Formaten fließen lassen 🌊",
+                "Präzise Konvertierung, perfekte Präsentation 💎",
+                "Perfekte Verschmelzung von Technologie und Ästhetik 🎨",
+                "Jede Konvertierung ist eine Schöpfung 🚀",
+                "Datenmagier, zu Ihren Diensten ⚡",
+                "Einfache, aber raffinierte Konvertierungserfahrung 🌟"
+            ],
+            'es': [
+                "Código como poesía, conversión como arte ✨",
+                "Manejando elegantemente cada punto de datos 🎯",
+                "Dejar que los datos fluyan libremente entre formatos 🌊",
+                "Conversión precisa, presentación perfecta 💎",
+                "Fusión perfecta de tecnología y estética 🎨",
+                "Cada conversión es una creación 🚀",
+                "Mago de datos, a su servicio ⚡",
+                "Experiencia de conversión simple pero sofisticada 🌟"
+            ],
+            'pt': [
+                "Código como poesia, conversão como arte ✨",
+                "Lidando elegantemente com cada ponto de dados 🎯",
+                "Deixar os dados fluírem livremente entre formatos 🌊",
+                "Conversão precisa, apresentação perfeita 💎",
+                "Fusão perfeita de tecnologia e estética 🎨",
+                "Cada conversão é uma criação 🚀",
+                "Mago dos dados, ao seu serviço ⚡",
+                "Experiência de conversão simples mas sofisticada 🌟"
+            ],
+            'it': [
+                "Codice come poesia, conversione come arte ✨",
+                "Gestendo elegantemente ogni punto dati 🎯",
+                "Lasciare che i dati fluiscano liberamente tra i formati 🌊",
+                "Conversione precisa, presentazione perfetta 💎",
+                "Fusione perfetta di tecnologia ed estetica 🎨",
+                "Ogni conversione è una creazione 🚀",
+                "Mago dei dati, al vostro servizio ⚡",
+                "Esperienza di conversione semplice ma sofisticata 🌟"
+            ],
+            'ar': [
+                "الكود كالشعر، التحويل كالفن ✨",
+                "التعامل بأناقة مع كل نقطة بيانات 🎯",
+                "دع البيانات تتدفق بحرية بين التنسيقات 🌊",
+                "تحويل دقيق، عرض مثالي 💎",
+                "اندماج مثالي للتكنولوجيا والجمال 🎨",
+                "كل تحويل هو إبداع 🚀",
+                "ساحر البيانات، في خدمتكم ⚡",
+                "تجربة تحويل بسيطة لكن متطورة 🌟"
+            ],
+            'ru': [
+                "Код как поэзия, конвертация как искусство ✨",
+                "Элегантная обработка каждой точки данных 🎯",
+                "Позвольте данным свободно течь между форматами 🌊",
+                "Точная конвертация, идеальная презентация 💎",
+                "Идеальное слияние технологии и эстетики 🎨",
+                "Каждая конвертация - это творение 🚀",
+                "Волшебник данных, к вашим услугам ⚡",
+                "Простой, но изысканный опыт конвертации 🌟"
             ]
         }
         
