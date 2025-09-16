@@ -641,77 +641,136 @@ def serve_background_image():
 weather_cache = {}
 CACHE_DURATION = 300  # 5分钟缓存
 
+def calculate_distance(lat1, lon1, lat2, lon2):
+    """计算两个坐标点之间的距离（公里）- 使用Haversine公式"""
+    import math
+    
+    # 将度数转换为弧度
+    lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
+    
+    # Haversine公式
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
+    c = 2 * math.asin(math.sqrt(a))
+    
+    # 地球半径（公里）
+    r = 6371
+    
+    return c * r
+
 def get_location_by_ip():
-    """通过IP获取位置信息 - 使用多个API源提高准确性"""
+    """通过IP获取位置信息 - 使用多个高精度API源提高准确性"""
     try:
-        # 使用多个免费的IP地理位置API，按可靠性排序
+        # 使用多个免费的IP地理位置API，按准确性和可靠性排序
         apis = [
-            # API 1: ipapi.co - 通常比较准确
+            # API 1: ipgeolocation.io - 高精度免费API，每月1000次免费请求
+            {
+                'url': 'https://api.ipgeolocation.io/ipgeo?apiKey=',
+                'city_key': 'city',
+                'lat_key': 'latitude',
+                'lon_key': 'longitude',
+                'country_key': 'country_name',
+                'country_code_key': 'country_code2',
+                'requires_key': False,  # 可以无key使用，但有限制
+                'name': 'IPGeolocation.io'
+            },
+            # API 2: ipapi.co - 通常比较准确，每月1000次免费
             {
                 'url': 'https://ipapi.co/json/',
                 'city_key': 'city',
                 'lat_key': 'latitude', 
                 'lon_key': 'longitude',
                 'country_key': 'country_name',
-                'country_code_key': 'country_code'
+                'country_code_key': 'country_code',
+                'requires_key': False,
+                'name': 'ipapi.co'
             },
-            # API 2: ip-api.com - 备用选择
-            {
-                'url': 'http://ip-api.com/json/?fields=city,country,countryCode,lat,lon,timezone',
-                'city_key': 'city',
-                'lat_key': 'lat',
-                'lon_key': 'lon', 
-                'country_key': 'country',
-                'country_code_key': 'countryCode'
-            },
-            # API 3: ipinfo.io - 另一个备用
+            # API 3: ipinfo.io - 高质量数据，每月50000次免费
             {
                 'url': 'https://ipinfo.io/json',
                 'city_key': 'city',
                 'lat_key': 'loc',  # 特殊处理，格式为 "lat,lon"
                 'lon_key': 'loc',
                 'country_key': 'country',
-                'country_code_key': 'country'
+                'country_code_key': 'country',
+                'requires_key': False,
+                'name': 'ipinfo.io'
+            },
+            # API 4: ip-api.com - 备用选择，每月1000次免费
+            {
+                'url': 'http://ip-api.com/json/?fields=city,country,countryCode,lat,lon,timezone,accuracy',
+                'city_key': 'city',
+                'lat_key': 'lat',
+                'lon_key': 'lon', 
+                'country_key': 'country',
+                'country_code_key': 'countryCode',
+                'requires_key': False,
+                'name': 'ip-api.com'
             }
         ]
         
         for api_config in apis:
             try:
-                response = requests.get(api_config['url'], timeout=5)
+                logger.info(f"🔍 尝试使用 {api_config.get('name', 'Unknown')} API...")
+                response = requests.get(api_config['url'], timeout=8)  # 增加超时时间
                 if response.status_code == 200:
                     data = response.json()
                     
                     # 检查是否有城市信息
                     city = data.get(api_config['city_key'])
                     if not city:
+                        logger.warning(f"❌ {api_config.get('name')} 未返回城市信息")
                         continue
                     
                     # 处理坐标信息
                     lat, lon = None, None
-                    if api_config['url'] == 'https://ipinfo.io/json':
-                        # ipinfo.io 的特殊格式处理
-                        loc = data.get('loc', '')
-                        if ',' in loc:
-                            lat, lon = loc.split(',')
-                            lat, lon = float(lat.strip()), float(lon.strip())
-                    else:
-                        lat = data.get(api_config['lat_key'])
-                        lon = data.get(api_config['lon_key'])
+                    try:
+                        if api_config['url'] == 'https://ipinfo.io/json':
+                            # ipinfo.io 的特殊格式处理
+                            loc = data.get('loc', '')
+                            if ',' in loc:
+                                lat_str, lon_str = loc.split(',')
+                                lat, lon = float(lat_str.strip()), float(lon_str.strip())
+                        else:
+                            lat = float(data.get(api_config['lat_key'], 0))
+                            lon = float(data.get(api_config['lon_key'], 0))
+                    except (ValueError, TypeError) as e:
+                        logger.warning(f"❌ {api_config.get('name')} 坐标解析失败: {e}")
+                        continue
                     
-                    if city and lat and lon:
+                    # 验证坐标有效性（纬度-90到90，经度-180到180）
+                    if lat and lon and (-90 <= lat <= 90) and (-180 <= lon <= 180) and (lat != 0 or lon != 0):
+                        # 获取额外信息
+                        accuracy = data.get('accuracy', 'unknown')
+                        timezone = data.get('timezone', '')
+                        
                         location_info = {
                             'city': city,
                             'lat': float(lat),
                             'lon': float(lon),
                             'country': data.get(api_config['country_key'], ''),
-                            'country_code': data.get(api_config['country_code_key'], '')
+                            'country_code': data.get(api_config['country_code_key'], ''),
+                            'source': api_config.get('name', 'Unknown'),
+                            'accuracy': accuracy,
+                            'timezone': timezone
                         }
                         
-                        logger.info(f"🌍 IP定位成功 ({api_config['url']}): {city}, {lat}, {lon}")
+                        logger.info(f"✅ IP定位成功 ({api_config.get('name')}): {city}, {lat}, {lon} (精度: {accuracy})")
                         return location_info
+                    else:
+                        logger.warning(f"❌ {api_config.get('name')} 返回无效坐标: ({lat}, {lon})")
+                else:
+                    logger.warning(f"❌ {api_config.get('name')} HTTP错误: {response.status_code}")
                         
+            except requests.exceptions.Timeout:
+                logger.warning(f"⏰ {api_config.get('name')} 请求超时")
+                continue
+            except requests.exceptions.RequestException as e:
+                logger.warning(f"🌐 {api_config.get('name')} 网络错误: {str(e)}")
+                continue
             except Exception as e:
-                logger.warning(f"IP定位API失败 ({api_config['url']}): {str(e)}")
+                logger.warning(f"❌ {api_config.get('name')} 未知错误: {str(e)}")
                 continue
                 
         logger.warning("🚫 所有IP定位API都失败了")
@@ -1189,18 +1248,72 @@ def get_greeting_info():
         lon = request.args.get('lon')
         city = request.args.get('city')
         
-        # GPS优先定位逻辑：如果有GPS坐标就优先使用，否则使用IP定位
+        # 多重定位验证机制：GPS优先，IP定位作为备用和验证
+        location_info = {
+            'source': 'unknown',
+            'accuracy': 'unknown',
+            'verified': False,
+            'alternatives': []
+        }
+        
+        if lat and lon:
+            # 有GPS坐标时优先使用
+            try:
+                lat_float = float(lat)
+                lon_float = float(lon)
+                if (-90 <= lat_float <= 90) and (-180 <= lon_float <= 180):
+                    location_info.update({
+                        'source': 'GPS',
+                        'accuracy': 'high',
+                        'verified': True
+                    })
+                    logger.info(f"📍 使用GPS定位: {lat}, {lon}")
+                    
+                    # 同时获取IP定位作为验证
+                    ip_location = get_location_by_ip()
+                    if ip_location:
+                        ip_distance = calculate_distance(lat_float, lon_float, ip_location['lat'], ip_location['lon'])
+                        location_info['alternatives'].append({
+                            'source': ip_location.get('source', 'IP'),
+                            'lat': ip_location['lat'],
+                            'lon': ip_location['lon'],
+                            'city': ip_location.get('city', ''),
+                            'distance_km': round(ip_distance, 2),
+                            'accuracy': ip_location.get('accuracy', 'unknown')
+                        })
+                        
+                        # 如果GPS和IP定位差距过大，标记为需要验证
+                        if ip_distance > 50:  # 50公里以上差距
+                            location_info['verified'] = False
+                            logger.warning(f"⚠️ GPS和IP定位差距较大: {ip_distance:.2f}km")
+                else:
+                    raise ValueError("GPS坐标超出有效范围")
+            except (ValueError, TypeError) as e:
+                logger.warning(f"❌ GPS坐标无效: {e}")
+                lat, lon = None, None
+        
         if not (lat and lon):
-            # 没有GPS坐标时，尝试IP定位
+            # 没有有效GPS坐标时，使用IP定位
             ip_location = get_location_by_ip()
             if ip_location and ip_location.get('lat') and ip_location.get('lon'):
                 lat = str(ip_location['lat'])
                 lon = str(ip_location['lon'])
-                logger.info(f"🌍 GPS不可用，使用IP定位: {lat}, {lon}")
+                location_info.update({
+                    'source': ip_location.get('source', 'IP'),
+                    'accuracy': ip_location.get('accuracy', 'medium'),
+                    'verified': True,
+                    'city': ip_location.get('city', ''),
+                    'country': ip_location.get('country', ''),
+                    'timezone': ip_location.get('timezone', '')
+                })
+                logger.info(f"🌍 GPS不可用，使用IP定位: {lat}, {lon} (来源: {ip_location.get('source')})")
             else:
                 logger.info("📍 GPS和IP定位都不可用，将使用默认城市")
-        else:
-            logger.info(f"📍 使用GPS定位: {lat}, {lon}")
+                location_info.update({
+                    'source': 'default',
+                    'accuracy': 'low',
+                    'verified': False
+                })
         
         # 多语言问候语库
         cool_greetings = {
@@ -1343,7 +1456,8 @@ def get_greeting_info():
         )
         
         response_data = {
-            'greeting': greeting_text
+            'greeting': greeting_text,
+            'location_info': location_info  # 添加定位精度和验证信息
         }
         
         # 如果天气数据获取成功，添加到响应中
