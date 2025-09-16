@@ -2182,3 +2182,71 @@ input:hover, select:hover {
 ::-webkit-scrollbar-corner {
     background: var(--bg-secondary);
 }
+
+/* RTL支持 - 阿拉伯语等从右到左的语言 */
+[dir="rtl"] {
+    text-align: right;
+}
+
+[dir="rtl"] .header {
+    text-align: right;
+}
+
+[dir="rtl"] .language-selector {
+    left: 20px;
+    right: auto;
+}
+
+[dir="rtl"] .location-info {
+    right: auto;
+    left: 20px;
+}
+
+[dir="rtl"] .config-grid {
+    text-align: right;
+}
+
+[dir="rtl"] .form-group label {
+    text-align: right;
+}
+
+[dir="rtl"] .route-info {
+    text-align: right;
+}
+
+[dir="rtl"] .route-stats {
+    justify-content: flex-end;
+}
+
+[dir="rtl"] .feature-card {
+    text-align: right;
+}
+
+[dir="rtl"] .footer {
+    text-align: right;
+}
+
+[dir="rtl"] .footer-links {
+    justify-content: flex-end;
+}
+
+/* RTL移动端适配 */
+@media (max-width: 768px) {
+    [dir="rtl"] .language-selector {
+        left: 10px;
+        right: auto;
+    }
+    
+    [dir="rtl"] .location-info {
+        right: auto;
+        left: 10px;
+    }
+    
+    [dir="rtl"] .route-info {
+        text-align: center;
+    }
+    
+    [dir="rtl"] .route-stats {
+        justify-content: center;
+    }
+}
