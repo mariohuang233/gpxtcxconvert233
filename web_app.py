@@ -642,32 +642,82 @@ weather_cache = {}
 CACHE_DURATION = 300  # 5分钟缓存
 
 def get_location_by_ip():
-    """通过IP获取位置信息"""
+    """通过IP获取位置信息 - 使用多个API源提高准确性"""
     try:
-        # 使用免费的IP地理位置API
+        # 使用多个免费的IP地理位置API，按可靠性排序
         apis = [
-            'http://ip-api.com/json/?fields=city,country,countryCode,lat,lon,timezone',
-            'https://ipapi.co/json/',
-            'https://freegeoip.app/json/'
+            # API 1: ipapi.co - 通常比较准确
+            {
+                'url': 'https://ipapi.co/json/',
+                'city_key': 'city',
+                'lat_key': 'latitude', 
+                'lon_key': 'longitude',
+                'country_key': 'country_name',
+                'country_code_key': 'country_code'
+            },
+            # API 2: ip-api.com - 备用选择
+            {
+                'url': 'http://ip-api.com/json/?fields=city,country,countryCode,lat,lon,timezone',
+                'city_key': 'city',
+                'lat_key': 'lat',
+                'lon_key': 'lon', 
+                'country_key': 'country',
+                'country_code_key': 'countryCode'
+            },
+            # API 3: ipinfo.io - 另一个备用
+            {
+                'url': 'https://ipinfo.io/json',
+                'city_key': 'city',
+                'lat_key': 'loc',  # 特殊处理，格式为 "lat,lon"
+                'lon_key': 'loc',
+                'country_key': 'country',
+                'country_code_key': 'country'
+            }
         ]
         
-        for api_url in apis:
+        for api_config in apis:
             try:
-                response = requests.get(api_url, timeout=3)
+                response = requests.get(api_config['url'], timeout=5)
                 if response.status_code == 200:
                     data = response.json()
-                    if 'city' in data and data['city']:
-                        return {
-                            'city': data.get('city', ''),
-                            'lat': data.get('lat', data.get('latitude')),
-                            'lon': data.get('lon', data.get('longitude')),
-                            'country': data.get('country', data.get('country_name', '')),
-                            'country_code': data.get('countryCode', data.get('country_code', ''))
+                    
+                    # 检查是否有城市信息
+                    city = data.get(api_config['city_key'])
+                    if not city:
+                        continue
+                    
+                    # 处理坐标信息
+                    lat, lon = None, None
+                    if api_config['url'] == 'https://ipinfo.io/json':
+                        # ipinfo.io 的特殊格式处理
+                        loc = data.get('loc', '')
+                        if ',' in loc:
+                            lat, lon = loc.split(',')
+                            lat, lon = float(lat.strip()), float(lon.strip())
+                    else:
+                        lat = data.get(api_config['lat_key'])
+                        lon = data.get(api_config['lon_key'])
+                    
+                    if city and lat and lon:
+                        location_info = {
+                            'city': city,
+                            'lat': float(lat),
+                            'lon': float(lon),
+                            'country': data.get(api_config['country_key'], ''),
+                            'country_code': data.get(api_config['country_code_key'], '')
                         }
-            except:
+                        
+                        logger.info(f"🌍 IP定位成功 ({api_config['url']}): {city}, {lat}, {lon}")
+                        return location_info
+                        
+            except Exception as e:
+                logger.warning(f"IP定位API失败 ({api_config['url']}): {str(e)}")
                 continue
+                
+        logger.warning("🚫 所有IP定位API都失败了")
         return None
-    except:
+    except Exception as e:
+        logger.error(f"IP定位函数异常: {str(e)}")
         return None
 
 def get_weather_data(lat=None, lon=None, city=None, lang='zh'):
@@ -703,10 +753,36 @@ def get_weather_data(lat=None, lon=None, city=None, lang='zh'):
     }
     
     def translate_weather_desc(desc, target_lang):
-        """翻译天气描述"""
+        """翻译天气描述 - 支持中英文双向翻译"""
+        if not desc:
+            return desc
+            
+        desc_lower = desc.lower().strip()
+        
         if target_lang == 'zh':
-            return weather_translations.get(desc.lower(), desc)
-        return desc
+            # 英文转中文
+            return weather_translations.get(desc_lower, desc)
+        else:
+            # target_lang == 'en' 或其他语言，确保返回英文
+            # 如果输入是中文，转换为英文；如果已经是英文，直接返回
+            
+            # 中文到英文的反向映射
+            zh_to_en = {
+                '晴朗': 'Clear', '多云': 'Partly Cloudy', '少云': 'Few Clouds',
+                '阴天': 'Overcast', '小雨': 'Light Rain', '中雨': 'Moderate Rain', 
+                '大雨': 'Heavy Rain', '雨': 'Rain', '阵雨': 'Shower Rain',
+                '小阵雨': 'Light Shower', '雷雨': 'Thunderstorm', '雷阵雨': 'Thunderstorm with Rain',
+                '雪': 'Snow', '小雪': 'Light Snow', '大雪': 'Heavy Snow',
+                '薄雾': 'Mist', '雾': 'Fog', '霾': 'Haze', '浮尘': 'Dust',
+                '毛毛雨': 'Drizzle', '冻雨': 'Freezing Rain'
+            }
+            
+            # 如果是中文描述，转换为英文
+            if desc in zh_to_en:
+                return zh_to_en[desc]
+            
+            # 如果是英文描述，标准化格式（首字母大写）
+            return desc.title()
     
     # 方案1: 免费的wttr.in API (无需API密钥)
     def get_weather_from_wttr():
