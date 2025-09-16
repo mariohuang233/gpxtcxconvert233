@@ -2449,9 +2449,10 @@
             if (!lat || !lng || isNaN(lat) || isNaN(lng) || 
                 lat < -90 || lat > 90 || lng < -180 || lng > 180) {
                 console.error('无效的坐标:', lat, lng);
-                countryElement.textContent = trans.locationError;
-                provinceElement.textContent = trans.locationError;
-                cityElement.textContent = trans.locationError;
+                // 初始错误时隐藏所有地区信息
+                    countryElement.parentElement.style.display = 'none';
+                    provinceElement.parentElement.style.display = 'none';
+                    cityElement.parentElement.style.display = 'none';
                 return;
             }
             
@@ -2654,14 +2655,31 @@
                     }
                     
                     // 最终过滤检查，确保不显示错误信息
-                    const finalCountry = (country && !country.includes('失败') && !country.includes('错误') && !country.includes('Error')) ? country : '位置解析中';
+                    const finalCountry = (country && !country.includes('失败') && !country.includes('错误') && !country.includes('Error')) ? country : '';
                     const finalProvince = (province && !province.includes('失败') && !province.includes('错误') && !province.includes('Error')) ? province : '';
                     const finalCity = (city && !city.includes('失败') && !city.includes('错误') && !city.includes('Error')) ? city : '';
                     
-                    // 分别更新显示
-                    countryElement.textContent = finalCountry;
-                    provinceElement.textContent = finalProvince;
-                    cityElement.textContent = finalCity;
+                    // 分别更新显示，如果内容为空则隐藏整个元素
+                    if (finalCountry) {
+                        countryElement.textContent = finalCountry;
+                        countryElement.parentElement.style.display = 'flex';
+                    } else {
+                        countryElement.parentElement.style.display = 'none';
+                    }
+                    
+                    if (finalProvince) {
+                        provinceElement.textContent = finalProvince;
+                        provinceElement.parentElement.style.display = 'flex';
+                    } else {
+                        provinceElement.parentElement.style.display = 'none';
+                    }
+                    
+                    if (finalCity) {
+                        cityElement.textContent = finalCity;
+                        cityElement.parentElement.style.display = 'flex';
+                    } else {
+                        cityElement.parentElement.style.display = 'none';
+                    }
                     } else {
                         throw new Error('API返回数据无效');
                     }
@@ -2713,9 +2731,27 @@
                             }
                         }
                         
-                        countryElement.textContent = fallbackCountry;
-                        provinceElement.textContent = fallbackProvince;
-                        cityElement.textContent = fallbackCity;
+                        // 错误处理时也要根据内容决定是否显示
+                        if (fallbackCountry) {
+                            countryElement.textContent = fallbackCountry;
+                            countryElement.parentElement.style.display = 'flex';
+                        } else {
+                            countryElement.parentElement.style.display = 'none';
+                        }
+                        
+                        if (fallbackProvince) {
+                            provinceElement.textContent = fallbackProvince;
+                            provinceElement.parentElement.style.display = 'flex';
+                        } else {
+                            provinceElement.parentElement.style.display = 'none';
+                        }
+                        
+                        if (fallbackCity) {
+                            cityElement.textContent = fallbackCity;
+                            cityElement.parentElement.style.display = 'flex';
+                        } else {
+                            cityElement.parentElement.style.display = 'none';
+                        }
                         
                         // 显示用户友好的提示信息
                         console.warn('地理位置解析失败，已启用容错显示模式');
