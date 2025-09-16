@@ -330,7 +330,7 @@ body {
     padding-bottom: 0;
     height: 100%;
     width: 100%;
-    min-height: 100vh;
+    height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
