@@ -327,6 +327,7 @@ body {
     line-height: 1.6;
     margin: 0;
     padding: 0;
+    padding-bottom: 120px; /* 为固定footer留出空间 */
     height: 100%;
     width: 100%;
     min-height: 100vh;
