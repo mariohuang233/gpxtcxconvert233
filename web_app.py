@@ -53,6 +53,7 @@ ERROR_MESSAGES = {
 # 默认转换器配置
 DEFAULT_CONVERTER_CONFIG = {
     'activity_type': 'Running',
+    'sub_sport': 'Generic',
     'device_name': 'Forerunner 570',
     'device_version': '12.70',
     'base_hr': 135,
