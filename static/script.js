@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeInteractiveEffects();
     initializeScrollAnimations();
     initializeParallaxEffects();
+    initializeErrorHandling();
     
     // 添加连接桥梁元素
     addConnectionBridge();
@@ -340,5 +341,52 @@ if (developerInfo) {
     });
 }
 
+// 错误处理和健壮性增强
+function initializeErrorHandling() {
+    // 全局错误处理
+    window.addEventListener('error', function(e) {
+        console.error('JavaScript错误:', e.error);
+        // 可以在这里添加错误上报逻辑
+    });
+    
+    // Promise错误处理
+    window.addEventListener('unhandledrejection', function(e) {
+        console.error('未处理的Promise错误:', e.reason);
+        e.preventDefault();
+    });
+    
+    // 网络请求错误处理
+    const originalFetch = window.fetch;
+    window.fetch = function(...args) {
+        return originalFetch.apply(this, args)
+            .catch(error => {
+                console.error('网络请求失败:', error);
+                throw error;
+            });
+    };
+}
+
+// 安全的DOM操作函数
+function safeQuerySelector(selector) {
+    try {
+        return document.querySelector(selector);
+    } catch (e) {
+        console.warn('选择器错误:', selector, e);
+        return null;
+    }
+}
+
+// 安全的事件监听器添加
+function safeAddEventListener(element, event, handler) {
+    if (element && typeof element.addEventListener === 'function') {
+        try {
+            element.addEventListener(event, handler);
+        } catch (e) {
+            console.warn('事件监听器添加失败:', e);
+        }
+    }
+}
+
 console.log('🎨 高级动画系统已加载');
 console.log('🔍 隐藏统计功能已激活');
+console.log('🛡️ 错误处理系统已激活');

@@ -66,26 +66,24 @@
         <div class="status-indicator status-error" id="errorMessage" style="display: none;"></div>
 
         <div class="upload-section animate-slide-up animate-delay-4">
-            <div class="card">
-                <div class="file-upload" id="fileUpload">
-                    <div class="upload-icon">⚡</div>
-                    <div class="upload-text">Drop your GPX file</div>
-                    <div class="upload-hint">Seamless conversion • Instant results • Professional grade</div>
-                    <input type="file" id="fileInput" accept=".gpx" style="display: none;" />
+            <div class="file-upload" id="fileUpload">
+                <div class="upload-icon">⚡</div>
+                <div class="upload-text">Drop your GPX file</div>
+                <div class="upload-hint">Seamless conversion • Instant results • Professional grade</div>
+                <input type="file" id="fileInput" accept=".gpx" style="display: none;" />
+            </div>
+            
+            <!-- GPX路径可视化区域 -->
+            <div class="gpx-preview" id="gpxPreview" style="display: none;">
+                <div class="preview-header">
+                    <h4 data-translate="routePreview">🗺️ 路径预览</h4>
+                    <div class="route-stats" id="routeStats"></div>
                 </div>
-                
-                <!-- GPX路径可视化区域 -->
-                <div class="gpx-preview" id="gpxPreview" style="display: none;">
-                    <div class="preview-header">
-                        <h4 data-translate="routePreview">🗺️ 路径预览</h4>
-                        <div class="route-stats" id="routeStats"></div>
-                    </div>
-                    <div class="map-container">
-                        <div id="gpxMap" class="gpx-map"></div>
-                    </div>
+                <div class="map-container">
+                    <div id="gpxMap" class="gpx-map"></div>
+                </div>
                     <div class="route-info" id="routeInfo"></div>
                 </div>
-            </div>
         </div>
 
         <div class="config-section animate-fade-in animate-delay-2">
@@ -113,11 +111,19 @@
                         </div>
                         <div class="form-group">
                             <label for="weight" data-translate="weight">体重 (kg)</label>
-                            <input type="number" id="weight" name="weight" value="70" min="30" max="200">
+                            <div class="number-input-container">
+                                <div class="number-btn decrease" onclick="adjustNumber('weight', -1)">−</div>
+                                <input type="number" id="weight" name="weight" value="70" min="30" max="200">
+                                <div class="number-btn increase" onclick="adjustNumber('weight', 1)">+</div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="caloriesPerKm" data-translate="caloriesPerKm">每公里卡路里</label>
-                            <input type="number" id="caloriesPerKm" name="calories_per_km" value="60" min="30" max="150">
+                            <div class="number-input-container">
+                                <div class="number-btn decrease" onclick="adjustNumber('caloriesPerKm', -5)">−</div>
+                                <input type="number" id="caloriesPerKm" name="calories_per_km" value="60" min="30" max="150">
+                                <div class="number-btn increase" onclick="adjustNumber('caloriesPerKm', 5)">+</div>
+                            </div>
                         </div>
                     </div>
 
@@ -126,11 +132,19 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="baseHr" data-translate="baseHr">基础心率</label>
-                                <input type="number" id="baseHr" name="base_hr" value="135" min="60" max="200">
+                                <div class="number-input-container">
+                                    <div class="number-btn decrease" onclick="adjustNumber('baseHr', -5)">−</div>
+                                    <input type="number" id="baseHr" name="base_hr" value="135" min="60" max="200">
+                                    <div class="number-btn increase" onclick="adjustNumber('baseHr', 5)">+</div>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="maxHr" data-translate="maxHr">最大心率</label>
-                                <input type="number" id="maxHr" name="max_hr" value="165" min="100" max="220">
+                                <div class="number-input-container">
+                                    <div class="number-btn decrease" onclick="adjustNumber('maxHr', -5)">−</div>
+                                    <input type="number" id="maxHr" name="max_hr" value="165" min="100" max="220">
+                                    <div class="number-btn increase" onclick="adjustNumber('maxHr', 5)">+</div>
+                                </div>
                             </div>
                         </div>
                         <div class="form-group">
@@ -145,23 +159,39 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="baseCadenceDisplay" data-translate="baseCadence">基础步频</label>
-                                <input type="number" id="baseCadenceDisplay" value="100" min="60" max="200" onchange="updateCadenceValue('base')">
+                                <div class="number-input-container">
+                                    <div class="number-btn decrease" onclick="adjustCadence('baseCadenceDisplay', -5)">−</div>
+                                    <input type="number" id="baseCadenceDisplay" value="100" min="60" max="200" onchange="updateCadenceValue('base')">
+                                    <div class="number-btn increase" onclick="adjustCadence('baseCadenceDisplay', 5)">+</div>
+                                </div>
                                 <input type="hidden" id="baseCadence" name="base_cadence" value="50">
                             </div>
                             <div class="form-group">
                                 <label for="maxCadenceDisplay" data-translate="maxCadence">最大步频</label>
-                                <input type="number" id="maxCadenceDisplay" value="140" min="100" max="240" onchange="updateCadenceValue('max')">
+                                <div class="number-input-container">
+                                    <div class="number-btn decrease" onclick="adjustCadence('maxCadenceDisplay', -5)">−</div>
+                                    <input type="number" id="maxCadenceDisplay" value="140" min="100" max="240" onchange="updateCadenceValue('max')">
+                                    <div class="number-btn increase" onclick="adjustCadence('maxCadenceDisplay', 5)">+</div>
+                                </div>
                                 <input type="hidden" id="maxCadence" name="max_cadence" value="70">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="basePower" data-translate="basePower">基础功率</label>
-                                <input type="number" id="basePower" name="base_power" value="150" min="50" max="500">
+                                <div class="number-input-container">
+                                    <div class="number-btn decrease" onclick="adjustNumber('basePower', -10)">−</div>
+                                    <input type="number" id="basePower" name="base_power" value="150" min="50" max="500">
+                                    <div class="number-btn increase" onclick="adjustNumber('basePower', 10)">+</div>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="maxPower" data-translate="maxPower">最大功率</label>
-                                <input type="number" id="maxPower" name="max_power" value="300" min="100" max="800">
+                                <div class="number-input-container">
+                                    <div class="number-btn decrease" onclick="adjustNumber('maxPower', -10)">−</div>
+                                    <input type="number" id="maxPower" name="max_power" value="300" min="100" max="800">
+                                    <div class="number-btn increase" onclick="adjustNumber('maxPower', 10)">+</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1690,6 +1720,42 @@
                 const actualValue = Math.round(displayValue / 2);
                 document.getElementById('maxCadence').value = actualValue;
             }
+        }
+
+        // 数字输入框调整函数
+        function adjustNumber(inputId, delta) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            
+            const currentValue = parseFloat(input.value) || 0;
+            const min = parseFloat(input.min) || -Infinity;
+            const max = parseFloat(input.max) || Infinity;
+            
+            let newValue = currentValue + delta;
+            newValue = Math.max(min, Math.min(max, newValue));
+            
+            input.value = newValue;
+            
+            // 触发change事件以确保其他逻辑正常工作
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        // 步频调整函数
+        function adjustCadence(inputId, delta) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            
+            const currentValue = parseFloat(input.value) || 0;
+            const min = parseFloat(input.min) || 60;
+            const max = parseFloat(input.max) || 240;
+            
+            let newValue = currentValue + delta;
+            newValue = Math.max(min, Math.min(max, newValue));
+            
+            input.value = newValue;
+            
+            // 触发change事件以更新隐藏的实际值
+            input.dispatchEvent(new Event('change', { bubbles: true }));
         }
 
         // 初始化步频值
