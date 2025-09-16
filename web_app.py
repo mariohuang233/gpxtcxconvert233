@@ -583,31 +583,100 @@ def get_greeting_info():
     try:
         # 获取语言参数
         lang = request.args.get('lang', 'zh')
-        # 获取用户真实IP地址
-        if request.headers.get('X-Forwarded-For'):
-            user_ip = request.headers.get('X-Forwarded-For').split(',')[0].strip()
-        elif request.headers.get('X-Real-IP'):
-            user_ip = request.headers.get('X-Real-IP')
-        else:
-            user_ip = request.remote_addr
         
-        # 如果是本地IP，直接使用默认位置信息
-        if user_ip in ['127.0.0.1', '::1', 'localhost']:
-            # 使用默认的北京位置信息
-            ip_data = {
-                'country_name': 'China',
-                'country_code': 'CN',
-                'region_name': 'Beijing',
-                'city': 'Beijing',
-                'latitude': 39.9042,
-                'longitude': 116.4074,
-                'time_zone': {'id': 'Asia/Shanghai'},
-                'connection': {'isp': 'Local Network'},
-                'continent_name': 'Asia'
-            }
-        else:
-            # 尝试多个IP地理位置API服务
-            ip_data = None
+        # 初始化user_ip变量
+        user_ip = 'Unknown'
+        
+        # 检查是否使用GPS定位
+        use_gps = request.args.get('gps', 'false').lower() == 'true'
+        gps_lat = request.args.get('lat')
+        gps_lng = request.args.get('lng')
+        
+        if use_gps and gps_lat and gps_lng:
+            # 使用GPS坐标
+            try:
+                latitude = float(gps_lat)
+                longitude = float(gps_lng)
+                
+                # GPS定位时设置特殊的IP标识
+                user_ip = f'GPS:{latitude},{longitude}'
+                
+                # 使用反向地理编码获取位置信息
+                location_data = None
+                
+                # 尝试使用Nominatim反向地理编码（免费）
+                try:
+                    geocode_url = f'https://nominatim.openstreetmap.org/reverse?format=json&lat={latitude}&lon={longitude}&accept-language={lang}'
+                    headers = {'User-Agent': 'GPX-TCX-Converter/1.0'}
+                    geocode_response = requests.get(geocode_url, headers=headers, timeout=5)
+                    
+                    if geocode_response.status_code == 200:
+                        geocode_data = geocode_response.json()
+                        address = geocode_data.get('address', {})
+                        
+                        location_data = {
+                            'country_name': address.get('country', 'Unknown'),
+                            'country_code': address.get('country_code', 'XX').upper(),
+                            'region_name': address.get('state', address.get('province', 'Unknown Region')),
+                            'city': address.get('city', address.get('town', address.get('village', 'Unknown City'))),
+                            'latitude': latitude,
+                            'longitude': longitude,
+                            'time_zone': {'id': 'UTC'},  # GPS模式下使用UTC
+                            'connection': {'isp': 'GPS Location'},
+                            'continent_name': 'Unknown'
+                        }
+                        logger.info(f"成功使用GPS坐标获取位置信息: {location_data['city']}")
+                except Exception as e:
+                    logger.warning(f"反向地理编码失败: {str(e)}")
+                
+                # 如果反向地理编码失败，使用基本GPS信息
+                if not location_data:
+                    location_data = {
+                        'country_name': 'Unknown',
+                        'country_code': 'XX',
+                        'region_name': 'GPS Location',
+                        'city': f'GPS ({latitude:.4f}, {longitude:.4f})',
+                        'latitude': latitude,
+                        'longitude': longitude,
+                        'time_zone': {'id': 'UTC'},
+                        'connection': {'isp': 'GPS Location'},
+                        'continent_name': 'Unknown'
+                    }
+                
+                ip_data = location_data
+                
+            except (ValueError, TypeError) as e:
+                logger.error(f"GPS坐标解析失败: {str(e)}")
+                # 回退到IP定位
+                use_gps = False
+        
+        if not use_gps:
+            # 使用IP定位（原有逻辑）
+            # 获取用户真实IP地址
+            if request.headers.get('X-Forwarded-For'):
+                user_ip = request.headers.get('X-Forwarded-For').split(',')[0].strip()
+            elif request.headers.get('X-Real-IP'):
+                user_ip = request.headers.get('X-Real-IP')
+            else:
+                user_ip = request.remote_addr
+            
+            # 如果是本地IP，直接使用默认位置信息
+            if user_ip in ['127.0.0.1', '::1', 'localhost']:
+                # 使用默认的北京位置信息
+                ip_data = {
+                    'country_name': 'China',
+                    'country_code': 'CN',
+                    'region_name': 'Beijing',
+                    'city': 'Beijing',
+                    'latitude': 39.9042,
+                    'longitude': 116.4074,
+                    'time_zone': {'id': 'Asia/Shanghai'},
+                    'connection': {'isp': 'Local Network'},
+                    'continent_name': 'Asia'
+                }
+            else:
+                # 尝试多个IP地理位置API服务
+                ip_data = None
             
             # API服务列表（按优先级排序）
             api_services = [

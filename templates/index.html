@@ -50,6 +50,9 @@
                 <div class="info-item" id="weatherInline" style="display: none;">
                     <span class="info-label" data-translate="weather">天气:</span>
                     <span class="info-value" id="weatherSummary">--</span>
+                    <button class="location-toggle" id="locationToggle" onclick="toggleLocationMethod()" title="切换定位方式">
+                        <span id="locationIcon">🌐</span>
+                    </button>
                 </div>
             </div>
             
@@ -410,7 +413,14 @@
                 startConvert: '开始转换',
                 errorGreetingFailed: '获取问候信息失败',
                 errorLocationFailed: '获取位置信息失败',
-                china: '中国'
+                china: '中国',
+                // Footer translations
+                enterpriseSecurity: '企业级安全认证',
+                privacyPolicy: '隐私政策',
+                termsOfService: '服务条款',
+                securityInfo: '安全说明',
+                copyrightText: '© 2024 GPX转TCX专业版',
+                dataSecurityGuarantee: '数据安全保障'
             },
             'en': {
                 pageTitle: '🥷Secret Arts - GPX to TCX Converter - Professional Sports Data Conversion Tool',
@@ -512,7 +522,14 @@
                 startConvert: 'Start Conversion',
                 errorGreetingFailed: 'Failed to get greeting information',
                 errorLocationFailed: 'Failed to get location information',
-                china: 'China'
+                china: 'China',
+                // Footer translations
+                enterpriseSecurity: 'Enterprise Security Certified',
+                privacyPolicy: 'Privacy Policy',
+                termsOfService: 'Terms of Service',
+                securityInfo: 'Security Information',
+                copyrightText: '© 2024 GPX to TCX Professional',
+                dataSecurityGuarantee: 'Data Security Guarantee'
             },
             'ja': {
                 pageTitle: '🥷秘術 - GPX から TCX コンバーター - プロスポーツデータ変換ツール',
@@ -614,7 +631,14 @@
                 startConvert: '変換開始',
                 errorGreetingFailed: '挨拶情報の取得に失敗しました',
                 errorLocationFailed: '位置情報の取得に失敗しました',
-                china: '中国'
+                china: '中国',
+                // Footer translations
+                enterpriseSecurity: 'エンタープライズセキュリティ認証',
+                privacyPolicy: 'プライバシーポリシー',
+                termsOfService: '利用規約',
+                securityInfo: 'セキュリティ情報',
+                copyrightText: '© 2024 GPX to TCX プロフェッショナル',
+                dataSecurityGuarantee: 'データセキュリティ保証'
              },
              'ko': {
                  pageTitle: '🥷비밀 기술 - GPX to TCX 변환기 - 전문 스포츠 데이터 변환 도구',
@@ -715,7 +739,14 @@
                 startConvert: '변환 시작',
                 errorGreetingFailed: '인사말 정보 가져오기 실패',
                 errorLocationFailed: '위치 정보 가져오기 실패',
-                china: '중국'
+                china: '중국',
+                // Footer translations
+                enterpriseSecurity: '기업급 보안 인증',
+                privacyPolicy: '개인정보 보호정책',
+                termsOfService: '서비스 약관',
+                securityInfo: '보안 정보',
+                copyrightText: '© 2024 GPX to TCX 프로페셔널',
+                dataSecurityGuarantee: '데이터 보안 보장'
              },
              'fr': {
                  pageTitle: '🥷Arts Secrets - Convertisseur GPX vers TCX - Outil de Conversion de Données Sportives Professionnel',
@@ -815,7 +846,14 @@
                 startConvert: 'Commencer la conversion',
                 errorGreetingFailed: 'Échec de l\'obtention des informations de salutation',
                 errorLocationFailed: 'Échec de l\'obtention des informations de localisation',
-                china: 'Chine'
+                china: 'Chine',
+                // Footer translations
+                enterpriseSecurity: 'Certification de Sécurité Entreprise',
+                privacyPolicy: 'Politique de Confidentialité',
+                termsOfService: 'Conditions de Service',
+                securityInfo: 'Informations de Sécurité',
+                copyrightText: '© 2024 GPX vers TCX Professionnel',
+                dataSecurityGuarantee: 'Garantie de Sécurité des Données'
              },
              'de': {
                  pageTitle: '🥷Geheime Künste - GPX zu TCX Konverter - Professionelles Sportdaten-Konvertierungstool',
@@ -915,7 +953,14 @@
                 startConvert: 'Konvertierung starten',
                 errorGreetingFailed: 'Fehler beim Abrufen der Begrüßungsinformationen',
                 errorLocationFailed: 'Fehler beim Abrufen der Standortinformationen',
-                china: 'China'
+                china: 'China',
+                // Footer translations
+                enterpriseSecurity: 'Unternehmenssicherheitszertifizierung',
+                privacyPolicy: 'Datenschutzrichtlinie',
+                termsOfService: 'Nutzungsbedingungen',
+                securityInfo: 'Sicherheitsinformationen',
+                copyrightText: '© 2024 GPX zu TCX Professional',
+                dataSecurityGuarantee: 'Datensicherheitsgarantie'
              },
              'es': {
                  pageTitle: '🥷Artes Secretas - Convertidor GPX a TCX - Herramienta Profesional de Conversión de Datos Deportivos',
@@ -1015,7 +1060,14 @@
                 startConvert: 'Iniciar conversión',
                 errorGreetingFailed: 'Error al obtener información de saludo',
                 errorLocationFailed: 'Error al obtener información de ubicación',
-                china: 'China'
+                china: 'China',
+                // Footer translations
+                enterpriseSecurity: 'Certificación de Seguridad Empresarial',
+                privacyPolicy: 'Política de Privacidad',
+                termsOfService: 'Términos de Servicio',
+                securityInfo: 'Información de Seguridad',
+                copyrightText: '© 2024 GPX a TCX Profesional',
+                dataSecurityGuarantee: 'Garantía de Seguridad de Datos'
              },
              'pt': {
                  pageTitle: '🥷Artes Secretas - Conversor GPX para TCX - Ferramenta Profissional de Conversão de Dados Esportivos',
@@ -1115,7 +1167,14 @@
                 startConvert: 'Iniciar conversão',
                 errorGreetingFailed: 'Falha ao obter informações de saudação',
                 errorLocationFailed: 'Falha ao obter informações de localização',
-                china: 'China'
+                china: 'China',
+                // Footer translations
+                enterpriseSecurity: 'Certificação de Segurança Empresarial',
+                privacyPolicy: 'Política de Privacidade',
+                termsOfService: 'Termos de Serviço',
+                securityInfo: 'Informações de Segurança',
+                copyrightText: '© 2024 GPX para TCX Profissional',
+                dataSecurityGuarantee: 'Garantia de Segurança de Dados'
              },
              'zh-tw': {
                  pageTitle: '🥷秘術 - GPX 轉 TCX 轉換器 - 專業運動數據轉換工具',
@@ -1215,7 +1274,14 @@
                 startConvert: '開始轉換',
                 errorGreetingFailed: '獲取問候信息失敗',
                 errorLocationFailed: '獲取位置信息失敗',
-                china: '中國'
+                china: '中國',
+                // Footer translations
+                enterpriseSecurity: '企業安全認證',
+                privacyPolicy: '隱私政策',
+                termsOfService: '服務條款',
+                securityInfo: '安全信息',
+                copyrightText: '© 2024 GPX 轉 TCX 專業版',
+                dataSecurityGuarantee: '數據安全保障'
              }
         };
 
@@ -1435,6 +1501,14 @@
             const uploadArea = document.querySelector('.file-upload');
             if (uploadArea) {
                 uploadArea.style.animation = 'breathe 3s ease-in-out infinite';
+            }
+            
+            // 初始化定位按钮状态（默认GPS定位）
+            const locationIcon = document.getElementById('locationIcon');
+            const locationToggle = document.getElementById('locationToggle');
+            if (locationIcon && locationToggle) {
+                locationIcon.textContent = '📍';
+                locationToggle.title = '使用GPS定位 (点击切换到IP定位)';
             }
         });
 
@@ -1777,6 +1851,68 @@
          const weatherInline = document.getElementById('weatherInline');
          const weatherSummary = document.getElementById('weatherSummary');
          const greetingError = document.getElementById('greetingError');
+         
+         // 定位方式状态管理
+         let useGPSLocation = true; // 默认使用GPS定位
+         let currentPosition = null;
+
+         // 切换定位方式
+         function toggleLocationMethod() {
+             useGPSLocation = !useGPSLocation;
+             const locationIcon = document.getElementById('locationIcon');
+             const locationToggle = document.getElementById('locationToggle');
+             
+             if (useGPSLocation) {
+                 locationIcon.textContent = '📍';
+                 locationToggle.title = '使用GPS定位 (点击切换到IP定位)';
+             } else {
+                 locationIcon.textContent = '🌐';
+                 locationToggle.title = '使用IP定位 (点击切换到GPS定位)';
+             }
+             
+             // 重新加载天气信息
+             loadGreeting();
+         }
+
+         // 获取GPS位置
+         function getCurrentPosition() {
+             return new Promise((resolve, reject) => {
+                 if (!navigator.geolocation) {
+                     reject(new Error('浏览器不支持GPS定位'));
+                     return;
+                 }
+                 
+                 navigator.geolocation.getCurrentPosition(
+                     (position) => {
+                         resolve({
+                             latitude: position.coords.latitude,
+                             longitude: position.coords.longitude,
+                             accuracy: position.coords.accuracy
+                         });
+                     },
+                     (error) => {
+                         let errorMessage = '获取GPS位置失败';
+                         switch(error.code) {
+                             case error.PERMISSION_DENIED:
+                                 errorMessage = '用户拒绝了GPS定位请求';
+                                 break;
+                             case error.POSITION_UNAVAILABLE:
+                                 errorMessage = 'GPS位置信息不可用';
+                                 break;
+                             case error.TIMEOUT:
+                                 errorMessage = 'GPS定位请求超时';
+                                 break;
+                         }
+                         reject(new Error(errorMessage));
+                     },
+                     {
+                         enableHighAccuracy: true,
+                         timeout: 10000,
+                         maximumAge: 300000 // 5分钟缓存
+                     }
+                 );
+             });
+         }
 
          // 页面加载时自动获取天气信息
          async function loadGreeting() {
@@ -1784,7 +1920,37 @@
                  if (weatherInline) weatherInline.style.display = 'none';
                  if (greetingError) greetingError.style.display = 'none';
 
-                 const response = await fetch(`/greeting-info?lang=${currentLang}`);
+                 let requestUrl = `/greeting-info?lang=${currentLang}`;
+                 
+                 // 如果使用GPS定位，先获取GPS坐标
+                 if (useGPSLocation) {
+                     try {
+                         const position = await getCurrentPosition();
+                         currentPosition = position;
+                         requestUrl += `&lat=${position.latitude}&lng=${position.longitude}&gps=true`;
+                     } catch (gpsError) {
+                         // GPS获取失败，显示错误并回退到IP定位
+                         if (greetingError) {
+                             greetingError.textContent = `GPS定位失败: ${gpsError.message}，已切换到IP定位`;
+                             greetingError.style.display = 'block';
+                             greetingError.classList.add('shake');
+                             
+                             setTimeout(() => {
+                                 greetingError.classList.remove('shake');
+                                 greetingError.style.display = 'none';
+                             }, 3000);
+                         }
+                         
+                         // 自动切换回IP定位
+                         useGPSLocation = false;
+                         const locationIcon = document.getElementById('locationIcon');
+                         const locationToggle = document.getElementById('locationToggle');
+                         locationIcon.textContent = '🌐';
+                         locationToggle.title = '使用IP定位 (点击切换到GPS定位)';
+                     }
+                 }
+
+                 const response = await fetch(requestUrl);
                  const data = await response.json();
  
                  if (data.success) {
@@ -1793,8 +1959,9 @@
                          const weather = data.data.weather;
                          const location = data.data.location;
                          
-                         // 创建简洁的天气摘要
-                         const weatherText = `${weather.temperature} | ${weather.description} | ${location.city}`;
+                         // 创建简洁的天气摘要，包含定位方式标识
+                         const locationSource = useGPSLocation && currentPosition ? '📍' : '🌐';
+                         const weatherText = `${locationSource} ${weather.temperature} | ${weather.description} | ${location.city}`;
                          weatherSummary.textContent = weatherText;
                          
                          weatherInline.style.display = 'flex';
@@ -2190,17 +2357,17 @@
                     <div class="security-section">
                         <div class="security-badge">
                             <div class="shield-glow">🛡️</div>
-                            <span>企业级安全认证</span>
+                            <span data-translate="enterpriseSecurity">企业级安全认证</span>
                         </div>
                     </div>
                     <div class="links-section">
-                        <a href="#" class="footer-link">隐私政策</a>
-                        <a href="#" class="footer-link">服务条款</a>
-                        <a href="#" class="footer-link">安全说明</a>
+                        <a href="#" class="footer-link" data-translate="privacyPolicy">隐私政策</a>
+                        <a href="#" class="footer-link" data-translate="termsOfService">服务条款</a>
+                        <a href="#" class="footer-link" data-translate="securityInfo">安全说明</a>
                     </div>
                     <div class="copyright-section">
-                        <span class="copyright-text">© 2024 GPX转TCX专业版</span>
-                        <span class="security-text">数据安全保障</span>
+                        <span class="copyright-text" data-translate="copyrightText">© 2024 GPX转TCX专业版</span>
+                        <span class="security-text" data-translate="dataSecurityGuarantee">数据安全保障</span>
                     </div>
                 </div>
             </div>

@@ -653,6 +653,29 @@ body::before {
     z-index: 1;
 }
 
+/* 定位切换按钮样式 */
+.location-toggle {
+    background: rgba(0, 208, 132, 0.2);
+    border: 1px solid rgba(0, 245, 212, 0.3);
+    border-radius: var(--radius-sm);
+    padding: 4px 8px;
+    margin-left: auto;
+    cursor: pointer;
+    transition: all var(--transition-smooth);
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+.location-toggle:hover {
+    background: rgba(0, 245, 212, 0.3);
+    border-color: rgba(0, 245, 212, 0.5);
+    transform: scale(1.05);
+}
+
+.location-toggle:active {
+    transform: scale(0.95);
+}
+
 
 
 .info-label {
