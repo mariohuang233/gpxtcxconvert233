@@ -2249,4 +2249,28 @@ input:hover, select:hover {
     [dir="rtl"] .route-stats {
         justify-content: center;
     }
+    
+    /* 修复移动端天气模块遮盖问题 */
+    .welcome-info {
+        margin-bottom: var(--space-xl);
+    }
+    
+    .info-item {
+        position: relative;
+        z-index: 1;
+        margin-bottom: var(--space-sm);
+    }
+    
+    .status-indicator {
+        position: relative;
+        z-index: 2;
+        margin-top: var(--space-lg);
+        margin-bottom: var(--space-xl);
+    }
+    
+    /* 确保天气模块不会浮动覆盖其他元素 */
+    #weatherInline {
+        position: static !important;
+        float: none !important;
+    }
 }
