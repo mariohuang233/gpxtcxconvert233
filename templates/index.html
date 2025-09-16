@@ -2316,7 +2316,7 @@
                      try {
                          const position = await getCurrentPosition(forceRefresh);
                          currentPosition = position;
-                         requestUrl += `&lat=${position.latitude}&lng=${position.longitude}&gps=true`;
+                         requestUrl += `&lat=${position.latitude}&lon=${position.longitude}&gps=true`;
                      } catch (gpsError) {
                          // GPS获取失败，显示错误并回退到IP定位
                          if (greetingError) {

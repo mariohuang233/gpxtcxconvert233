@@ -978,11 +978,59 @@ def get_weather_data(lat=None, lon=None, city=None, lang='zh'):
                     'wind_speed': float(current['windspeedKmph']) / 3.6  # 转换为m/s
                 }
                 
-                location_data = {
-                    'city': location['areaName'][0]['value'],
-                    'country': location['country'][0]['value'],
-                    'province': location['region'][0]['value']
-                }
+                # 如果有GPS坐标，使用反向地理编码获取准确的位置信息
+                if lat and lon:
+                    try:
+                        # 尝试使用Nominatim进行反向地理编码
+                        geocode_url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lon}&accept-language={lang}"
+                        geocode_response = requests.get(geocode_url, timeout=3, headers={'User-Agent': 'GPX-TCX-Converter/1.0'})
+                        if geocode_response.status_code == 200:
+                            geocode_data = geocode_response.json()
+                            address = geocode_data.get('address', {})
+                            
+                            # 提取城市信息
+                            city_name = (address.get('city') or 
+                                       address.get('town') or 
+                                       address.get('village') or 
+                                       address.get('county') or 
+                                       address.get('state_district', 'Unknown'))
+                            
+                            # 提取省份信息
+                            province_name = (address.get('state') or 
+                                           address.get('province') or 
+                                           address.get('region', 'Unknown'))
+                            
+                            # 提取国家信息
+                            country_name = address.get('country', 'Unknown')
+                            
+                            location_data = {
+                                'city': city_name,
+                                'country': country_name,
+                                'province': province_name
+                            }
+                            logger.info(f"✅ 使用GPS坐标反向地理编码获取位置: {city_name}, {province_name}, {country_name}")
+                        else:
+                            # 反向地理编码失败，使用wttr.in返回的位置信息
+                            location_data = {
+                                'city': location['areaName'][0]['value'],
+                                'country': location['country'][0]['value'],
+                                'province': location['region'][0]['value']
+                            }
+                            logger.warning("反向地理编码失败，使用wttr.in返回的位置信息")
+                    except Exception as geo_e:
+                        logger.warning(f"反向地理编码失败: {str(geo_e)}，使用wttr.in返回的位置信息")
+                        location_data = {
+                            'city': location['areaName'][0]['value'],
+                            'country': location['country'][0]['value'],
+                            'province': location['region'][0]['value']
+                        }
+                else:
+                    # 没有GPS坐标，使用wttr.in返回的位置信息
+                    location_data = {
+                        'city': location['areaName'][0]['value'],
+                        'country': location['country'][0]['value'],
+                        'province': location['region'][0]['value']
+                    }
                 
                 return weather_data, location_data
         except Exception as e:
