@@ -2306,7 +2306,7 @@
          // 页面加载时自动获取天气信息
          async function loadGreeting(forceRefresh = false) {
              try {
-                 if (weatherInline) weatherInline.style.display = 'none';
+                 // 只隐藏错误信息，保持天气信息显示直到新数据加载完成
                  if (greetingError) greetingError.style.display = 'none';
 
                  let requestUrl = `/greeting-info?lang=${currentLang}`;
