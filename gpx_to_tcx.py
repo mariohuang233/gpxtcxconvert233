@@ -458,9 +458,17 @@ class GPXToTCXConverter:
             first_point_time = points[0]['time']
             time_interval = realistic_total_time / max(1, len(points) - 1)
             
-            # 重新分配时间间隔，但保持第一个点的时间不变
-            for i, point in enumerate(points):
-                point['time'] = first_point_time + timedelta(seconds=i * time_interval)
+            # 重新分配时间间隔，但保持第一个点的时间不变（保持用户自定义的开始时间）
+            # 只有当第一个点的时间不是用户自定义时间时，才重新分配所有时间
+            # 如果用户设置了自定义开始时间，则保持第一个点的时间不变
+            if self.config.get('start_time'):
+                # 用户设置了自定义开始时间，保持第一个点时间不变，只调整后续点的时间间隔
+                for i in range(1, len(points)):
+                    points[i]['time'] = first_point_time + timedelta(seconds=i * time_interval)
+            else:
+                # 没有自定义开始时间，可以重新分配所有点的时间
+                for i, point in enumerate(points):
+                    point['time'] = first_point_time + timedelta(seconds=i * time_interval)
         
         # TCX文件头部
         tcx_content = '''<?xml version="1.0" encoding="UTF-8"?>
