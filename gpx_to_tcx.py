@@ -479,16 +479,15 @@ class GPXToTCXConverter:
         realistic_total_time = metrics['total_distance'] / metrics['avg_speed'] if metrics['avg_speed'] > 0 else metrics['total_time']
         
         # 重新计算时间戳，确保与realistic_total_time一致
-        if self.config.get('start_time'):
-            # 使用自定义开始时间，按realistic_total_time重新分配时间间隔
+        # 注意：points中的时间已经在parse_gpx_file中正确设置，这里只需要调整时间间隔
+        if len(points) > 1:
+            # 获取第一个点的时间作为基准（已经在parse_gpx_file中正确设置）
+            first_point_time = points[0]['time']
             time_interval = realistic_total_time / max(1, len(points) - 1)
+            
+            # 重新分配时间间隔，但保持第一个点的时间不变
             for i, point in enumerate(points):
-                point['time'] = start_time + timedelta(seconds=i * time_interval)
-        else:
-            # 使用原始时间，但按realistic_total_time重新分配时间间隔
-            time_interval = realistic_total_time / max(1, len(points) - 1)
-            for i, point in enumerate(points):
-                point['time'] = start_time + timedelta(seconds=i * time_interval)
+                point['time'] = first_point_time + timedelta(seconds=i * time_interval)
         
         # TCX文件头部
         tcx_content = '''<?xml version="1.0" encoding="UTF-8"?>
