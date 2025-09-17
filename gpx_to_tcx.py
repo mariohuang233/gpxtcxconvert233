@@ -177,8 +177,8 @@ class GPXToTCXConverter:
                         base_time = datetime.strptime(str(start_time_config), '%Y-%m-%d %H:%M:%S')
                     print(f"✅ 使用自定义开始时间: {base_time.strftime('%Y-%m-%d %H:%M:%S')}")
                 except:
-                    base_time = datetime(2024, 12, 25, 6, 0, 0)
-                    print(f"⚠️ 自定义时间解析失败，使用默认时间: {base_time.strftime('%Y-%m-%d %H:%M:%S')}")
+                    base_time = datetime.now()
+                    print(f"⚠️ 自定义时间解析失败，使用当前时间: {base_time.strftime('%Y-%m-%d %H:%M:%S')}")
         else:
             # 如果没有配置自定义时间，尝试使用GPX文件中的第一个时间点
             base_time = None
@@ -193,9 +193,9 @@ class GPXToTCXConverter:
                         continue
             
             if base_time is None:
-                # 如果GPX文件中也没有有效时间，使用默认时间
-                base_time = datetime(2024, 12, 25, 6, 0, 0)
-                print(f"✅ 使用默认时间: {base_time.strftime('%Y-%m-%d %H:%M:%S')}")
+                # 如果GPX文件中也没有有效时间，使用当前时间
+                base_time = datetime.now()
+                print(f"✅ 使用当前时间: {base_time.strftime('%Y-%m-%d %H:%M:%S')}")
         
         # 为所有点分配时间
         for i, match in enumerate(matches):
