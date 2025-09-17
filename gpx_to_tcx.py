@@ -46,7 +46,7 @@ class GPXToTCXConverter:
             config (dict): 配置参数字典
         """
         # 默认配置参数
-        self.config = config or {
+        default_config = {
             'base_hr': 135,              # 基础心率 (bpm) - 真实运动心率
             'max_hr': 165,               # 最大心率 (bpm) - 真实运动心率
             'hr_factor': 1.5,            # 心率调整系数
@@ -63,6 +63,11 @@ class GPXToTCXConverter:
             'calories_per_km': 60,       # 每公里消耗卡路里
             'target_pace': '5:30'        # 目标配速 (min/km)
         }
+        
+        # 合并用户配置和默认配置
+        self.config = default_config.copy()
+        if config:
+            self.config.update(config)
     
     def parse_target_pace(self, pace_str):
         """
@@ -156,46 +161,48 @@ class GPXToTCXConverter:
                 matches.append((lat, lon, ele, time_str))
         
         gpx_points = []
+        
+        # 确定基础时间 - 优先使用用户配置的开始时间
+        if self.config.get('start_time'):
+            start_time_config = self.config['start_time']
+            if isinstance(start_time_config, datetime):
+                base_time = start_time_config
+                print(f"✅ 使用自定义开始时间: {base_time.strftime('%Y-%m-%d %H:%M:%S')}")
+            else:
+                # 如果是字符串，尝试解析
+                try:
+                    if 'T' in str(start_time_config):
+                        base_time = datetime.fromisoformat(str(start_time_config).replace('Z', '+00:00'))
+                    else:
+                        base_time = datetime.strptime(str(start_time_config), '%Y-%m-%d %H:%M:%S')
+                    print(f"✅ 使用自定义开始时间: {base_time.strftime('%Y-%m-%d %H:%M:%S')}")
+                except:
+                    base_time = datetime(2024, 12, 25, 6, 0, 0)
+                    print(f"⚠️ 自定义时间解析失败，使用默认时间: {base_time.strftime('%Y-%m-%d %H:%M:%S')}")
+        else:
+            # 如果没有配置自定义时间，尝试使用GPX文件中的第一个时间点
+            base_time = None
+            for i, match in enumerate(matches):
+                lat, lon, ele, time_str = match
+                if time_str:
+                    try:
+                        base_time = datetime.fromisoformat(time_str.replace('Z', '+00:00'))
+                        print(f"✅ 使用GPX文件中的时间: {base_time.strftime('%Y-%m-%d %H:%M:%S')}")
+                        break
+                    except:
+                        continue
+            
+            if base_time is None:
+                # 如果GPX文件中也没有有效时间，使用默认时间
+                base_time = datetime(2024, 12, 25, 6, 0, 0)
+                print(f"✅ 使用默认时间: {base_time.strftime('%Y-%m-%d %H:%M:%S')}")
+        
+        # 为所有点分配时间
         for i, match in enumerate(matches):
             lat, lon, ele, time_str = match
             
-            # 处理时间
-            if time_str:
-                try:
-                    # 解析GPX时间格式
-                    point_time = datetime.fromisoformat(time_str.replace('Z', '+00:00'))
-                except:
-                    # 如果解析失败，使用合理的历史时间
-                    if self.config.get('start_time'):
-                        start_time_config = self.config['start_time']
-                        if isinstance(start_time_config, datetime):
-                            base_time = start_time_config
-                        else:
-                            # 如果是字符串，尝试解析
-                            try:
-                                base_time = datetime.fromisoformat(str(start_time_config).replace('Z', '+00:00'))
-                            except:
-                                base_time = datetime(2024, 12, 25, 6, 0, 0)
-                    else:
-                        # 使用一个合理的历史时间（比如2024年12月25日早上6点）
-                        base_time = datetime(2024, 12, 25, 6, 0, 0)
-                    point_time = base_time + timedelta(seconds=i)
-            else:
-                # 如果没有时间信息，使用合理的历史时间
-                if self.config.get('start_time'):
-                    start_time_config = self.config['start_time']
-                    if isinstance(start_time_config, datetime):
-                        base_time = start_time_config
-                    else:
-                        # 如果是字符串，尝试解析
-                        try:
-                            base_time = datetime.fromisoformat(str(start_time_config).replace('Z', '+00:00'))
-                        except:
-                            base_time = datetime.now().replace(hour=6, minute=0, second=0, microsecond=0)
-                else:
-                    # 使用一个合理的历史时间（比如今天早上6点）
-                    base_time = datetime.now().replace(hour=6, minute=0, second=0, microsecond=0)
-                point_time = base_time + timedelta(seconds=i)
+            # 使用基础时间加上索引秒数来分配时间
+            point_time = base_time + timedelta(seconds=i)
             
             gpx_points.append({
                 'lat': float(lat),
