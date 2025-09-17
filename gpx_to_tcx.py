@@ -436,42 +436,15 @@ class GPXToTCXConverter:
         if not points:
             return ""
         
-        # 确定开始时间
-        if self.config.get('start_time'):
-            # 处理时间输入格式
-            start_time_input = self.config['start_time']
-            
-            if isinstance(start_time_input, datetime):
-                # 如果已经是datetime对象，将北京时间转换为UTC时间
-                start_time = start_time_input - timedelta(hours=8)
-            elif isinstance(start_time_input, str):
-                # 如果是字符串，需要解析
-                if 'Z' in start_time_input:
-                    # 如果已经是UTC格式，直接解析
-                    start_time = datetime.fromisoformat(start_time_input.replace('Z', '+00:00'))
-                else:
-                    # 如果是本地时间格式，解析后转换为UTC时间
-                    try:
-                        # 尝试解析不同格式的时间
-                        if 'T' in start_time_input:
-                            local_time = datetime.fromisoformat(start_time_input)
-                        else:
-                            # 处理 "2025-09-09 01:52:39" 格式
-                            local_time = datetime.strptime(start_time_input, '%Y-%m-%d %H:%M:%S')
-                        # 将北京时间转换为UTC时间（北京时间 = UTC + 8小时）
-                        start_time = local_time - timedelta(hours=8)
-                    except:
-                        # 如果解析失败，使用默认时间
-                        start_time = datetime(2024, 12, 25, 6, 0, 0)
-            else:
-                # 其他类型，使用默认时间
-                start_time = datetime(2024, 12, 25, 6, 0, 0)
-                
-            # 生成Activity ID，使用UTC时间格式
+        # 使用points中第一个点的时间作为开始时间（已在parse_gpx_file中正确设置）
+        if points and len(points) > 0:
+            # 使用第一个轨迹点的时间作为开始时间
+            start_time = points[0]['time']
+            # 生成Activity ID，使用时间格式
             activity_id = start_time.strftime('%Y-%m-%dT%H:%M:%S.000Z')
         else:
-            # 使用2024年12月25日早上6点作为默认开始时间
-            start_time = datetime(2024, 12, 25, 6, 0, 0)
+            # 如果没有轨迹点，使用当前时间作为默认
+            start_time = datetime.now()
             activity_id = start_time.strftime('%Y-%m-%dT%H:%M:%S.000Z')
         
         # 根据压缩后的平均速度重新计算合理的总时间
