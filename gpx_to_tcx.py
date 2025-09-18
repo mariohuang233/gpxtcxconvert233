@@ -172,7 +172,9 @@ class GPXToTCXConverter:
                 # 如果是字符串，尝试解析
                 try:
                     if 'T' in str(start_time_config):
-                        base_time = datetime.fromisoformat(str(start_time_config).replace('Z', '+00:00'))
+                        # 移除时区信息，按本地时间解析
+                        time_str = str(start_time_config).replace('Z', '').split('+')[0].split('-')[0] if '+' in str(start_time_config) or 'Z' in str(start_time_config) else str(start_time_config)
+                        base_time = datetime.fromisoformat(time_str)
                     else:
                         base_time = datetime.strptime(str(start_time_config), '%Y-%m-%d %H:%M:%S')
                     print(f"✅ 使用自定义开始时间: {base_time.strftime('%Y-%m-%d %H:%M:%S')}")
@@ -548,7 +550,7 @@ class GPXToTCXConverter:
             # 格式化时间（TCX标准要求UTC时间格式）
             time_str = point['time'].strftime('%Y-%m-%dT%H:%M:%S.000Z')
             
-            # 生成轨迹点XML
+            # 生成轨迹点XML（保留Position字段和所有必要字段）
             trackpoint_xml = f'''
           <Trackpoint>
             <Time>{time_str}</Time>
@@ -563,7 +565,7 @@ class GPXToTCXConverter:
             </HeartRateBpm>
             <Extensions>
               <ns3:TPX>
-                <ns3:Speed>{current_speed}</ns3:Speed>
+                <ns3:Speed>{float(current_speed):.1f}</ns3:Speed>
                 <ns3:RunCadence>{cadence}</ns3:RunCadence>
                 <ns3:Watts>{power}</ns3:Watts>
               </ns3:TPX>
@@ -631,7 +633,6 @@ class GPXToTCXConverter:
             <ns3:MaxRunCadence>{max_cadence}</ns3:MaxRunCadence>
             <ns3:AvgWatts>{avg_power}</ns3:AvgWatts>
             <ns3:MaxWatts>{max_power}</ns3:MaxWatts>
-            <ns3:SubSport>{escape(sub_sport)}</ns3:SubSport>
           </ns3:LX>
         </Extensions>
       </Lap>

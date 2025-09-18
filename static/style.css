@@ -78,41 +78,33 @@
     --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Segoe UI', 'PingFang SC', sans-serif;
     --font-mono: 'SF Mono', 'Monaco', 'JetBrains Mono', 'Cascadia Code', monospace;
     
-    /* 动画系统 - Apple风格缓动 */
-    --transition-smooth: 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-    --transition-spring: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.175);
-    --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bounce: 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    --transition-elegant: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    /* 动画系统 - 优化性能版本 */
+    --transition-smooth: 0.25s ease-out;
+    --transition-spring: 0.3s ease-out;
+    --transition-fast: 0.15s ease-out;
+    --transition-bounce: 0.35s ease-out;
+    --transition-elegant: 0.3s ease-out;
     
-    /* 性能优化 - 统一transform和transition */
-    --transform-hover-lift: translateY(-2px) scale(1.02);
-    --transform-hover-subtle: translateY(-1px) scale(1.005);
-    --transform-hover-strong: translateY(-4px) scale(1.05);
+    /* 性能优化 - 简化transform和transition */
+    --transform-hover-lift: translateY(-1px) scale(1.01);
+    --transform-hover-subtle: translateY(-0.5px) scale(1.002);
+    --transform-hover-strong: translateY(-2px) scale(1.02);
     --transform-reset: translateY(0) scale(1);
     --transform-center: translateX(-50%);
     --transform-center-both: translate(-50%, -50%);
-    --transition-hover: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    --transition-quick: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --transition-hover: all 0.2s ease-out;
+    --transition-quick: all 0.15s ease-out;
 }
 
 /* 高级动画系统 */
 @keyframes appleFloat {
     0%, 100% {
-        transform: translateY(0px) scale(1);
-        opacity: 0.9;
-    }
-    25% {
-        transform: translateY(-1px);
+        transform: translateY(0px);
         opacity: 0.95;
     }
     50% {
-        transform: translateY(-2px);
-        opacity: 1;
-    }
-    75% {
         transform: translateY(-1px);
-        opacity: 0.95;
+        opacity: 1;
     }
 }
 
@@ -162,34 +154,21 @@
 /* 视差背景 */
 @keyframes parallaxFloat {
     0%, 100% {
-        transform: translateY(0px) translateX(0px);
-    }
-    25% {
-        transform: translateY(-10px) translateX(5px);
+        transform: translateY(0px);
     }
     50% {
-        transform: translateY(-5px) translateX(-3px);
-    }
-    75% {
-        transform: translateY(-15px) translateX(2px);
+        transform: translateY(-5px);
     }
 }
 
 @keyframes appleFadeIn {
     0% {
         opacity: 0;
-        transform: translateY(15px) scale(0.98);
-        filter: blur(2px);
-    }
-    50% {
-        opacity: 0.7;
-        transform: translateY(5px) scale(0.99);
-        filter: blur(1px);
+        transform: translateY(10px);
     }
     100% {
         opacity: 1;
-        transform: translateY(0) scale(1);
-        filter: blur(0);
+        transform: translateY(0);
     }
 }
 
@@ -227,29 +206,22 @@
 @keyframes cardFadeIn {
     0% {
         opacity: 0;
-        transform: translateY(20px) scale(0.95);
+        transform: translateY(15px);
     }
     100% {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translateY(0);
     }
 }
 
 @keyframes elementSlideIn {
     0% {
         opacity: 0;
-        transform: translateX(-30px) scale(0.9);
-        filter: blur(10px);
-    }
-    60% {
-        opacity: 0.8;
-        transform: translateX(5px) scale(1.02);
-        filter: blur(2px);
+        transform: translateX(-20px);
     }
     100% {
         opacity: 1;
-        transform: translateX(0) scale(1);
-        filter: blur(0);
+        transform: translateX(0);
     }
 }
 
@@ -265,18 +237,11 @@
 @keyframes progressiveLoad {
     0% {
         opacity: 0;
-        transform: translateY(40px) rotateX(15deg);
-        filter: blur(8px);
-    }
-    50% {
-        opacity: 0.7;
-        transform: translateY(10px) rotateX(5deg);
-        filter: blur(3px);
+        transform: translateY(20px);
     }
     100% {
         opacity: 1;
-        transform: translateY(0) rotateX(0deg);
-        filter: blur(0);
+        transform: translateY(0);
     }
 }
 

@@ -165,6 +165,10 @@ def sanitize_config(config):
             # 防止XSS攻击，清理字符串
             sanitized[field] = config[field].strip()[:100]  # 限制长度
     
+    # 保留start_time字段（如果存在）
+    if 'start_time' in config:
+        sanitized['start_time'] = config['start_time']
+    
     return sanitized
 
 class ConversionTask:
@@ -229,19 +233,24 @@ def perform_conversion(task):
             try:
                 # 支持HTML datetime-local格式: 2024-01-01T10:30
                 if 'T' in start_time_str:
-                    # HTML datetime-local 输入的是本地时间，需要保持原样
-                    start_time = datetime.fromisoformat(start_time_str)
+                    # HTML datetime-local 输入的是本地时间，直接解析为本地时间
+                    # 移除可能的时区信息，确保按本地时间处理
+                    clean_time_str = start_time_str.replace('Z', '').split('+')[0].split('-')[0] if '+' in start_time_str or 'Z' in start_time_str else start_time_str
+                    start_time = datetime.fromisoformat(clean_time_str)
                 else:
                     start_time = datetime.strptime(start_time_str, '%Y-%m-%d %H:%M:%S')
                 
-                # 直接使用用户输入的本地时间，不进行时区转换
-                converter.config['start_time'] = start_time
-                logger.info(f"设置自定义开始时间 (本地时间): {start_time}")
+                # 用户要求减去8小时来补偿时区差异
+                from datetime import timedelta
+                adjusted_time = start_time - timedelta(hours=8)
+                converter.config['start_time'] = adjusted_time
+                logger.info(f"设置自定义开始时间 (原始时间: {start_time}, 调整后: {adjusted_time})")
             except (ValueError, TypeError) as e:
                 logger.warning(f"时间格式解析失败: {start_time_str}, 错误: {e}")
                 pass  # 使用GPX文件中的时间
         
-        logger.info(f"转换器配置完成: {task.config}")
+        logger.info(f"任务配置: {task.config}")
+        logger.info(f"转换器配置完成: {converter.config}")
         
         task.progress = 40
         task.message = '正在解析GPX文件...'

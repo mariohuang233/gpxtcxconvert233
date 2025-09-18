@@ -36,16 +36,12 @@ function initializeInteractiveEffects() {
     buttons.forEach(button => {
         // 使用节流优化鼠标事件 - 减少频率
         const throttledMouseEnter = throttle(function(e) {
-            requestAnimationFrame(() => {
-                this.style.transform = 'translateY(-1px) scale(1.01) translateZ(0)';
-            });
-        }, 32); // 30fps 减少频率
+            this.style.transform = 'translateY(-1px) scale(1.01) translateZ(0)';
+        }, 50); // 降低频率到20fps提升性能
         
         const throttledMouseLeave = throttle(function(e) {
-            requestAnimationFrame(() => {
-                this.style.transform = 'translateY(0) scale(1) translateZ(0)';
-            });
-        }, 32);
+            this.style.transform = 'translateY(0) scale(1) translateZ(0)';
+        }, 50);
         
         button.addEventListener('mouseenter', throttledMouseEnter);
         button.addEventListener('mouseleave', throttledMouseLeave);
@@ -84,16 +80,12 @@ function initializeInteractiveEffects() {
     const cards = document.querySelectorAll('.card');
     cards.forEach(card => {
         const throttledEnter = throttle(function() {
-            requestAnimationFrame(() => {
-                this.style.transform = 'translateY(-3px) scale(1.005) translateZ(0)';
-            });
-        }, 32);
+            this.style.transform = 'translateY(-2px) scale(1.002) translateZ(0)';
+        }, 50); // 减少变换幅度和频率
         
         const throttledLeave = throttle(function() {
-            requestAnimationFrame(() => {
-                this.style.transform = 'translateY(0) scale(1) translateZ(0)';
-            });
-        }, 32);
+            this.style.transform = 'translateY(0) scale(1) translateZ(0)';
+        }, 50);
         
         card.addEventListener('mouseenter', throttledEnter);
         card.addEventListener('mouseleave', throttledLeave);
@@ -112,74 +104,50 @@ function initializeInteractiveEffects() {
     });
 }
 
-// 滚动动画
+// 初始化滚动动画 - 简化版
 function initializeScrollAnimations() {
     const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
+        threshold: 0.2,
+        rootMargin: '0px 0px -30px 0px'
     };
     
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.classList.add('animate-in');
-                
-                // 添加延迟动画 - 性能优化
-                const children = entry.target.querySelectorAll('.form-group, .info-item, .btn-primary');
-                children.forEach((child, index) => {
-                    requestAnimationFrame(() => {
-                        setTimeout(() => {
-                            child.style.opacity = '1';
-                            child.style.transform = 'translateY(0)';
-                        }, index * 50); // 减少延迟时间
-                    });
-                });
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+                observer.unobserve(entry.target);
             }
         });
     }, observerOptions);
     
-    // 观察所有卡片
-    document.querySelectorAll('.card').forEach(card => {
-        observer.observe(card);
+    // 只观察主要元素
+    const animateElements = document.querySelectorAll('.card');
+    animateElements.forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(15px)';
+        el.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
+        observer.observe(el);
     });
 }
 
-// 视差效果 - 性能优化版
+// 视差效果 - 简化版
 function initializeParallaxEffects() {
     const parallaxElements = document.querySelectorAll('.welcome-section');
-    let ticking = false;
     
-    // 优化滚动视差效果 - 减少视差强度
-    const updateParallax = () => {
+    if (parallaxElements.length === 0) return;
+    
+    // 简化的滚动视差效果
+    const throttledScroll = throttle(() => {
         const scrolled = window.pageYOffset;
-        const rate = scrolled * -0.2; // 减少视差强度
+        const rate = scrolled * -0.1; // 进一步减少视差强度
         
         parallaxElements.forEach(element => {
-            element.style.transform = `translateY(${rate}px) translateZ(0)`;
+            element.style.transform = `translateY(${rate}px)`;
         });
-        ticking = false;
-    };
+    }, 50); // 降低频率到20fps
     
-    window.addEventListener('scroll', () => {
-        if (!ticking) {
-            requestAnimationFrame(updateParallax);
-            ticking = true;
-        }
-    }, { passive: true });
-    
-    // 优化鼠标跟随效果
-    const updateMouseEffect = throttle((e) => {
-        const mouseX = e.clientX / window.innerWidth;
-        const mouseY = e.clientY / window.innerHeight;
-        
-        parallaxElements.forEach(element => {
-            const moveX = (mouseX - 0.5) * 20;
-            const moveY = (mouseY - 0.5) * 20;
-            element.style.transform = `translateY(${window.pageYOffset * -0.5}px) translate(${moveX}px, ${moveY}px)`;
-        });
-    }, 16);
-    
-    document.addEventListener('mousemove', updateMouseEffect, { passive: true });
+    window.addEventListener('scroll', throttledScroll, { passive: true });
 }
 
 // 添加CSS动画关键帧
