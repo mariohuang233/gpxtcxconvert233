@@ -436,39 +436,41 @@ class GPXToTCXConverter:
         if not points:
             return ""
         
-        # 使用points中第一个点的时间作为开始时间（已在parse_gpx_file中正确设置）
-        if points and len(points) > 0:
+        # 确定开始时间：优先使用用户配置的开始时间，否则使用第一个轨迹点的时间
+        if self.config.get('start_time'):
+            # 使用用户配置的自定义开始时间
+            start_time = self.config['start_time']
+            print(f"✅ TCX生成使用自定义开始时间: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
+        elif points and len(points) > 0:
             # 使用第一个轨迹点的时间作为开始时间
             start_time = points[0]['time']
-            # 生成Activity ID，使用时间格式
-            activity_id = start_time.strftime('%Y-%m-%dT%H:%M:%S.000Z')
+            print(f"✅ TCX生成使用GPX文件时间: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
         else:
             # 如果没有轨迹点，使用当前时间作为默认
             start_time = datetime.now()
-            activity_id = start_time.strftime('%Y-%m-%dT%H:%M:%S.000Z')
+            print(f"✅ TCX生成使用当前时间: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
+        
+        # 生成Activity ID，使用确定的开始时间
+        activity_id = start_time.strftime('%Y-%m-%dT%H:%M:%S.000Z')
         
         # 根据压缩后的平均速度重新计算合理的总时间
         # 确保距离/时间比值与实际速度一致，避免运动平台显示异常配速
         realistic_total_time = metrics['total_distance'] / metrics['avg_speed'] if metrics['avg_speed'] > 0 else metrics['total_time']
         
         # 重新计算时间戳，确保与realistic_total_time一致
-        # 注意：points中的时间已经在parse_gpx_file中正确设置，这里只需要调整时间间隔
+        # 使用确定的开始时间作为基准重新分配所有轨迹点的时间
         if len(points) > 1:
-            # 获取第一个点的时间作为基准（已经在parse_gpx_file中正确设置）
-            first_point_time = points[0]['time']
             time_interval = realistic_total_time / max(1, len(points) - 1)
             
-            # 重新分配时间间隔，但保持第一个点的时间不变（保持用户自定义的开始时间）
-            # 只有当第一个点的时间不是用户自定义时间时，才重新分配所有时间
-            # 如果用户设置了自定义开始时间，则保持第一个点的时间不变
-            if self.config.get('start_time'):
-                # 用户设置了自定义开始时间，保持第一个点时间不变，只调整后续点的时间间隔
-                for i in range(1, len(points)):
-                    points[i]['time'] = first_point_time + timedelta(seconds=i * time_interval)
-            else:
-                # 没有自定义开始时间，可以重新分配所有点的时间
-                for i, point in enumerate(points):
-                    point['time'] = first_point_time + timedelta(seconds=i * time_interval)
+            # 使用确定的开始时间重新分配所有轨迹点的时间
+            # 这确保了无论是自定义开始时间还是GPX文件时间，都能正确应用
+            for i, point in enumerate(points):
+                point['time'] = start_time + timedelta(seconds=i * time_interval)
+            
+            print(f"✅ 重新分配轨迹点时间，基于开始时间: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
+        elif len(points) == 1:
+            # 只有一个点时，直接使用确定的开始时间
+            points[0]['time'] = start_time
         
         # TCX文件头部
         tcx_content = '''<?xml version="1.0" encoding="UTF-8"?>
