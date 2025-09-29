@@ -2109,11 +2109,24 @@
             resultIcon.classList.add('success-bounce');
             resultMessage.textContent = translations[currentLang].conversionCompleteMsg;
             
-            // 正确设置下载按钮的点击事件
+            // 设置下载按钮的点击事件
+            const downloadBtn = document.getElementById('downloadBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            
             downloadBtn.onclick = () => {
                 window.location.href = `/download/${currentTaskId}`;
             };
-            resetUI();
+            
+            // 重置按钮功能
+            resetBtn.onclick = () => {
+                resetConversion();
+            };
+            
+            // 重置转换按钮状态
+            convertBtn.disabled = false;
+            convertBtn.classList.remove('btn-loading');
+            convertBtn.querySelector('.btn-text').textContent = translations[currentLang].startConvert;
+            convertBtn.querySelector('.btn-icon').textContent = '🔄';
         }
 
         function resetUI() {
