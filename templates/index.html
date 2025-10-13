@@ -1788,9 +1788,9 @@
         // 语言初始化已移至DOMContentLoaded事件中
 
         // 版本标识
-        const APP_VERSION = 'v1.1.1';
+        const APP_VERSION = 'v1.2.0';
         console.log(`%c🚀 GPX转TCX转换器 ${APP_VERSION}`, 'color: #00d084; font-size: 16px; font-weight: bold;');
-        console.log('%c✅ 修复版本已加载 - 包含完整的超时和错误处理', 'color: #00d084;');
+        console.log('%c✅ 简化版本已加载 - 去掉初始化进度框，直接显示结果', 'color: #00d084;');
         
         let selectedFile = null;
         let currentTaskId = null;
@@ -2000,6 +2000,7 @@
             }
 
             try {
+                // 设置按钮为转换中状态
                 convertBtn.disabled = true;
                 convertBtn.classList.add('btn-loading');
                 convertBtn.querySelector('.btn-text').textContent = translations[currentLang].converting;
@@ -2007,6 +2008,8 @@
                 hideError();
                 resultSection.style.display = 'none';
                 pollCount = 0; // 重置轮询计数器
+                
+                console.log('📤 开始上传文件...');
 
                 const response = await fetch('/upload', {
                     method: 'POST',
@@ -2017,12 +2020,15 @@
 
                 if (response.ok) {
                     currentTaskId = result.task_id;
-                    showProgress();
+                    console.log('✅ 上传成功，任务ID:', currentTaskId);
+                    console.log('🔄 开始轮询转换状态...');
+                    // 直接开始轮询，不显示进度框
                     pollStatus();
                 } else {
                     throw new Error(result.error || translations[currentLang].errorUploadFailed);
                 }
             } catch (error) {
+                console.error('❌ 上传失败:', error);
                 showError(error.message);
                 resetUI();
             }
@@ -2064,13 +2070,6 @@
             hideError();
         }
 
-        function showProgress() {
-            progressSection.style.display = 'block';
-            progressSection.classList.add('fade-in');
-            progressFill.style.width = '0%';
-            progressText.textContent = translations[currentLang].preparing;
-        }
-
         async function pollStatus() {
             if (!currentTaskId) {
                 console.warn('❌ pollStatus: currentTaskId is null');
@@ -2102,8 +2101,7 @@
                 console.log(`   - progress: ${status.progress}%`);
                 console.log(`   - message: ${status.message}`);
 
-                updateProgress(status.progress || 0, status.message || '处理中...');
-
+                // 不再显示进度条，直接检查状态
                 if (status.status === 'completed') {
                     console.log('✅ 检测到转换完成状态！');
                     console.log('🎯 准备调用 showSuccess()...');
@@ -2143,33 +2141,29 @@
             console.log('🎉 showSuccess() 函数开始执行');
             console.log('   currentTaskId:', currentTaskId);
             
-            // 隐藏进度框
-            console.log('   1. 隐藏进度框...');
-            progressSection.style.display = 'none';
-            
             // 显示结果框
-            console.log('   2. 显示结果框...');
+            console.log('   1. 显示结果框...');
             console.log('   resultSection 元素:', resultSection);
             resultSection.style.display = 'block';
             resultSection.classList.add('fade-in');
             console.log('   resultSection.style.display =', resultSection.style.display);
             
             // 获取元素
-            console.log('   3. 获取结果图标和消息元素...');
+            console.log('   2. 获取结果图标和消息元素...');
             const resultIcon = document.getElementById('resultIcon');
             const resultMessage = document.getElementById('resultMessage');
             console.log('   resultIcon:', resultIcon);
             console.log('   resultMessage:', resultMessage);
             
             // 设置图标和消息
-            console.log('   4. 设置图标和消息...');
+            console.log('   3. 设置图标和消息...');
             resultIcon.textContent = '✅';
             resultIcon.classList.add('success-bounce');
             resultMessage.textContent = translations[currentLang].conversionCompleteMsg;
             console.log('   消息文本:', translations[currentLang].conversionCompleteMsg);
             
             // 设置下载按钮
-            console.log('   5. 设置下载按钮...');
+            console.log('   4. 设置下载按钮...');
             const downloadBtn = document.getElementById('downloadBtn');
             const resetBtn = document.getElementById('resetBtn');
             console.log('   downloadBtn:', downloadBtn);
@@ -2196,7 +2190,7 @@
             }
             
             // 重置转换按钮状态
-            console.log('   6. 重置转换按钮状态...');
+            console.log('   5. 重置转换按钮状态...');
             convertBtn.disabled = false;
             convertBtn.classList.remove('btn-loading');
             convertBtn.querySelector('.btn-text').textContent = translations[currentLang].startConvert;
