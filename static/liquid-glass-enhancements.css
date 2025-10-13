@@ -1,0 +1,522 @@
+/* ============================================
+   Liquid Glass Enhancements
+   Additional refinements for Apple iOS 26 style
+   ============================================ */
+
+/* ============================================
+   Enhanced Glass Particles Background
+   ============================================ */
+
+body::after {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+        radial-gradient(circle at 10% 20%, rgba(199, 225, 248, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 90% 80%, rgba(214, 196, 255, 0.06) 0%, transparent 50%),
+        radial-gradient(circle at 50% 10%, rgba(200, 220, 255, 0.05) 0%, transparent 60%),
+        radial-gradient(circle at 30% 70%, rgba(180, 210, 255, 0.04) 0%, transparent 50%),
+        radial-gradient(circle at 70% 40%, rgba(199, 225, 248, 0.05) 0%, transparent 55%);
+    animation: liquid-particles 30s ease-in-out infinite;
+    opacity: 0.8;
+}
+
+@keyframes liquid-particles {
+    0%, 100% {
+        transform: translate(0, 0) rotate(0deg) scale(1);
+    }
+    25% {
+        transform: translate(2%, -2%) rotate(1deg) scale(1.02);
+    }
+    50% {
+        transform: translate(-1%, 2%) rotate(-1deg) scale(0.98);
+    }
+    75% {
+        transform: translate(1%, 1%) rotate(0.5deg) scale(1.01);
+    }
+}
+
+/* ============================================
+   Enhanced Welcome Section
+   ============================================ */
+
+.welcome-section {
+    position: relative;
+}
+
+.welcome-section::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: calc(var(--radius-glass-lg) + 2px);
+    background: linear-gradient(135deg,
+        rgba(100, 200, 255, 0.3) 0%,
+        rgba(150, 150, 255, 0.2) 25%,
+        rgba(200, 150, 255, 0.15) 50%,
+        rgba(150, 200, 255, 0.2) 75%,
+        rgba(100, 200, 255, 0.3) 100%);
+    background-size: 400% 400%;
+    animation: liquid-border-flow 8s ease-in-out infinite;
+    z-index: -1;
+    opacity: 0.5;
+}
+
+@keyframes liquid-border-flow {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+/* ============================================
+   Liquid Glass Logo/Icon Glow
+   ============================================ */
+
+.upload-icon,
+.result-icon {
+    filter: drop-shadow(0 4px 12px rgba(100, 150, 255, 0.3))
+            drop-shadow(0 0 24px rgba(150, 200, 255, 0.2));
+    animation: icon-glow-pulse 3s ease-in-out infinite;
+}
+
+@keyframes icon-glow-pulse {
+    0%, 100% {
+        filter: drop-shadow(0 4px 12px rgba(100, 150, 255, 0.3))
+                drop-shadow(0 0 24px rgba(150, 200, 255, 0.2));
+    }
+    50% {
+        filter: drop-shadow(0 6px 16px rgba(100, 150, 255, 0.4))
+                drop-shadow(0 0 32px rgba(150, 200, 255, 0.3));
+    }
+}
+
+/* ============================================
+   Enhanced Button Hover Shimmer
+   ============================================ */
+
+.btn-primary {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::after {
+    animation-duration: 4s;
+}
+
+/* Additional glow layer for buttons */
+.btn-primary:hover::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle,
+        rgba(255, 255, 255, 0.3) 0%,
+        transparent 70%);
+    opacity: 0;
+    animation: button-glow-spread 1s ease-out;
+}
+
+@keyframes button-glow-spread {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+/* ============================================
+   Form Field Enhanced Focus
+   ============================================ */
+
+input:focus,
+select:focus,
+textarea:focus {
+    position: relative;
+}
+
+input:focus::after,
+select:focus::after,
+textarea:focus::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border-radius: inherit;
+    background: linear-gradient(135deg,
+        rgba(100, 200, 255, 0.2) 0%,
+        rgba(150, 150, 255, 0.15) 50%,
+        rgba(100, 200, 255, 0.2) 100%);
+    z-index: -1;
+    animation: focus-glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes focus-glow-pulse {
+    0%, 100% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.02);
+    }
+}
+
+/* ============================================
+   Enhanced Card Parallax on Hover
+   ============================================ */
+
+.card {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+}
+
+.card:hover {
+    transform: translateY(-4px) scale(1.01) rotateX(2deg);
+}
+
+.card > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* ============================================
+   Liquid Loading Animation
+   ============================================ */
+
+.ai-matrix-loader .digit {
+    background: linear-gradient(135deg,
+        rgba(100, 200, 255, 0.6) 0%,
+        rgba(150, 150, 255, 0.7) 50%,
+        rgba(100, 200, 255, 0.6) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 8px rgba(100, 150, 255, 0.5));
+    animation: liquid-digit-flow 2s ease-in-out infinite;
+}
+
+.ai-matrix-loader .digit:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+.ai-matrix-loader .digit:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+@keyframes liquid-digit-flow {
+    0%, 100% {
+        opacity: 0.6;
+        filter: drop-shadow(0 0 8px rgba(100, 150, 255, 0.5));
+    }
+    50% {
+        opacity: 1;
+        filter: drop-shadow(0 0 16px rgba(100, 150, 255, 0.8));
+    }
+}
+
+/* ============================================
+   File Upload Drop Zone Enhanced
+   ============================================ */
+
+.file-upload {
+    position: relative;
+}
+
+.file-upload::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80%;
+    height: 80%;
+    border-radius: 50%;
+    background: radial-gradient(circle,
+        rgba(100, 200, 255, 0.1) 0%,
+        transparent 70%);
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0;
+    transition: var(--transition-shimmer);
+    pointer-events: none;
+}
+
+.file-upload:hover::after {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* Drag over effect */
+.file-upload.drag-over {
+    border-color: rgba(100, 200, 255, 0.6);
+    box-shadow: var(--shadow-glass-lg),
+                0 0 48px rgba(100, 150, 255, 0.3);
+}
+
+.file-upload.drag-over::after {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+    animation: drag-pulse 1s ease-in-out infinite;
+}
+
+@keyframes drag-pulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.3);
+    }
+}
+
+/* ============================================
+   Progress Bar Liquid Flow Enhanced
+   ============================================ */
+
+.progress-fill {
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%);
+    animation: liquid-progress-shine 2s ease-in-out infinite;
+}
+
+@keyframes liquid-progress-shine {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 200%;
+    }
+}
+
+/* ============================================
+   Tooltip/Info Glass Style
+   ============================================ */
+
+[data-tooltip]:hover::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-8px);
+    background: var(--glass-bg-primary);
+    backdrop-filter: var(--blur-glass-strong);
+    -webkit-backdrop-filter: var(--blur-glass-strong);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-glass-sm);
+    box-shadow: var(--shadow-glass-md);
+    padding: 6px 12px;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    z-index: 1000;
+    animation: tooltip-fade-in 0.3s ease-out;
+}
+
+@keyframes tooltip-fade-in {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-8px);
+    }
+}
+
+/* ============================================
+   Success/Error Message Glass
+   ============================================ */
+
+.error-message,
+.success-message {
+    background: var(--glass-bg-primary);
+    backdrop-filter: var(--blur-glass-strong);
+    -webkit-backdrop-filter: var(--blur-glass-strong);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-glass-md);
+    box-shadow: var(--shadow-glass-md);
+    animation: message-slide-in 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+@keyframes message-slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   Download Button Enhanced
+   ============================================ */
+
+.btn-success {
+    background: linear-gradient(135deg,
+        rgba(100, 255, 150, 0.2) 0%,
+        rgba(100, 200, 255, 0.15) 100%);
+    backdrop-filter: var(--blur-glass);
+    -webkit-backdrop-filter: var(--blur-glass);
+    border: 1px solid rgba(100, 255, 150, 0.3);
+    border-radius: var(--radius-glass-sm);
+    box-shadow: var(--shadow-glass-sm),
+                0 0 24px rgba(100, 255, 150, 0.15);
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition-liquid);
+}
+
+.btn-success::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.3) 50%,
+        transparent 100%);
+    transition: left 0.6s ease-out;
+}
+
+.btn-success:hover::before {
+    left: 100%;
+}
+
+.btn-success:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: var(--shadow-glass-md),
+                0 0 32px rgba(100, 255, 150, 0.25);
+    border-color: rgba(100, 255, 150, 0.5);
+}
+
+/* ============================================
+   Map Controls Enhanced Glass
+   ============================================ */
+
+.leaflet-control-zoom a,
+.leaflet-control-layers {
+    background: var(--glass-bg-primary) !important;
+    backdrop-filter: var(--blur-glass-subtle) !important;
+    -webkit-backdrop-filter: var(--blur-glass-subtle) !important;
+    border: 1px solid var(--glass-border-subtle) !important;
+    box-shadow: var(--shadow-glass-sm) !important;
+    transition: var(--transition-liquid) !important;
+}
+
+.leaflet-control-zoom a:hover {
+    background: var(--glass-bg-secondary) !important;
+    box-shadow: var(--shadow-glass-md) !important;
+}
+
+/* ============================================
+   Weather Widget Glass Enhancement
+   ============================================ */
+
+.weather-section {
+    position: relative;
+    overflow: hidden;
+}
+
+.weather-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center,
+        rgba(100, 200, 255, 0.08) 0%,
+        transparent 70%);
+    animation: weather-glow-rotate 10s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes weather-glow-rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* ============================================
+   Mobile Responsive Liquid Glass
+   ============================================ */
+
+@media (max-width: 768px) {
+    body::before,
+    body::after {
+        animation-duration: 25s;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px) scale(1.005) rotateX(1deg);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-1px) scale(1.01);
+    }
+}
+
+/* ============================================
+   Accessibility: Reduce Motion
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ============================================
+   High Contrast Mode Support
+   ============================================ */
+
+@media (prefers-contrast: high) {
+    .card,
+    .btn-primary,
+    input,
+    select {
+        border-width: 2px;
+    }
+}
+

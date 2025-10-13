@@ -3150,4 +3150,1182 @@ input:hover, select:hover {
         background-position: 0% 0%, 100% 100%, 0% 100%, 100% 0%, 0% 0%;
         opacity: 0.8;
     }
+}/* ============================================
+   Apple iOS 26 "Liquid Glass" Design System
+   ============================================ */
+
+:root {
+    /* Liquid Glass Color Palette */
+    --glass-bg-primary: rgba(255, 255, 255, 0.12);
+    --glass-bg-secondary: rgba(255, 255, 255, 0.08);
+    --glass-bg-tertiary: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.25);
+    --glass-border-subtle: rgba(255, 255, 255, 0.15);
+    
+    /* Liquid Colors - Soft translucent tones */
+    --liquid-blue: rgba(199, 225, 248, 0.3);
+    --liquid-purple: rgba(214, 196, 255, 0.25);
+    --liquid-white: rgba(255, 255, 255, 0.2);
+    --liquid-silver: rgba(200, 220, 255, 0.15);
+    
+    /* Gradients - Liquid Glass Style */
+    --gradient-glass-primary: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.3) 0%, 
+        rgba(200, 220, 255, 0.15) 50%,
+        rgba(214, 196, 255, 0.1) 100%);
+    --gradient-glass-hover: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.35) 0%, 
+        rgba(199, 225, 248, 0.2) 50%,
+        rgba(214, 196, 255, 0.15) 100%);
+    --gradient-glass-accent: linear-gradient(135deg,
+        rgba(100, 200, 255, 0.25) 0%,
+        rgba(180, 150, 255, 0.2) 100%);
+    
+    /* Shadows - Diffused & Luminous */
+    --shadow-glass-sm: 0 2px 8px rgba(100, 150, 255, 0.08),
+                       0 1px 4px rgba(200, 220, 255, 0.05),
+                       inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+    --shadow-glass-md: 0 4px 16px rgba(100, 150, 255, 0.12),
+                       0 2px 8px rgba(200, 220, 255, 0.08),
+                       inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+    --shadow-glass-lg: 0 8px 32px rgba(100, 150, 255, 0.15),
+                       0 4px 16px rgba(200, 220, 255, 0.1),
+                       inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+    --shadow-glass-glow: 0 0 24px rgba(150, 200, 255, 0.2),
+                         0 0 48px rgba(180, 210, 255, 0.1);
+    
+    /* Backdrop Filters */
+    --blur-glass: blur(30px) saturate(160%);
+    --blur-glass-strong: blur(40px) saturate(180%);
+    --blur-glass-subtle: blur(20px) saturate(140%);
+    
+    /* Border Radius - Smooth & Liquid */
+    --radius-glass-sm: 18px;
+    --radius-glass-md: 24px;
+    --radius-glass-lg: 30px;
+    --radius-glass-xl: 36px;
+    
+    /* Transitions - Smooth & Elegant */
+    --transition-liquid: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+    --transition-shimmer: all 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
 }
+
+/* ============================================
+   Global Base Styles
+   ============================================ */
+
+body {
+    background: linear-gradient(135deg, 
+        #E8F4FF 0%, 
+        #F0F8FF 25%,
+        #F5F0FF 50%,
+        #F8F4FF 75%,
+        #E8F4FF 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Liquid Glass Particle Background */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    background: 
+        radial-gradient(ellipse at 20% 30%, rgba(199, 225, 248, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(214, 196, 255, 0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(200, 220, 255, 0.08) 0%, transparent 70%);
+    animation: liquid-float 20s ease-in-out infinite;
+}
+
+@keyframes liquid-float {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.6;
+    }
+    33% {
+        transform: translate(30px, -20px) scale(1.05);
+        opacity: 0.8;
+    }
+    66% {
+        transform: translate(-20px, 30px) scale(0.95);
+        opacity: 0.7;
+    }
+}
+
+/* ============================================
+   Container & Layout
+   ============================================ */
+
+.container {
+    position: relative;
+    z-index: 1;
+}
+
+/* Welcome Section - Liquid Glass Hero */
+.welcome-section {
+    background: var(--glass-bg-primary);
+    backdrop-filter: var(--blur-glass);
+    -webkit-backdrop-filter: var(--blur-glass);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-glass-lg);
+    box-shadow: var(--shadow-glass-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+.welcome-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--gradient-glass-primary);
+    opacity: 0.6;
+    transition: var(--transition-liquid);
+    pointer-events: none;
+}
+
+.welcome-section:hover::before {
+    background: var(--gradient-glass-hover);
+    opacity: 0.8;
+}
+
+/* Welcome Title - Liquid Typography */
+.welcome-title {
+    background: linear-gradient(135deg, 
+        rgba(100, 150, 255, 0.9) 0%,
+        rgba(150, 100, 255, 0.8) 50%,
+        rgba(100, 200, 255, 0.9) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 2px 8px rgba(100, 150, 255, 0.3));
+    position: relative;
+    z-index: 1;
+}
+
+/* ============================================
+   Cards - Liquid Glass Containers
+   ============================================ */
+
+.card {
+    background: var(--glass-bg-primary);
+    backdrop-filter: var(--blur-glass);
+    -webkit-backdrop-filter: var(--blur-glass);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-glass-md);
+    box-shadow: var(--shadow-glass-md);
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition-liquid);
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--gradient-glass-primary);
+    opacity: 0.5;
+    transition: var(--transition-liquid);
+    pointer-events: none;
+}
+
+.card:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: var(--shadow-glass-lg), var(--shadow-glass-glow);
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+.card:hover::before {
+    opacity: 0.7;
+    background: var(--gradient-glass-hover);
+}
+
+/* ============================================
+   Buttons - Liquid Glass Interactive
+   ============================================ */
+
+.btn-primary {
+    background: var(--glass-bg-secondary);
+    backdrop-filter: var(--blur-glass-subtle);
+    -webkit-backdrop-filter: var(--blur-glass-subtle);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-glass-sm);
+    box-shadow: var(--shadow-glass-sm);
+    color: rgba(100, 150, 255, 0.95);
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition-liquid);
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: var(--gradient-glass-accent);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease-out, height 0.6s ease-out;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: var(--shadow-glass-md), var(--shadow-glass-glow);
+    border-color: rgba(255, 255, 255, 0.4);
+    color: rgba(80, 130, 255, 1);
+}
+
+.btn-primary:hover::before {
+    width: 300%;
+    height: 300%;
+}
+
+.btn-primary:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* Button Shimmer Effect */
+@keyframes shimmer {
+    0% {
+        background-position: -200% center;
+    }
+    100% {
+        background-position: 200% center;
+    }
+}
+
+.btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.3) 50%,
+        transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 3s infinite;
+    pointer-events: none;
+}
+
+/* ============================================
+   Inputs - Liquid Glass Forms
+   ============================================ */
+
+input[type="text"],
+input[type="number"],
+input[type="datetime-local"],
+select,
+textarea {
+    background: var(--glass-bg-secondary);
+    backdrop-filter: var(--blur-glass-subtle);
+    -webkit-backdrop-filter: var(--blur-glass-subtle);
+    border: 1px solid var(--glass-border-subtle);
+    border-radius: var(--radius-glass-sm);
+    box-shadow: var(--shadow-glass-sm);
+    color: rgba(80, 100, 150, 0.9);
+    transition: var(--transition-liquid);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    background: var(--glass-bg-primary);
+    border-color: var(--glass-border);
+    box-shadow: var(--shadow-glass-md),
+                0 0 0 4px rgba(100, 150, 255, 0.1);
+    outline: none;
+    transform: translateY(-1px);
+}
+
+/* ============================================
+   File Upload - Liquid Glass Drop Zone
+   ============================================ */
+
+.file-upload {
+    background: var(--glass-bg-primary);
+    backdrop-filter: var(--blur-glass);
+    -webkit-backdrop-filter: var(--blur-glass);
+    border: 2px dashed var(--glass-border);
+    border-radius: var(--radius-glass-lg);
+    box-shadow: var(--shadow-glass-md);
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition-liquid);
+}
+
+.file-upload::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--gradient-glass-primary);
+    opacity: 0.3;
+    transition: var(--transition-shimmer);
+}
+
+.file-upload:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: var(--shadow-glass-lg), var(--shadow-glass-glow);
+    transform: scale(1.01);
+}
+
+.file-upload:hover::before {
+    opacity: 0.5;
+    background: var(--gradient-glass-hover);
+}
+
+.file-upload.file-selected {
+    border-style: solid;
+    border-color: rgba(100, 200, 255, 0.4);
+    box-shadow: var(--shadow-glass-lg),
+                0 0 32px rgba(100, 150, 255, 0.2);
+}
+
+/* ============================================
+   Progress & Result Sections
+   ============================================ */
+
+.progress-section,
+.result-section {
+    background: var(--glass-bg-primary);
+    backdrop-filter: var(--blur-glass-strong);
+    -webkit-backdrop-filter: var(--blur-glass-strong);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-glass-lg);
+    box-shadow: var(--shadow-glass-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-section::before,
+.result-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--gradient-glass-primary);
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+/* Progress Bar - Liquid Flow */
+.progress-bar {
+    background: var(--glass-bg-tertiary);
+    border-radius: var(--radius-glass-sm);
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    background: linear-gradient(90deg,
+        rgba(100, 200, 255, 0.6) 0%,
+        rgba(150, 150, 255, 0.7) 50%,
+        rgba(100, 200, 255, 0.6) 100%);
+    background-size: 200% 100%;
+    animation: liquid-flow 2s ease-in-out infinite;
+    box-shadow: 0 0 16px rgba(100, 150, 255, 0.4);
+    border-radius: var(--radius-glass-sm);
+}
+
+@keyframes liquid-flow {
+    0%, 100% {
+        background-position: 0% center;
+    }
+    50% {
+        background-position: 100% center;
+    }
+}
+
+/* ============================================
+   Map Container - Embedded Glass
+   ============================================ */
+
+.gpx-preview,
+#gpxMap {
+    background: var(--glass-bg-secondary);
+    backdrop-filter: var(--blur-glass);
+    -webkit-backdrop-filter: var(--blur-glass);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-glass-md);
+    box-shadow: var(--shadow-glass-md);
+    overflow: hidden;
+}
+
+/* Leaflet Controls Glass Style */
+.leaflet-control-container .leaflet-control {
+    background: var(--glass-bg-primary);
+    backdrop-filter: var(--blur-glass-subtle);
+    -webkit-backdrop-filter: var(--blur-glass-subtle);
+    border: 1px solid var(--glass-border-subtle);
+    border-radius: var(--radius-glass-sm);
+    box-shadow: var(--shadow-glass-sm);
+}
+
+/* ============================================
+   Glowing Borders & Accents
+   ============================================ */
+
+.glow-border {
+    position: relative;
+}
+
+.glow-border::after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    border-radius: inherit;
+    background: linear-gradient(135deg,
+        rgba(100, 200, 255, 0.5) 0%,
+        rgba(150, 150, 255, 0.4) 50%,
+        rgba(100, 200, 255, 0.5) 100%);
+    background-size: 200% 200%;
+    animation: glow-rotate 4s linear infinite;
+    opacity: 0;
+    transition: var(--transition-liquid);
+    pointer-events: none;
+    z-index: -1;
+}
+
+.glow-border:hover::after {
+    opacity: 1;
+}
+
+@keyframes glow-rotate {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* ============================================
+   Floating Animation
+   ============================================ */
+
+@keyframes float-gentle {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+.float-animation {
+    animation: float-gentle 4s ease-in-out infinite;
+}
+
+/* ============================================
+   Success Bounce - Liquid Style
+   ============================================ */
+
+@keyframes success-bounce-liquid {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.success-bounce {
+    animation: success-bounce-liquid 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* ============================================
+   Ripple Effect (Pure CSS)
+   ============================================ */
+
+.ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease-out, height 0.6s ease-out, opacity 0.6s ease-out;
+    opacity: 0;
+}
+
+.ripple:active::after {
+    width: 200%;
+    height: 200%;
+    opacity: 1;
+    transition: width 0s, height 0s, opacity 0s;
+}
+
+/* ============================================
+   Text Gradient - Liquid Typography
+   ============================================ */
+
+.text-gradient-liquid {
+    background: linear-gradient(135deg,
+        rgba(100, 150, 255, 0.9) 0%,
+        rgba(150, 100, 255, 0.8) 50%,
+        rgba(100, 200, 255, 0.9) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ============================================
+   Weather Section - Glass Morphism
+   ============================================ */
+
+.weather-info {
+    background: var(--glass-bg-secondary);
+    backdrop-filter: var(--blur-glass);
+    -webkit-backdrop-filter: var(--blur-glass);
+    border: 1px solid var(--glass-border-subtle);
+    border-radius: var(--radius-glass-md);
+    box-shadow: var(--shadow-glass-sm);
+    transition: var(--transition-liquid);
+}
+
+.weather-info:hover {
+    box-shadow: var(--shadow-glass-md);
+    border-color: var(--glass-border);
+}
+
+/* ============================================
+   Scrollbar - Liquid Glass Style
+   ============================================ */
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-glass-sm);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--glass-bg-primary);
+    backdrop-filter: var(--blur-glass-subtle);
+    border: 1px solid var(--glass-border-subtle);
+    border-radius: var(--radius-glass-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--glass-bg-secondary);
+    border-color: var(--glass-border);
+}
+
+/* ============================================
+   Responsive Adjustments
+   ============================================ */
+
+@media (max-width: 768px) {
+    :root {
+        --radius-glass-sm: 16px;
+        --radius-glass-md: 20px;
+        --radius-glass-lg: 24px;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px) scale(1.005);
+    }
+}
+
+/* ============================================
+   Performance Optimizations
+   ============================================ */
+
+.card,
+.btn-primary,
+input,
+select,
+.file-upload {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* ============================================
+   Dark Mode Support (Optional)
+   ============================================ */
+
+@media (prefers-color-scheme: dark) {
+    body {
+        background: linear-gradient(135deg,
+            #1a1a2e 0%,
+            #16213e 25%,
+            #0f1620 50%,
+            #1a1a2e 100%);
+    }
+    
+    .card,
+    .btn-primary,
+    input,
+    select {
+        box-shadow: var(--shadow-glass-md),
+                    0 0 24px rgba(100, 150, 255, 0.1);
+    }
+}
+
+/* ============================================
+   Liquid Glass Enhancements
+   Additional refinements for Apple iOS 26 style
+   ============================================ */
+
+/* ============================================
+   Enhanced Glass Particles Background
+   ============================================ */
+
+body::after {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+        radial-gradient(circle at 10% 20%, rgba(199, 225, 248, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 90% 80%, rgba(214, 196, 255, 0.06) 0%, transparent 50%),
+        radial-gradient(circle at 50% 10%, rgba(200, 220, 255, 0.05) 0%, transparent 60%),
+        radial-gradient(circle at 30% 70%, rgba(180, 210, 255, 0.04) 0%, transparent 50%),
+        radial-gradient(circle at 70% 40%, rgba(199, 225, 248, 0.05) 0%, transparent 55%);
+    animation: liquid-particles 30s ease-in-out infinite;
+    opacity: 0.8;
+}
+
+@keyframes liquid-particles {
+    0%, 100% {
+        transform: translate(0, 0) rotate(0deg) scale(1);
+    }
+    25% {
+        transform: translate(2%, -2%) rotate(1deg) scale(1.02);
+    }
+    50% {
+        transform: translate(-1%, 2%) rotate(-1deg) scale(0.98);
+    }
+    75% {
+        transform: translate(1%, 1%) rotate(0.5deg) scale(1.01);
+    }
+}
+
+/* ============================================
+   Enhanced Welcome Section
+   ============================================ */
+
+.welcome-section {
+    position: relative;
+}
+
+.welcome-section::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: calc(var(--radius-glass-lg) + 2px);
+    background: linear-gradient(135deg,
+        rgba(100, 200, 255, 0.3) 0%,
+        rgba(150, 150, 255, 0.2) 25%,
+        rgba(200, 150, 255, 0.15) 50%,
+        rgba(150, 200, 255, 0.2) 75%,
+        rgba(100, 200, 255, 0.3) 100%);
+    background-size: 400% 400%;
+    animation: liquid-border-flow 8s ease-in-out infinite;
+    z-index: -1;
+    opacity: 0.5;
+}
+
+@keyframes liquid-border-flow {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+/* ============================================
+   Liquid Glass Logo/Icon Glow
+   ============================================ */
+
+.upload-icon,
+.result-icon {
+    filter: drop-shadow(0 4px 12px rgba(100, 150, 255, 0.3))
+            drop-shadow(0 0 24px rgba(150, 200, 255, 0.2));
+    animation: icon-glow-pulse 3s ease-in-out infinite;
+}
+
+@keyframes icon-glow-pulse {
+    0%, 100% {
+        filter: drop-shadow(0 4px 12px rgba(100, 150, 255, 0.3))
+                drop-shadow(0 0 24px rgba(150, 200, 255, 0.2));
+    }
+    50% {
+        filter: drop-shadow(0 6px 16px rgba(100, 150, 255, 0.4))
+                drop-shadow(0 0 32px rgba(150, 200, 255, 0.3));
+    }
+}
+
+/* ============================================
+   Enhanced Button Hover Shimmer
+   ============================================ */
+
+.btn-primary {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::after {
+    animation-duration: 4s;
+}
+
+/* Additional glow layer for buttons */
+.btn-primary:hover::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle,
+        rgba(255, 255, 255, 0.3) 0%,
+        transparent 70%);
+    opacity: 0;
+    animation: button-glow-spread 1s ease-out;
+}
+
+@keyframes button-glow-spread {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+/* ============================================
+   Form Field Enhanced Focus
+   ============================================ */
+
+input:focus,
+select:focus,
+textarea:focus {
+    position: relative;
+}
+
+input:focus::after,
+select:focus::after,
+textarea:focus::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border-radius: inherit;
+    background: linear-gradient(135deg,
+        rgba(100, 200, 255, 0.2) 0%,
+        rgba(150, 150, 255, 0.15) 50%,
+        rgba(100, 200, 255, 0.2) 100%);
+    z-index: -1;
+    animation: focus-glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes focus-glow-pulse {
+    0%, 100% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.02);
+    }
+}
+
+/* ============================================
+   Enhanced Card Parallax on Hover
+   ============================================ */
+
+.card {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+}
+
+.card:hover {
+    transform: translateY(-4px) scale(1.01) rotateX(2deg);
+}
+
+.card > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* ============================================
+   Liquid Loading Animation
+   ============================================ */
+
+.ai-matrix-loader .digit {
+    background: linear-gradient(135deg,
+        rgba(100, 200, 255, 0.6) 0%,
+        rgba(150, 150, 255, 0.7) 50%,
+        rgba(100, 200, 255, 0.6) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 8px rgba(100, 150, 255, 0.5));
+    animation: liquid-digit-flow 2s ease-in-out infinite;
+}
+
+.ai-matrix-loader .digit:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+.ai-matrix-loader .digit:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+@keyframes liquid-digit-flow {
+    0%, 100% {
+        opacity: 0.6;
+        filter: drop-shadow(0 0 8px rgba(100, 150, 255, 0.5));
+    }
+    50% {
+        opacity: 1;
+        filter: drop-shadow(0 0 16px rgba(100, 150, 255, 0.8));
+    }
+}
+
+/* ============================================
+   File Upload Drop Zone Enhanced
+   ============================================ */
+
+.file-upload {
+    position: relative;
+}
+
+.file-upload::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80%;
+    height: 80%;
+    border-radius: 50%;
+    background: radial-gradient(circle,
+        rgba(100, 200, 255, 0.1) 0%,
+        transparent 70%);
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0;
+    transition: var(--transition-shimmer);
+    pointer-events: none;
+}
+
+.file-upload:hover::after {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* Drag over effect */
+.file-upload.drag-over {
+    border-color: rgba(100, 200, 255, 0.6);
+    box-shadow: var(--shadow-glass-lg),
+                0 0 48px rgba(100, 150, 255, 0.3);
+}
+
+.file-upload.drag-over::after {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+    animation: drag-pulse 1s ease-in-out infinite;
+}
+
+@keyframes drag-pulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.3);
+    }
+}
+
+/* ============================================
+   Progress Bar Liquid Flow Enhanced
+   ============================================ */
+
+.progress-fill {
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%);
+    animation: liquid-progress-shine 2s ease-in-out infinite;
+}
+
+@keyframes liquid-progress-shine {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 200%;
+    }
+}
+
+/* ============================================
+   Tooltip/Info Glass Style
+   ============================================ */
+
+[data-tooltip]:hover::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-8px);
+    background: var(--glass-bg-primary);
+    backdrop-filter: var(--blur-glass-strong);
+    -webkit-backdrop-filter: var(--blur-glass-strong);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-glass-sm);
+    box-shadow: var(--shadow-glass-md);
+    padding: 6px 12px;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    z-index: 1000;
+    animation: tooltip-fade-in 0.3s ease-out;
+}
+
+@keyframes tooltip-fade-in {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-8px);
+    }
+}
+
+/* ============================================
+   Success/Error Message Glass
+   ============================================ */
+
+.error-message,
+.success-message {
+    background: var(--glass-bg-primary);
+    backdrop-filter: var(--blur-glass-strong);
+    -webkit-backdrop-filter: var(--blur-glass-strong);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-glass-md);
+    box-shadow: var(--shadow-glass-md);
+    animation: message-slide-in 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+@keyframes message-slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   Download Button Enhanced
+   ============================================ */
+
+.btn-success {
+    background: linear-gradient(135deg,
+        rgba(100, 255, 150, 0.2) 0%,
+        rgba(100, 200, 255, 0.15) 100%);
+    backdrop-filter: var(--blur-glass);
+    -webkit-backdrop-filter: var(--blur-glass);
+    border: 1px solid rgba(100, 255, 150, 0.3);
+    border-radius: var(--radius-glass-sm);
+    box-shadow: var(--shadow-glass-sm),
+                0 0 24px rgba(100, 255, 150, 0.15);
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition-liquid);
+}
+
+.btn-success::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.3) 50%,
+        transparent 100%);
+    transition: left 0.6s ease-out;
+}
+
+.btn-success:hover::before {
+    left: 100%;
+}
+
+.btn-success:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: var(--shadow-glass-md),
+                0 0 32px rgba(100, 255, 150, 0.25);
+    border-color: rgba(100, 255, 150, 0.5);
+}
+
+/* ============================================
+   Map Controls Enhanced Glass
+   ============================================ */
+
+.leaflet-control-zoom a,
+.leaflet-control-layers {
+    background: var(--glass-bg-primary) !important;
+    backdrop-filter: var(--blur-glass-subtle) !important;
+    -webkit-backdrop-filter: var(--blur-glass-subtle) !important;
+    border: 1px solid var(--glass-border-subtle) !important;
+    box-shadow: var(--shadow-glass-sm) !important;
+    transition: var(--transition-liquid) !important;
+}
+
+.leaflet-control-zoom a:hover {
+    background: var(--glass-bg-secondary) !important;
+    box-shadow: var(--shadow-glass-md) !important;
+}
+
+/* ============================================
+   Weather Widget Glass Enhancement
+   ============================================ */
+
+.weather-section {
+    position: relative;
+    overflow: hidden;
+}
+
+.weather-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center,
+        rgba(100, 200, 255, 0.08) 0%,
+        transparent 70%);
+    animation: weather-glow-rotate 10s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes weather-glow-rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* ============================================
+   Mobile Responsive Liquid Glass
+   ============================================ */
+
+@media (max-width: 768px) {
+    body::before,
+    body::after {
+        animation-duration: 25s;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px) scale(1.005) rotateX(1deg);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-1px) scale(1.01);
+    }
+}
+
+/* ============================================
+   Accessibility: Reduce Motion
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ============================================
+   High Contrast Mode Support
+   ============================================ */
+
+@media (prefers-contrast: high) {
+    .card,
+    .btn-primary,
+    input,
+    select {
+        border-width: 2px;
+    }
+}
+
