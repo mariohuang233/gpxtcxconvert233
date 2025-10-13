@@ -2073,14 +2073,14 @@
 
         async function pollStatus() {
             if (!currentTaskId) {
-                console.warn('pollStatus: currentTaskId is null');
+                console.warn('❌ pollStatus: currentTaskId is null');
                 return;
             }
 
             // 检查是否超时
             pollCount++;
             if (pollCount > MAX_POLL_COUNT) {
-                console.error('轮询超时');
+                console.error('❌ 轮询超时');
                 showError('转换超时，请重试');
                 resetUI();
                 pollCount = 0;
@@ -2088,35 +2088,41 @@
             }
 
             try {
-                console.log(`轮询状态 (${pollCount}/${MAX_POLL_COUNT}): /status/${currentTaskId}`);
+                console.log(`🔄 轮询状态 (${pollCount}/${MAX_POLL_COUNT}): /status/${currentTaskId}`);
                 const response = await fetch(`/status/${currentTaskId}`);
-                const status = await response.json();
                 
-                console.log('状态响应:', status);
+                if (!response.ok) {
+                    console.error(`❌ HTTP错误: ${response.status} ${response.statusText}`);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const status = await response.json();
+                console.log('📊 状态响应:', JSON.stringify(status, null, 2));
+                console.log(`   - status: ${status.status}`);
+                console.log(`   - progress: ${status.progress}%`);
+                console.log(`   - message: ${status.message}`);
 
-                if (response.ok) {
-                    updateProgress(status.progress || 0, status.message || '处理中...');
+                updateProgress(status.progress || 0, status.message || '处理中...');
 
-                    if (status.status === 'completed') {
-                        console.log('转换完成，显示成功页面');
-                        pollCount = 0; // 重置计数器
-                        showSuccess();
-                    } else if (status.status === 'error') {
-                        console.error('转换错误:', status.error);
-                        pollCount = 0; // 重置计数器
-                        throw new Error(status.error || translations[currentLang].errorConversionFailed);
-                    } else {
-                        // 继续轮询
-                        console.log(`继续轮询，当前状态: ${status.status}, 进度: ${status.progress}%`);
-                        setTimeout(() => pollStatus(), 1000);
-                    }
+                if (status.status === 'completed') {
+                    console.log('✅ 检测到转换完成状态！');
+                    console.log('🎯 准备调用 showSuccess()...');
+                    pollCount = 0;
+                    showSuccess();
+                    console.log('✅ showSuccess() 已调用');
+                } else if (status.status === 'error') {
+                    console.error('❌ 转换错误:', status.error);
+                    pollCount = 0;
+                    throw new Error(status.error || translations[currentLang].errorConversionFailed);
                 } else {
-                    pollCount = 0; // 重置计数器
-                    throw new Error(status.error || translations[currentLang].errorStatusFailed);
+                    // 继续轮询
+                    console.log(`⏳ 继续轮询，当前状态: ${status.status}, 进度: ${status.progress}%`);
+                    setTimeout(() => pollStatus(), 1000);
                 }
             } catch (error) {
-                console.error('轮询状态失败:', error);
-                pollCount = 0; // 重置计数器
+                console.error('❌ 轮询状态失败:', error);
+                console.error('错误堆栈:', error.stack);
+                pollCount = 0;
                 showError(error.message);
                 resetUI();
             }
@@ -2134,35 +2140,69 @@
         }
 
         function showSuccess() {
+            console.log('🎉 showSuccess() 函数开始执行');
+            console.log('   currentTaskId:', currentTaskId);
+            
+            // 隐藏进度框
+            console.log('   1. 隐藏进度框...');
             progressSection.style.display = 'none';
+            
+            // 显示结果框
+            console.log('   2. 显示结果框...');
+            console.log('   resultSection 元素:', resultSection);
             resultSection.style.display = 'block';
             resultSection.classList.add('fade-in');
+            console.log('   resultSection.style.display =', resultSection.style.display);
             
+            // 获取元素
+            console.log('   3. 获取结果图标和消息元素...');
             const resultIcon = document.getElementById('resultIcon');
             const resultMessage = document.getElementById('resultMessage');
+            console.log('   resultIcon:', resultIcon);
+            console.log('   resultMessage:', resultMessage);
             
+            // 设置图标和消息
+            console.log('   4. 设置图标和消息...');
             resultIcon.textContent = '✅';
             resultIcon.classList.add('success-bounce');
             resultMessage.textContent = translations[currentLang].conversionCompleteMsg;
+            console.log('   消息文本:', translations[currentLang].conversionCompleteMsg);
             
-            // 设置下载按钮的点击事件
+            // 设置下载按钮
+            console.log('   5. 设置下载按钮...');
             const downloadBtn = document.getElementById('downloadBtn');
             const resetBtn = document.getElementById('resetBtn');
+            console.log('   downloadBtn:', downloadBtn);
+            console.log('   resetBtn:', resetBtn);
             
-            downloadBtn.onclick = () => {
-                window.location.href = `/download/${currentTaskId}`;
-            };
+            if (downloadBtn) {
+                downloadBtn.onclick = () => {
+                    console.log('📥 下载按钮被点击，跳转到:', `/download/${currentTaskId}`);
+                    window.location.href = `/download/${currentTaskId}`;
+                };
+                console.log('   ✅ 下载按钮事件已设置');
+            } else {
+                console.error('   ❌ downloadBtn 元素不存在！');
+            }
             
             // 重置按钮功能
-            resetBtn.onclick = () => {
-                resetConversion();
-            };
+            if (resetBtn) {
+                resetBtn.onclick = () => {
+                    resetConversion();
+                };
+                console.log('   ✅ 重置按钮事件已设置');
+            } else {
+                console.error('   ❌ resetBtn 元素不存在！');
+            }
             
             // 重置转换按钮状态
+            console.log('   6. 重置转换按钮状态...');
             convertBtn.disabled = false;
             convertBtn.classList.remove('btn-loading');
             convertBtn.querySelector('.btn-text').textContent = translations[currentLang].startConvert;
             convertBtn.querySelector('.btn-icon').textContent = '🔄';
+            
+            console.log('✅ showSuccess() 函数执行完成！');
         }
 
         function resetUI() {
