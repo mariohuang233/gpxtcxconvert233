@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title data-translate="pageTitle">🚀 GPX to TCX Converter - Professional Sports Data Transformation Tool</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1784,6 +1787,11 @@
 
         // 语言初始化已移至DOMContentLoaded事件中
 
+        // 版本标识
+        const APP_VERSION = 'v1.1.1';
+        console.log(`%c🚀 GPX转TCX转换器 ${APP_VERSION}`, 'color: #00d084; font-size: 16px; font-weight: bold;');
+        console.log('%c✅ 修复版本已加载 - 包含完整的超时和错误处理', 'color: #00d084;');
+        
         let selectedFile = null;
         let currentTaskId = null;
         let pollCount = 0;
