@@ -1786,6 +1786,8 @@
 
         let selectedFile = null;
         let currentTaskId = null;
+        let pollCount = 0;
+        const MAX_POLL_COUNT = 120; // 最多轮询120次（2分钟）
 
         // 文件上传处理
         const fileUpload = document.getElementById('fileUpload');
@@ -1996,6 +1998,7 @@
                 convertBtn.querySelector('.btn-icon').textContent = '⏳';
                 hideError();
                 resultSection.style.display = 'none';
+                pollCount = 0; // 重置轮询计数器
 
                 const response = await fetch('/upload', {
                     method: 'POST',
@@ -2066,32 +2069,46 @@
                 return;
             }
 
+            // 检查是否超时
+            pollCount++;
+            if (pollCount > MAX_POLL_COUNT) {
+                console.error('轮询超时');
+                showError('转换超时，请重试');
+                resetUI();
+                pollCount = 0;
+                return;
+            }
+
             try {
-                console.log(`轮询状态: /status/${currentTaskId}`);
+                console.log(`轮询状态 (${pollCount}/${MAX_POLL_COUNT}): /status/${currentTaskId}`);
                 const response = await fetch(`/status/${currentTaskId}`);
                 const status = await response.json();
                 
                 console.log('状态响应:', status);
 
                 if (response.ok) {
-                    updateProgress(status.progress, status.message);
+                    updateProgress(status.progress || 0, status.message || '处理中...');
 
                     if (status.status === 'completed') {
                         console.log('转换完成，显示成功页面');
+                        pollCount = 0; // 重置计数器
                         showSuccess();
                     } else if (status.status === 'error') {
                         console.error('转换错误:', status.error);
+                        pollCount = 0; // 重置计数器
                         throw new Error(status.error || translations[currentLang].errorConversionFailed);
                     } else {
                         // 继续轮询
                         console.log(`继续轮询，当前状态: ${status.status}, 进度: ${status.progress}%`);
-                        setTimeout(pollStatus, 1000);
+                        setTimeout(() => pollStatus(), 1000);
                     }
                 } else {
+                    pollCount = 0; // 重置计数器
                     throw new Error(status.error || translations[currentLang].errorStatusFailed);
                 }
             } catch (error) {
                 console.error('轮询状态失败:', error);
+                pollCount = 0; // 重置计数器
                 showError(error.message);
                 resetUI();
             }

@@ -206,10 +206,12 @@ def perform_conversion(task):
         
         # 创建转换器
         converter = GPXToTCXConverter()
+        logger.info(f"转换器创建成功 - 任务 {task.task_id}")
         
         # 应用配置
         task.progress = 20
         task.message = '正在应用配置...'
+        logger.info(f"开始应用配置 - 任务 {task.task_id}")
         
         # 应用配置，使用默认值作为后备
         config_updates = {}
@@ -254,12 +256,15 @@ def perform_conversion(task):
         
         task.progress = 40
         task.message = '正在解析GPX文件...'
+        logger.info(f"开始解析GPX文件 - 任务 {task.task_id}")
         
         # 执行转换
         task.progress = 60
         task.message = '转换中...'
+        logger.info(f"开始执行转换 - 任务 {task.task_id}")
         
         success = converter.convert(task.input_file, task.output_file)
+        logger.info(f"转换方法返回: {success} - 任务 {task.task_id}")
         
         task.progress = 90
         task.message = '保存文件...'
@@ -273,7 +278,8 @@ def perform_conversion(task):
             logger.info(f"转换任务 {task.task_id} 完成，输出文件: {task.output_file}")
         else:
             task.status = 'error'
-            task.error = '转换失败，请检查GPX文件格式'
+            task.error = f'转换失败，请检查GPX文件格式 (success={success}, file_exists={os.path.exists(task.output_file)})'
+            logger.error(f"转换失败 - 任务 {task.task_id}: success={success}, output_file_exists={os.path.exists(task.output_file)}")
             
     except Exception as e:
         logger.error(f"转换任务 {task.task_id} 失败: {str(e)}")
