@@ -2,21 +2,37 @@
 <html lang="zh-CN"><head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
   {% if pages %}<meta name="app-mode" content="pages"><meta http-equiv="Content-Security-Policy" content="{{ pages_csp }}">{% endif %}
-  <title>{{ '本机访问统计' if pages else '访问统计' }} · GPX → TCX</title>
+  <title>访问统计 · GPX → TCX</title>
   <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <script src="{{ url_for('static', filename='theme.js') }}"></script>
   {% if pages %}<script type="module" src="{{ url_for('static', filename='pages-analytics.js') }}"></script>
   {% else %}<script src="{{ url_for('static', filename='analytics.js') }}" defer></script>{% endif %}
 </head><body><main class="stats-container">
-  <header class="stats-header"><h1>{{ '本机访问统计' if pages else '访问统计' }}</h1><a href="{{ '../' if pages else '/' }}">返回转换工具</a></header>
+  <header class="stats-header"><h1>访问统计</h1><a href="{{ '../' if pages else '/' }}">返回转换工具</a></header>
   {% if pages %}
+  <section aria-labelledby="global-stats-heading" class="global-stats">
+    <h2 id="global-stats-heading">全站访客</h2>
+    <p id="global-stats-status" class="field-help" role="status">正在连接统计服务…</p>
+    <div id="global-stats-data" hidden>
+      <dl class="stats-overview">
+        <div><dt>今日访客</dt><dd id="today-visitors">—</dd></div><div><dt>累计访客</dt><dd id="total-visitors">—</dd></div>
+        <div><dt>今日访问次数</dt><dd id="today-views">—</dd></div><div><dt>累计访问次数</dt><dd id="total-views">—</dd></div>
+      </dl>
+      <p id="global-stats-since" class="field-help"></p>
+      <p class="field-help">按北京时间统计；访客按随机浏览器标识去重，换设备或清除站点数据会计为新访客。累计访客跨日期去重，不能直接把每日访客相加。</p>
+      <div class="stats-table-scroll"><table><caption>最近 30 天全站统计（北京时间）</caption><thead><tr><th scope="col">日期</th><th scope="col">访客</th><th scope="col">访问</th><th scope="col">开始转换</th><th scope="col">转换成功</th><th scope="col">转换失败</th><th scope="col">下载</th><th scope="col">天气刷新</th></tr></thead><tbody id="global-stats-body"></tbody></table></div>
+    </div>
+    <button type="button" id="refresh-global-stats" class="location-toggle">刷新全站统计</button>
+  </section>
+  <details id="local-stats-details" open><summary>本浏览器统计</summary>
   <p class="field-help">仅显示本浏览器的访问、转换和下载次数，保留最近 30 个 UTC 日期；其他设备的数据不会在这里汇总。轨迹文件不上传服务器。清除浏览器站点数据也会清除这些统计。</p>
-  <p id="remote-stats-note" class="field-help" hidden>本站另有匿名统计后端接收固定事件名称；下方仍只显示本浏览器数据。</p>
+  <p id="remote-stats-note" class="field-help" hidden>全站统计仅接收事件名称、随机事件标识及访问时的随机浏览器标识；不会上传文件名、轨迹或位置。本机计数独立保留。</p>
   {% else %}
   <p class="field-help">统计保留 30 天，日期按 UTC 汇总；访问次数包括重复访问，独立访客为每日会话去重，最多 10,000 个。转换成功与失败由服务器记录，下载为请求次数。</p>
   <form id="stats-form"><div class="form-group"><label for="admin-token">管理员令牌</label><input type="password" id="admin-token" autocomplete="off" required aria-describedby="token-help"><p id="token-help" class="field-help">使用部署时设置的 ADMIN_TOKEN。令牌仅保留在当前页面内存中。</p></div><button type="submit" class="btn btn-primary">查看统计</button></form>
   {% endif %}
   <p id="stats-error" role="alert" class="field-error"></p>
   <div id="stats-result" hidden><table><caption class="sr-only">最近 30 天{{ '本机' if pages else '聚合' }}事件</caption><thead><tr><th scope="col">日期（UTC）</th><th scope="col">事件</th><th scope="col">次数</th></tr></thead><tbody id="stats-body"></tbody></table><button type="button" id="clear-stats" class="location-toggle">清空统计</button><p class="field-help">清空后不可恢复，不会删除轨迹{{ '结果' if pages else '任务' }}。</p></div>
+  {% if pages %}</details>{% endif %}
 </main></body></html>

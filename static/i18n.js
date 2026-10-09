@@ -40,11 +40,11 @@ export async function setLanguage(lang) {
   messages={...extra.en,...dictionary,...(extra[lang] || {})};
   if(document.querySelector('meta[name="app-mode"]')?.content==='pages')Object.assign(messages,lang==='zh'?{
     privacyNote:'文件仅在本浏览器中处理，不上传服务器；下载结果在当前页面最多保留 60 分钟，',minutes:'重置、删除或关闭页面后释放。',
-    analyticsNote:'访问、转换与下载次数仅保存在本浏览器，保留最近 30 个 UTC 日期。天气由你主动获取，地图在读取轨迹后自动加载；统计不会记录文件名、轨迹内容或精确位置。',
-    privacyDesc:'轨迹在浏览器后台线程中处理，不上传服务器。',stats:'本机访问统计'
+    analyticsNote:'本浏览器事件计数保留最近 30 个 UTC 日期。启用全站统计时发送事件名称与随机标识用于访客去重，不发送文件名、轨迹或位置。天气由你主动获取，地图在读取轨迹后自动加载。',
+    privacyDesc:'轨迹在浏览器后台线程中处理，不上传服务器。',stats:'访问统计'
   }:{privacyNote:'Files stay in this browser. Downloads remain in this tab for up to 60 minutes; ',minutes:'reset, delete or close the page to release them.',
-    analyticsNote:'Visit, conversion and download counts stay in this browser for 30 UTC dates. Weather is opt-in; map tiles load after selecting a track. Analytics never contain filenames, tracks or precise locations.',
-    privacyDesc:'Tracks are processed in a browser worker without uploading.',stats:'Local visit statistics'});
+    analyticsNote:'Local event counts remain for 30 UTC dates. When global analytics is enabled, events and random identifiers are sent for visitor counts, without filenames, tracks or locations. Weather is opt-in; map tiles load after selecting a track.',
+    privacyDesc:'Tracks are processed in a browser worker without uploading.',stats:'Visit statistics'});
   document.documentElement.lang=lang==='zh'?'zh-CN':lang==='zh-tw'?'zh-TW':lang;
   document.documentElement.dir=lang==='ar'?'rtl':'ltr';
   document.querySelectorAll('[data-translate]').forEach(el=>{

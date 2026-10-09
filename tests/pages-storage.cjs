@@ -4,6 +4,7 @@ const assert=require('node:assert/strict');
   const browser=await chromium.launch({headless:true,...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{})});
   const context=await browser.newContext(),page=await context.newPage(),base=process.env.TEST_BASE_URL||'http://127.0.0.1:8899/';
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  await page.route('**/pages-config.json',route=>route.fulfill({contentType:'application/json',body:'{"analytics_endpoint":""}'}));
   await page.goto(base);await page.waitForFunction(()=>document.getElementById('simulation-badge').textContent.length>0);
   const dates=await page.evaluate(()=>{
     const key=Object.keys(localStorage).find(k=>k.startsWith('gpx-tcx:stats:'));

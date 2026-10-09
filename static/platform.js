@@ -4,6 +4,7 @@ const jobs=new Map(), weatherCache=new Map(), root=new URL('../',import.meta.url
 const events=new Set(['page_view','conversion_started','conversion_completed','conversion_failed','download','weather_requested']);
 const storageKey='gpx-tcx:stats:'+root.pathname;
 let memoryStats={},settings={analytics_endpoint:''};
+let memoryVisitor;
 export const settingsReady=isPages?fetch(new URL('./pages-config.json',import.meta.url)).then(r=>r.ok?r.json():{}).then(config=>{settings=config;}).catch(()=>{}):Promise.resolve();
 const apiError=(message,field,status=400)=>Object.assign(new Error(message),{field,status});
 
@@ -28,14 +29,32 @@ export function record(event) {
   if(!stats[day])stats[day]={};
   stats[day][event]=Math.min(Number.MAX_SAFE_INTEGER,(Number(stats[day][event])||0)+1);memoryStats=stats;
   try{localStorage.setItem(storageKey,JSON.stringify(stats));}catch{}
-  // An optional HTTPS endpoint receives only the fixed event name, never user files or metadata.
+  // Remote visitor counts use a random browser ID, never user files or location metadata.
   void settingsReady.then(()=>{
     if(!settings.analytics_endpoint)return;
+    const payload={event};
+    if(settings.analytics_protocol==='visitors-v1'){
+      payload.event_id=crypto.randomUUID();
+      if(event==='page_view'){
+        try{const key='gpx-tcx:visitor:'+root.pathname;let id=localStorage.getItem(key);
+          if(!/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(id||'')){id=crypto.randomUUID();localStorage.setItem(key,id);}memoryVisitor=id;
+        }catch{memoryVisitor??=crypto.randomUUID();}
+        payload.visitor_id=memoryVisitor;
+      }
+    }
     void fetch(settings.analytics_endpoint,{method:'POST',mode:'cors',credentials:'omit',referrerPolicy:'no-referrer',
-      headers:{'Content-Type':'application/json'},body:JSON.stringify({event}),keepalive:true}).catch(()=>{});
+      headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),keepalive:true,signal:AbortSignal.timeout(4000)}).catch(()=>{});
   });
 }
 export async function remoteAnalyticsEnabled(){await settingsReady;return Boolean(settings.analytics_endpoint);}
+export async function remoteStats(){
+  await settingsReady;
+  if(!settings.analytics_endpoint||settings.analytics_protocol!=='visitors-v1')return null;
+  const endpoint=new URL(settings.analytics_endpoint);endpoint.pathname=endpoint.pathname.replace(/\/events\/?$/,'/stats');endpoint.search='';
+  const response=await fetch(endpoint,{credentials:'omit',referrerPolicy:'no-referrer',cache:'no-store',signal:AbortSignal.timeout(5000)});
+  if(!response.ok)throw new Error('统计服务暂时不可用，请稍后刷新。');
+  return response.json();
+}
 
 function workerCall(file,mode,config,{signal,onProgress}={}) {
   const worker=new Worker(new URL('./conversion-worker.js',import.meta.url),{type:'module'});

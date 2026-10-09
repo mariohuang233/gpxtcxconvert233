@@ -41,6 +41,7 @@ jobs:
       - run: python -m pip install -r requirements-dev.txt
       - run: npm ci
       - run: npm run test:converter
+      - run: npm run test:analytics
       - run: python tests/validate_pages_output.py
       - run: npx playwright install --with-deps chromium
       - name: Browser and accessibility tests

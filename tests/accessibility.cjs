@@ -5,6 +5,7 @@ const assert=require('node:assert/strict');
   const browser=await chromium.launch({headless:true,...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{})});
   const context=await browser.newContext(),page=await context.newPage();
   const base=process.env.TEST_BASE_URL||'http://127.0.0.1:8080';
+  await page.route('**/pages-config.json',route=>route.fulfill({contentType:'application/json',body:'{"analytics_endpoint":""}'}));
   await page.route('https://tile.openstreetmap.org/**',route=>route.fulfill({status:200,contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jR1sAAAAASUVORK5CYII=','base64')}));
   for(const path of ['/','/analytics'+(process.env.TEST_PAGES?'/' :'')]){
     await page.goto(base+path);await page.waitForLoadState('networkidle');

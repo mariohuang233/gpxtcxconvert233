@@ -233,7 +233,7 @@
 
         <p class="status-indicator status-error" id="errorMessage" role="alert" aria-live="polite" hidden></p><p id="file-error" class="field-error" aria-live="polite"></p>
         <p class="retention-note"><span data-translate="privacyNote">{{ translate('privacyNote') }}</span>{% if not pages %} {{ retention_minutes }} {% endif %}<span data-translate="minutes">{{ translate('minutes') }}</span></p>
-        {% if pages %}<p id="remote-stats-note" class="retention-note" hidden>本站已启用匿名统计后端，仅向其发送固定事件名称，不包含轨迹或表单数据。</p>{% endif %}
+        {% if pages %}<p id="remote-stats-note" class="retention-note" hidden>本站已启用全站统计，发送事件名称与随机标识，用于访客去重；不包含文件名、轨迹、位置或表单数据。</p>{% endif %}
         <button type="button" id="cancel-button" class="reset-inline" data-translate="reset">{{ translate('reset') }}</button><div class="convert-section animate-fade-in animate-delay-9">
             <button id="convertBtn" class="btn btn-primary" form="configForm" type="submit" disabled>
 

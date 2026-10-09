@@ -10,6 +10,7 @@ const output=process.env.TEST_ARTIFACTS;
   const browser=await chromium.launch({headless:true,...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{})});
   const context=await browser.newContext({viewport:{width:1440,height:1000},timezoneId:'America/New_York',locale:'zh-CN'});
   const page=await context.newPage(), errors=[], external=[];
+  await page.route('**/pages-config.json',route=>route.fulfill({contentType:'application/json',body:'{"analytics_endpoint":""}'}));
   const tileRequests=[];
   page.on('pageerror',e=>errors.push(e.message));
   page.on('request',r=>{if(!r.url().startsWith(base)) external.push(r.url());});
@@ -121,7 +122,8 @@ const output=process.env.TEST_ARTIFACTS;
     assert.ok(counts.page_view>=1&&counts.conversion_completed>=3&&counts.download>=1);
     await page.goto(new URL('analytics/',base.endsWith('/')?base:base+'/').href);
     await page.locator('#stats-result').waitFor({state:'visible'});
-    assert.match(await page.locator('h1').textContent(),/本机/);assert.equal(await page.locator('#admin-token').count(),0);
+    assert.match(await page.locator('h1').textContent(),/访问统计/);assert.equal(await page.locator('#admin-token').count(),0);
+    await page.waitForFunction(()=>document.getElementById('global-stats-status').textContent.includes('尚未接入'));
     page.once('dialog',dialog=>dialog.accept());await page.locator('#clear-stats').click();
     assert.match(await page.locator('#stats-body').textContent(),/暂无统计/);
   }

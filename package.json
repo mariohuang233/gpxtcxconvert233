@@ -5,6 +5,7 @@
   "scripts": {
     "build:pages": "node scripts/build-pages.cjs",
     "test:converter": "node --test tests/browser-converter.test.mjs",
+    "test:analytics": "node --test tests/analytics-worker.test.mjs",
     "test:pages": "node tests/pages.cjs",
     "test": "node tests/browser.cjs && node tests/map.cjs && node tests/accessibility.cjs",
     "test:browser": "node tests/browser.cjs",

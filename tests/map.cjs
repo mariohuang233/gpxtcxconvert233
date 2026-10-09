@@ -10,6 +10,7 @@ const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42
   for(const scenario of ['tiles-fail','assets-fail','reset-loading']){
     const context=await browser.newContext({locale:'zh-CN'}),page=await context.newPage(),errors=[];
     page.on('pageerror',error=>errors.push(error.message));
+    await page.route('**/pages-config.json',route=>route.fulfill({contentType:'application/json',body:'{"analytics_endpoint":""}'}));
     await page.route('https://tile.openstreetmap.org/**',route=>scenario==='tiles-fail'?route.abort():route.fulfill({contentType:'image/png',body:png}));
     let release,assetBlocked;
     if(scenario==='assets-fail')await page.route('**/vendor/leaflet/leaflet.js',route=>route.abort());

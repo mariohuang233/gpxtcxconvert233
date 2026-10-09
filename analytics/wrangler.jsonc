@@ -1,0 +1,14 @@
+{
+  "name": "gpx-tcx-analytics",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-10-09",
+  "workers_dev": true,
+  "vars": { "ALLOWED_ORIGIN": "https://mariohuang233.github.io" },
+  "triggers": { "crons": ["15 16 * * *"] },
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "gpx-tcx-analytics",
+    "database_id": "27d2f20a-b13f-4da8-803a-7746ea0ed997"
+  }],
+  "observability": { "enabled": false }
+}

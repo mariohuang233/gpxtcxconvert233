@@ -11,6 +11,7 @@ _site/
 test-artifacts/
 lighthouse*.json
 .env
+.wrangler/
 *.sqlite3*
 *.part
 .DS_Store
