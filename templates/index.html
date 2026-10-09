@@ -91,9 +91,9 @@
                     <div class="route-stats" id="routeStats"><span><b id="distance">--</b><small data-translate="totalDistance">{{ translate('totalDistance') }}</small></span><span><b id="duration">--</b><small data-translate="timeRange">{{ translate('timeRange') }}</small></span><span><b id="points">--</b><small data-translate="trackPoints">{{ translate('trackPoints') }}</small></span><span><b id="ascent">--</b><small data-translate="elevationGain">{{ translate('elevationGain') }}</small></span></div>
                 </div>
                 <div class="map-container">
-                    <div id="gpxMap" class="gpx-map"><canvas id="route-canvas" role="img" aria-label="轨迹路线图"></canvas><div id="route-empty" hidden></div></div>
+                    <div id="gpxMap" class="gpx-map" role="region" aria-label="路线地图"><canvas id="route-canvas" role="img" aria-label="轨迹路线图"></canvas><div id="route-empty" hidden></div></div>
                 </div>
-                    <div class="route-info" id="routeInfo"><span id="preview-source" data-translate="sourceGpx">{{ translate('sourceGpx') }}</span><p id="preview-note" role="status"></p><button type="button" class="location-toggle" id="route-weather" data-translate="routeWeather">{{ translate('routeWeather') }}</button><button type="button" class="location-toggle" id="load-map" data-translate="loadMap">{{ translate('loadMap') }}</button><p class="map-privacy" data-translate="mapPrivacy">{{ translate('mapPrivacy') }}</p></div>
+                    <div class="route-info" id="routeInfo"><span id="preview-source" data-translate="sourceGpx">{{ translate('sourceGpx') }}</span><p id="preview-note" role="status"></p><button type="button" class="location-toggle" id="route-weather" data-translate="routeWeather">{{ translate('routeWeather') }}</button><button type="button" class="location-toggle" id="load-map" data-translate="hideMap" aria-pressed="true">{{ translate('hideMap') }}</button><button type="button" class="location-toggle" id="fit-map" data-translate="fitRoute" hidden>{{ translate('fitRoute') }}</button><p id="map-status" class="map-status" role="status" aria-live="polite"></p><p class="map-privacy" data-translate="mapPrivacy">{{ translate('mapPrivacy') }}</p></div>
                 </div>
         </section>
 

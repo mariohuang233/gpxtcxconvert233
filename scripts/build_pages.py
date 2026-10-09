@@ -27,7 +27,7 @@ messages=json.loads((ROOT/'static/locales/zh.json').read_text(encoding='utf-8'))
 messages.update(privacyNote='文件仅在本浏览器中处理，不上传服务器；下载结果在当前页面最多保留 60 分钟，',
                 minutes='重置、删除或关闭页面后释放。',stats='本机访问统计',
                 privacyDesc='轨迹在浏览器后台线程中处理，不上传服务器。',
-                analyticsNote='访问、转换与下载次数仅保存在本浏览器，保留最近 30 个 UTC 日期。天气和地图由你主动加载；不会记录文件名、轨迹内容或精确位置。')
+                analyticsNote='访问、转换与下载次数仅保存在本浏览器，保留最近 30 个 UTC 日期。天气由你主动获取，地图在读取轨迹后自动加载；统计不会记录文件名、轨迹内容或精确位置。')
 env=Environment(loader=FileSystemLoader(ROOT/'templates'),autoescape=select_autoescape(['html']))
 for template,destination,prefix in [('index.html','index.html','./'),('analytics.html','analytics/index.html','../')]:
     target=SITE/destination;target.parent.mkdir(exist_ok=True)

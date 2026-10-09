@@ -13,4 +13,13 @@
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation:none!important;transition:none!important}}
 .config-group .form-row .form-group{margin-top:17px}.stats-container .location-toggle{margin-top:18px}
 .file-upload{width:100%;color:var(--text-primary)}
+:root{--map-route-halo:#08271b;--map-route-end:#f3c970;--map-tile-filter:invert(.94) hue-rotate(180deg) saturate(.38) brightness(1.08) contrast(.88)}
+:root[data-theme=light]{--map-route-halo:#fff;--map-route-end:#b76716;--map-tile-filter:saturate(.58) contrast(.92) brightness(1.04)}
+.gpx-map.leaflet-container{background:var(--bg-input);isolation:isolate}.route-basemap .leaflet-tile{filter:var(--map-tile-filter)}
+.gpx-map .leaflet-bar{border:1px solid var(--border-soft);border-radius:10px;overflow:hidden;box-shadow:0 4px 14px #061a1426}
+.gpx-map .leaflet-bar a{background:var(--bg-card);color:var(--text-primary);border-color:var(--border-soft);width:36px;height:36px;line-height:36px}
+.gpx-map .leaflet-bar a:hover{background:var(--soft-green);color:var(--primary-green)}.gpx-map .leaflet-bar a.leaflet-disabled{background:var(--bg-card);color:var(--text-tertiary)}
+#gpxMap .leaflet-control-attribution{background:var(--bg-card);color:var(--text-secondary);padding:3px 7px;font-size:11px;line-height:1.4;border-radius:7px 0 0 0}
+#gpxMap .leaflet-control-attribution a{color:var(--primary-green)}.gpx-map .leaflet-tooltip{background:var(--bg-card);color:var(--text-primary);border-color:var(--border);box-shadow:0 2px 8px #061a1430;font-size:12px;border-radius:7px}
+.map-status{font-size:11px;color:var(--text-secondary)}.map-status:empty{display:none}.route-info button[aria-pressed=true]{background:var(--soft-green)}
 @media(max-width:767px){.welcome-section{background-image:linear-gradient(180deg,#09231799,#091c14c4),url("images/runners-mobile.webp")}}

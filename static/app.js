@@ -7,6 +7,7 @@ const form = $('converter');
 let selectedFile = null, routeData = null, taskId = null, generation = 0, pollTimer = null;
 let previewController = null, pollController = null, weatherController = null;
 let busy = false, languageReady = false, previewReady = false, sourceData = null, leafletMap = null;
+let mapWanted = true, leafletReady = null, mapLoadingGeneration = null;
 
 function text(id, value) { $(id).textContent = value; }
 function clearErrors() {
@@ -84,7 +85,8 @@ function showSummary(data, output = false) {
   text('preview-note', data.missing_times ? t('missingTimes') : t('previewHint'));
   $('route-empty').hidden = true; $('gpxPreview').hidden = false;
   $('route-weather').hidden = false;
-  if (leafletMap) renderMap(); else drawRoute();
+  if (leafletMap) renderMap(); else { drawRoute(); if(mapWanted)void loadMap(); }
+  syncMapControls();
 }
 function stopLocal() {
   generation += 1;
@@ -101,10 +103,7 @@ async function chooseFile(file) {
   stopLocal(); taskId = null; void removeTask(previous);
   const version = generation;
   selectedFile = null; routeData = null; sourceData = null;
-  if (leafletMap) {
-    leafletMap.stop(); leafletMap.remove(); leafletMap = null; $('route-canvas').hidden = false;
-    for (const cls of Array.from($('route-view').classList)) if (cls.startsWith('leaflet-')) $('route-view').classList.remove(cls);
-  }
+  clearMap(); mapWanted = true; syncMapControls(); setMapStatus('');
   clearErrors();
   $('job-panel').hidden = true; $('resultSection').hidden = true; $('gpxPreview').hidden = true; $('download-link').hidden = true; $('delete-result').hidden = true;
   $('route-empty').hidden = false; $('route-weather').hidden = true;
@@ -235,7 +234,7 @@ $('theme-toggle').addEventListener('click', () => {
   const theme = activeTheme() === 'dark' ? 'light' : 'dark';
   document.documentElement.dataset.theme = theme;
   try { localStorage.setItem('theme', theme); } catch { /* preference stays in this tab */ }
-  drawRoute();
+  if(leafletMap)renderMap();else drawRoute();
 });
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', drawRoute);
 new ResizeObserver(drawRoute).observe($('route-view'));
@@ -272,29 +271,82 @@ record('page_view');
 $('download-link').addEventListener('click',()=>{if(isPages)record('download');});
 if(isPages&&await remoteAnalyticsEnabled())$('remote-stats-note').hidden=false;
 
-function renderMap() {
+function setMapStatus(key) {
+  if(key)$('map-status').dataset.translate=key;else delete $('map-status').dataset.translate;
+  text('map-status',key?t(key):'');
+}
+function syncMapControls() {
+  $('load-map').dataset.translate=mapWanted?'hideMap':'loadMap';
+  text('load-map',t(mapWanted?'hideMap':'loadMap'));
+  $('load-map').setAttribute('aria-pressed',String(mapWanted));
+  $('fit-map').hidden=!leafletMap;
+}
+function clearMap() {
+  if(leafletMap){const previous=leafletMap;leafletMap=null;previous.stop();previous.remove();}
+  $('route-canvas').hidden=false;
+  for(const cls of Array.from($('route-view').classList))if(cls.startsWith('leaflet-'))$('route-view').classList.remove(cls);
+}
+function mapCoordinates() {
+  let last=routeData.route[0][1];
+  return routeData.route.map(([lat,lon,segment])=>{
+    while(lon-last>180)lon-=360;while(lon-last< -180)lon+=360;last=lon;
+    return [lat,lon,segment];
+  });
+}
+function renderMap(fit = false) {
   if (!leafletMap || !routeData) return;
   leafletMap.eachLayer(layer => { if (!(layer instanceof L.TileLayer)) leafletMap.removeLayer(layer); });
-  const segments = new Map();
-  routeData.route.forEach(([lat,lon,segment]) => { if(!segments.has(segment)) segments.set(segment,[]); segments.get(segment).push([lat,lon]); });
-  const color=getComputedStyle(document.documentElement).getPropertyValue('--primary-green').trim();
-  for(const points of segments.values()) L.polyline(points,{color,weight:3}).addTo(leafletMap);
-  const coords=routeData.route.map(p=>p.slice(0,2));
-  if(coords.length===1) leafletMap.setView(coords[0],15); else leafletMap.fitBounds(coords,{padding:[24,24],maxZoom:16});
+  const points=mapCoordinates(),segments=new Map(),style=getComputedStyle(document.documentElement);
+  points.forEach(([lat,lon,segment])=>{if(!segments.has(segment))segments.set(segment,[]);segments.get(segment).push([lat,lon]);});
+  const color=style.getPropertyValue('--primary-green').trim(),halo=style.getPropertyValue('--map-route-halo').trim();
+  for(const coords of segments.values()){
+    L.polyline(coords,{color:halo,weight:8,opacity:.85,interactive:false,lineCap:'round',lineJoin:'round'}).addTo(leafletMap);
+    L.polyline(coords,{color,weight:4,opacity:1,interactive:false,lineCap:'round',lineJoin:'round'}).addTo(leafletMap);
+  }
+  for(const [index,key] of [[0,'routeStart'],[points.length-1,'routeEnd']]){
+    L.circleMarker(points[index].slice(0,2),{radius:index===0?6:5,color:halo,weight:3,fillColor:index===0?color:style.getPropertyValue('--map-route-end').trim(),fillOpacity:1})
+      .bindTooltip(t(key),{direction:'top',offset:[0,-6]}).addTo(leafletMap);
+  }
+  if(fit){const coords=points.map(p=>p.slice(0,2));if(coords.length===1)leafletMap.setView(coords[0],15,{animate:false});else leafletMap.fitBounds(coords,{padding:[32,32],maxZoom:16,animate:false});}
 }
-$('load-map').addEventListener('click',async()=>{
-  if(leafletMap || !routeData) return;
+function loadLeaflet() {
+  if(leafletReady)return leafletReady;
+  leafletReady=new Promise((resolve,reject)=>{
+    const css=document.createElement('link'),script=document.createElement('script');
+    css.rel='stylesheet';css.href=new URL('./vendor/leaflet/leaflet.css',import.meta.url);
+    script.src=new URL('./vendor/leaflet/leaflet.js',import.meta.url);
+    let loaded=0,settled=false;const timer=setTimeout(()=>failed(),8000);
+    const failed=()=>{if(settled)return;settled=true;clearTimeout(timer);css.remove();script.remove();leafletReady=null;reject(new Error('Map assets unavailable'));};
+    const ready=()=>{if(!settled&&++loaded===2){settled=true;clearTimeout(timer);resolve();}};
+    css.onload=script.onload=ready;css.onerror=script.onerror=failed;document.head.append(css,script);
+  });
+  return leafletReady;
+}
+async function loadMap() {
+  if(!mapWanted || leafletMap || !routeData?.route.length || mapLoadingGeneration===generation)return;
   const version=generation;
-  $('load-map').disabled=true;
+  mapLoadingGeneration=version;setMapStatus('mapLoading');
   try {
-    if(!window.L) {
-      const css=document.createElement('link'); css.rel='stylesheet'; css.href=new URL('./vendor/leaflet/leaflet.css',import.meta.url); document.head.append(css);
-      await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=new URL('./vendor/leaflet/leaflet.js',import.meta.url);script.onload=resolve;script.onerror=reject;document.head.append(script);});
-    }
-    if(version!==generation || !routeData) return;
+    await loadLeaflet();
+    if(version!==generation || !routeData || !mapWanted)return;
     $('route-canvas').hidden=true;
-    leafletMap=L.map('gpxMap',{zoomAnimation:false,fadeAnimation:false,markerZoomAnimation:false}).setView(routeData.route[0].slice(0,2),13);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(leafletMap);
-    renderMap();
-  } catch { error(t('networkError')); } finally { $('load-map').disabled=false; }
+    const map=leafletMap=L.map('gpxMap',{zoomAnimation:false,fadeAnimation:false,markerZoomAnimation:false,scrollWheelZoom:false});
+    map.zoomControl.setPosition('topright');renderMap(true);
+    let loaded=0,failed=0;
+    const tiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,keepBuffer:1,updateWhenIdle:true,
+      referrerPolicy:'strict-origin-when-cross-origin',className:'route-basemap',attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'});
+    const current=()=>version===generation&&map===leafletMap;
+    tiles.on('loading',()=>{loaded=0;failed=0;if(current())setMapStatus('mapLoading');});
+    tiles.on('tileload',()=>loaded++);tiles.on('tileerror',()=>failed++);
+    tiles.on('load',()=>{if(current())setMapStatus(loaded===0&&failed?'mapUnavailable':failed?'mapPartial':'mapReady');});
+    tiles.addTo(map);syncMapControls();
+  } catch {
+    if(version===generation&&mapWanted){clearMap();mapWanted=false;syncMapControls();drawRoute();setMapStatus('mapUnavailable');}
+  } finally {if(version===generation)mapLoadingGeneration=null;}
+}
+$('load-map').addEventListener('click',()=>{
+  mapWanted=!mapWanted;
+  if(mapWanted)void loadMap();else {clearMap();drawRoute();setMapStatus('mapHidden');}
+  syncMapControls();
 });
+$('fit-map').addEventListener('click',()=>renderMap(true));

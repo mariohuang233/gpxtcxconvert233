@@ -10,19 +10,32 @@ const output=process.env.TEST_ARTIFACTS;
   const browser=await chromium.launch({headless:true,...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{})});
   const context=await browser.newContext({viewport:{width:1440,height:1000},timezoneId:'America/New_York',locale:'zh-CN'});
   const page=await context.newPage(), errors=[], external=[];
+  const tileRequests=[];
   page.on('pageerror',e=>errors.push(e.message));
   page.on('request',r=>{if(!r.url().startsWith(base)) external.push(r.url());});
+  await page.route('https://tile.openstreetmap.org/**',route=>{
+    tileRequests.push(route.request());
+    return route.fulfill({status:200,contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jR1sAAAAASUVORK5CYII=','base64')});
+  });
   const fixture=await fs.readFile(path.join(__dirname,'fixtures/track.gpx'));
   let pagesMode=false;
   async function open(){await page.goto(base);await page.waitForFunction(()=>document.getElementById('simulation-badge').textContent.length>0);}
   async function choose(name='测试.gpx',buffer=fixture){await page.locator('#fileInput').setInputFiles({name,mimeType:'application/gpx+xml',buffer});await page.waitForFunction(()=>!document.getElementById('convertBtn').disabled);}
   await open();
+  assert.equal(external.length,0,'No external map request before selecting a track');
   pagesMode=await page.locator('meta[name="app-mode"]').count()>0;
   assert.equal(await page.locator('#simulate-metrics').isChecked(),true);
   assert.equal(await page.locator('#startTime').inputValue(),'');
   assert.equal(await page.locator('#time-mode').inputValue(),'preserve');
   if(output){await fs.mkdir(output,{recursive:true});await page.screenshot({path:path.join(output,'desktop-dark.png'),fullPage:true});}
   await choose('<img src=x onerror=alert(1)>.gpx');
+  await page.locator('.leaflet-control-attribution').waitFor();
+  await page.waitForFunction(()=>document.getElementById('map-status').textContent.includes('已加载'));
+  assert.ok(tileRequests.length>0,'Map tiles load automatically after preview');
+  assert.equal(await page.locator('#load-map').getAttribute('aria-pressed'),'true');
+  assert.equal(await page.locator('#route-canvas').isVisible(),false);
+  assert.equal(await page.locator('.route-basemap .leaflet-tile').first().getAttribute('referrerpolicy'),'strict-origin-when-cross-origin');
+  assert.ok(await page.locator('.leaflet-overlay-pane path').count()>=4,'Route halo and endpoints are drawn');
   assert.equal(await page.locator('#upload-heading').textContent(),'<img src=x onerror=alert(1)>.gpx');
   assert.equal(await page.locator('#fileUpload img').count(),0);
   assert.equal(await page.locator('#duration').textContent(),'00:01:00');
@@ -73,13 +86,21 @@ const output=process.env.TEST_ARTIFACTS;
     assert.equal(await page.locator('html').getAttribute('dir'),lang==='ar'?'rtl':'ltr');
   }
   await page.locator('#languageSelector').selectOption('zh');
-  assert.equal(external.filter(url=>!url.startsWith('blob:')).length,0,'Initial page, preview and conversion must not contact third parties');
+  assert.equal(external.filter(url=>!url.startsWith('blob:')&&!url.startsWith('https://tile.openstreetmap.org/')).length,0,'Only visible map tiles may load automatically; no other third-party requests');
   const weatherPattern=pagesMode?'https://api.open-meteo.com/**':'**/api/weather?**';
   await page.route(weatherPattern,route=>route.fulfill({status:503,contentType:'application/json',body:'{"available":false,"error":"offline"}'}));
   await choose();await page.locator('#route-weather').click();await page.waitForFunction(()=>document.getElementById('weatherSummary').textContent.includes('不可用'));
   await page.unroute(weatherPattern);
-  await page.route('https://tile.openstreetmap.org/**',route=>route.fulfill({status:200,contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jR1sAAAAASUVORK5CYII=','base64')}));
+  await page.locator('.leaflet-control-attribution').waitFor();
+  await page.locator('#load-map').click();assert.equal(await page.locator('.leaflet-container').count(),0);
+  assert.equal(await page.locator('#route-canvas').isVisible(),true);
   await page.locator('#load-map').click();await page.locator('.leaflet-control-attribution').waitFor();
+  await page.locator('#fit-map').click();
+  const tile=page.locator('.route-basemap .leaflet-tile').first();
+  const darkFilter=await tile.evaluate(el=>getComputedStyle(el).filter);
+  await page.locator('#theme-toggle').click();const lightFilter=await tile.evaluate(el=>getComputedStyle(el).filter);
+  assert.notEqual(darkFilter,lightFilter,'Map style follows the page theme');
+  await page.locator('#theme-toggle').click();
   await page.locator('#cancel-button').click();assert.equal(await page.locator('.leaflet-container').count(),0);
   for(const size of [{width:390,height:844},{width:768,height:1024},{width:1440,height:1000}]){
     await page.setViewportSize(size);
@@ -105,6 +126,6 @@ const output=process.env.TEST_ARTIFACTS;
     assert.match(await page.locator('#stats-body').textContent(),/暂无统计/);
   }
   assert.deepEqual(errors,[]);
-  console.log(JSON.stringify({passed:true,pagesMode,checks:'Default simulation, dates/timezones, field errors, download, simulation off, file name safety, reset races, keyboard input, 12 languages, weather failures, map opt-in, 3 viewports and 2 themes',pageErrors:errors},null,2));
+  console.log(JSON.stringify({passed:true,pagesMode,checks:'Default simulation, dates/timezones, field errors, download, simulation off, file name safety, reset races, keyboard input, 12 languages, weather failures, automatic themed map, route-only toggle, fit route, 3 viewports and 2 themes',pageErrors:errors},null,2));
   await browser.close();
 })().catch(error=>{console.error(error);process.exit(1);});

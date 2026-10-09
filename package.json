@@ -6,7 +6,7 @@
     "build:pages": "node scripts/build-pages.cjs",
     "test:converter": "node --test tests/browser-converter.test.mjs",
     "test:pages": "node tests/pages.cjs",
-    "test": "node tests/browser.cjs && node tests/accessibility.cjs",
+    "test": "node tests/browser.cjs && node tests/map.cjs && node tests/accessibility.cjs",
     "test:browser": "node tests/browser.cjs",
     "test:accessibility": "node tests/accessibility.cjs",
     "audit:performance": "lighthouse http://127.0.0.1:8080/ --chrome-flags=--headless --output=json --output-path=lighthouse.json"
