@@ -2,9 +2,30 @@
 
 保留原有跑步背景、绿色界面和配置分组，专注网页上传、轨迹预览、运动参数配置、转换和下载；天气与聚合访问统计也保留。桌面 GUI、个人路径脚本、历史测试输出和重复部署说明已从当前版本移除，旧版本仍可通过 Git 历史查看。
 
+## GitHub Pages
+
+在线网页：[mariohuang233.github.io/gpxtcxconvert233](https://mariohuang233.github.io/gpxtcxconvert233/)。`main` 的自动测试全部通过后，GitHub Actions 才发布 `_site` 中的公开网页资源；Python 源码、测试、数据库、环境配置与 Node 依赖不会上传到 Pages。
+
+Pages 复用同一套页面，在 Web Worker 中解析 GPX 并生成实际可下载的 TCX，轨迹文件不上传服务器，模拟数据仍默认开启，原始传感器指标优先。支持相同的运动类型、时间模式、16 MB / 100,000 点限制、轨迹分段、参数与官方 TCX 格式；JS 使用固定种子重现本平台的模拟数据，随机序列与 Python 版本不同。浏览器文件读取支持 UTF-8 和带 BOM 的 UTF-16；结果最多保留 60 分钟，也可重置或删除，关闭页面后释放。
+
+天气仍需主动选择定位或轨迹起点，通过 HTTPS 请求 Open-Meteo，缓存和失败状态与原界面一致。按照部署选择，Pages 的访问、转换、下载和天气刷新计数保存在当前浏览器，最近 30 个 UTC 日期可在“本机访问统计”中查看；不代表全站人数，没有服务器管理员令牌，也不记录文件名、轨迹或位置。浏览器禁止本地存储时会显示限制说明。
+
+后续接入全站事件统计时，在仓库 Actions Variables 中设置公开的 `PAGES_ANALYTICS_ENDPOINT` HTTPS 接收地址并重新运行工作流；不要填写包含密钥的地址。接收端需允许本站来源的 CORS `POST` / `Content-Type`，接受 `{"event":"page_view"}` 以及 `conversion_started`、`conversion_completed`、`conversion_failed`、`download`、`weather_requested` 六种固定事件名称。请求不附带 Cookie、文件、坐标、表单或 Referrer，后端不可用不影响转换；管理与全站报表由该后端提供，网页仍显示本机计数并提示已启用匿名上报。当前部署没有配置外部统计地址。
+
+构建与子目录预览（先安装下面的 Python 依赖，再准备 Node.js 24）：
+
+```sh
+npm ci
+npm run build:pages
+python tests/serve_pages.py
+# http://127.0.0.1:8900/gpxtcxconvert233/
+```
+
+`npm run test:converter` 检查浏览器转换规则，`python tests/validate_pages_output.py` 验证合成导出的官方 XSD 与 Python 汇总语义；设置 `TEST_BASE_URL` 后运行 `npm run test:pages` 可检查静态网页真实浏览器流程。构建产物不提交 Git，XML 解析器依赖和许可证随构建公开，避免维护另一份完整页面。
+
 ## 本地运行
 
-需要 Python 3.11 或更新版本；运行网页不需要 Node.js。
+需要 Python 3.11 或更新版本；运行 Flask 网页不需要 Node.js，构建 Pages 时需要 Node.js。
 
 ```sh
 python -m venv .venv

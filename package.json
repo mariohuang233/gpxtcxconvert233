@@ -1,8 +1,11 @@
 {
   "name": "gpx-tcx-web-tests",
   "private": true,
-  "description": "Browser checks only; the website does not require Node.js to run.",
+  "description": "Static Pages build and web regression tests; Flask runtime uses Python only.",
   "scripts": {
+    "build:pages": "node scripts/build-pages.cjs",
+    "test:converter": "node --test tests/browser-converter.test.mjs",
+    "test:pages": "node tests/pages.cjs",
     "test": "node tests/browser.cjs && node tests/accessibility.cjs",
     "test:browser": "node tests/browser.cjs",
     "test:accessibility": "node tests/accessibility.cjs",
@@ -10,8 +13,12 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
+    "esbuild": "0.28.2",
     "lighthouse": "13.5.0",
-    "playwright": "1.64.0"
+    "playwright": "1.64.0",
+    "saxes": "6.0.0"
   },
-  "engines": { "node": ">=22.19" }
+  "engines": {
+    "node": ">=22.19"
+  }
 }

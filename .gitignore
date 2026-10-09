@@ -7,6 +7,7 @@ __pycache__/
 .coverage
 htmlcov/
 node_modules/
+_site/
 test-artifacts/
 lighthouse*.json
 .env

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% if pages %}<meta name="app-mode" content="pages"><meta http-equiv="Content-Security-Policy" content="{{ pages_csp }}">{% endif %}
     <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
     <title data-translate="pageTitle">{{ translate('pageTitle') }}</title>
 
@@ -10,7 +11,7 @@
 
 
     <meta name="color-scheme" content="dark light">
-    <link rel="preload" as="image" href="/static/images/runners.webp" imagesrcset="/static/images/runners-mobile.webp 768w, /static/images/runners.webp 1500w" imagesizes="100vw" fetchpriority="high">
+    <link rel="preload" as="image" href="{{ url_for('static', filename='images/runners.webp') }}" imagesrcset="{{ url_for('static', filename='images/runners-mobile.webp') }} 768w, {{ url_for('static', filename='images/runners.webp') }} 1500w" imagesizes="100vw" fetchpriority="high">
     <meta name="description" content="预览 GPX 轨迹，配置模拟运动数据，导出 TCX 文件。">
     <script src="{{ url_for('static', filename='theme.js') }}"></script>
     <script type="module" src="{{ url_for('static', filename='app.js') }}"></script>
@@ -231,7 +232,8 @@
         </section>
 
         <p class="status-indicator status-error" id="errorMessage" role="alert" aria-live="polite" hidden></p><p id="file-error" class="field-error" aria-live="polite"></p>
-        <p class="retention-note"><span data-translate="privacyNote">{{ translate('privacyNote') }}</span> {{ retention_minutes }} <span data-translate="minutes">{{ translate('minutes') }}</span></p>
+        <p class="retention-note"><span data-translate="privacyNote">{{ translate('privacyNote') }}</span>{% if not pages %} {{ retention_minutes }} {% endif %}<span data-translate="minutes">{{ translate('minutes') }}</span></p>
+        {% if pages %}<p id="remote-stats-note" class="retention-note" hidden>本站已启用匿名统计后端，仅向其发送固定事件名称，不包含轨迹或表单数据。</p>{% endif %}
         <button type="button" id="cancel-button" class="reset-inline" data-translate="reset">{{ translate('reset') }}</button><div class="convert-section animate-fade-in animate-delay-9">
             <button id="convertBtn" class="btn btn-primary" form="configForm" type="submit" disabled>
 
@@ -318,5 +320,5 @@
     </div>
 
     </main></div>
-    <footer class="apple-footer"><div class="footer-content"><span>GPX → TCX · mariohuang233</span><div class="links-section"><a href="https://github.com/mariohuang233/gpxtcxconvert233" target="_blank" rel="noopener noreferrer">GitHub</a><a href="/analytics" data-translate="stats">{{ translate('stats') }}</a><a href="#privacy-details" data-translate="privacyPolicy">{{ translate('privacyPolicy') }}</a></div></div><p id="privacy-details" data-translate="analyticsNote">{{ translate('analyticsNote') }}</p></footer>
+    <footer class="apple-footer"><div class="footer-content"><span>GPX → TCX · mariohuang233</span><div class="links-section"><a href="https://github.com/mariohuang233/gpxtcxconvert233" target="_blank" rel="noopener noreferrer">GitHub</a><a href="{{ 'analytics/' if pages else '/analytics' }}" data-translate="stats">{{ translate('stats') }}</a><a href="#privacy-details" data-translate="privacyPolicy">{{ translate('privacyPolicy') }}</a></div></div><p id="privacy-details" data-translate="analyticsNote">{{ translate('analyticsNote') }}</p></footer>
   </body></html>

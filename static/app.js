@@ -1,4 +1,5 @@
 import { t, setLanguage, initializeLanguage } from './i18n.js';
+import { request, isPages, downloadUrl, downloadName, record, remoteAnalyticsEnabled } from './platform.js';
 
 const aliases = {'converter':'configForm','convert-button':'convertBtn','reset-button':'resetBtn','drop-zone':'fileUpload','file-input':'fileInput','file-name':'upload-heading','file-hint':'upload-hint','form-error':'errorMessage','activity-type':'activityType','start-time':'startTime','target-pace':'targetPace','min-hr':'baseHr','max-hr':'maxHr','min-cadence':'baseCadenceDisplay','max-cadence':'maxCadenceDisplay','base-power':'basePower','max-power':'maxPower','route-view':'gpxMap','job-panel':'progressSection','job-message':'progressText','download-link':'downloadBtn','weather-location':'locationToggle','weather-state':'weatherSummary','language':'languageSelector'};
 const $ = (id) => document.getElementById(aliases[id] || id);
@@ -28,10 +29,7 @@ function error(message, field) {
   $('form-error').hidden = false;
 }
 async function jsonRequest(url, options = {}) {
-  const response = await fetch(url, { credentials: 'same-origin', ...options });
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw Object.assign(new Error(payload.error || t('networkError')), { field: payload.field, status: response.status });
-  return payload;
+  return request(url, options);
 }
 function activeTheme() {
   return document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
@@ -63,8 +61,8 @@ function drawRoute() {
   const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
   const fit = Math.min((box.width - 68) / Math.max(maxX - minX, .00001), (box.height - 68) / Math.max(maxY - minY, .00001));
   const xy = ([x, y]) => [(x - (maxX + minX) / 2) * fit + box.width / 2, (y - (maxY + minY) / 2) * fit + box.height / 2];
-  const color = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
-  const surface = getComputedStyle(document.documentElement).getPropertyValue('--surface').trim();
+  const color = getComputedStyle(document.documentElement).getPropertyValue('--primary-green').trim();
+  const surface = getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim();
   ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath();
   projected.forEach((p, i) => {
     const [x, y] = xy(p);
@@ -96,7 +94,7 @@ function stopLocal() {
 }
 async function removeTask(id) {
   if (!id) return;
-  await fetch(`/tasks/${id}`, { method: 'DELETE', credentials: 'same-origin' }).catch(() => {});
+  await request(`/tasks/${id}`, { method: 'DELETE' }).catch(() => {});
 }
 async function chooseFile(file) {
   const previous = taskId;
@@ -162,7 +160,8 @@ async function poll(id, version, attempts = 0) {
       text('job-message', t(payload.result.simulated ? 'completeSimulated' : 'completeMeasured'));
       showSummary(payload.result, true);
       text('result-summary', `${payload.result.start_time} · ${(payload.result.distance_m / 1000).toFixed(2)} km · ${duration(payload.result.duration_s)} · ${t(payload.result.simulated ? 'completeSimulated' : 'completeMeasured')}`);
-      $('download-link').href = `/download/${id}`; $('download-link').hidden = false;
+      $('download-link').href = downloadUrl(id); $('download-link').hidden = false;
+      if(isPages)$('download-link').download=downloadName(id);
       $('delete-result').hidden = false;
       $('job-progress').hidden = true; updateButton();
       return;
@@ -194,7 +193,7 @@ form.addEventListener('submit', async (event) => {
   data.set('timezone_offset', String($('start-time').value ? new Date($('start-time').value).getTimezoneOffset() : new Date().getTimezoneOffset()));
   $('job-panel').hidden = false; $('resultSection').hidden = true; $('download-link').hidden = true; $('delete-result').hidden = true;
   $('job-progress').hidden = false; $('job-progress').value = 0;
-  text('job-title', t('processing')); text('job-message', t('uploading'));
+  text('job-title', t('processing')); text('job-message', t(isPages?'processing':'uploading'));
   try {
     const payload = await jsonRequest('/upload', { method: 'POST', body: data });
     if (version !== generation) { void removeTask(payload.task_id); return; }
@@ -269,7 +268,9 @@ $('language').addEventListener('change', async (event) => {
 $('cancel-button').addEventListener('click', () => { form.reset(); syncSettings(); void chooseFile(null); });
 await initializeLanguage(); languageReady = true; syncSettings(); updateButton();
 // Only fixed aggregate event names are sent; never include filenames, coordinates or form data.
-void fetch('/api/analytics', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'page_view' }), keepalive: true }).catch(() => {});
+record('page_view');
+$('download-link').addEventListener('click',()=>{if(isPages)record('download');});
+if(isPages&&await remoteAnalyticsEnabled())$('remote-stats-note').hidden=false;
 
 function renderMap() {
   if (!leafletMap || !routeData) return;
@@ -287,8 +288,8 @@ $('load-map').addEventListener('click',async()=>{
   $('load-map').disabled=true;
   try {
     if(!window.L) {
-      const css=document.createElement('link'); css.rel='stylesheet'; css.href='/static/vendor/leaflet/leaflet.css'; document.head.append(css);
-      await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/static/vendor/leaflet/leaflet.js';script.onload=resolve;script.onerror=reject;document.head.append(script);});
+      const css=document.createElement('link'); css.rel='stylesheet'; css.href=new URL('./vendor/leaflet/leaflet.css',import.meta.url); document.head.append(css);
+      await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=new URL('./vendor/leaflet/leaflet.js',import.meta.url);script.onload=resolve;script.onerror=reject;document.head.append(script);});
     }
     if(version!==generation || !routeData) return;
     $('route-canvas').hidden=true;

@@ -5,7 +5,7 @@ const assert=require('node:assert/strict');
   const browser=await chromium.launch({headless:true,...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{})});
   const context=await browser.newContext(),page=await context.newPage();
   const base=process.env.TEST_BASE_URL||'http://127.0.0.1:8080';
-  for(const path of ['/','/analytics']){
+  for(const path of ['/','/analytics'+(process.env.TEST_PAGES?'/' :'')]){
     await page.goto(base+path);await page.waitForLoadState('networkidle');
     for(const theme of ['dark','light']){
       const uploadBackground=await page.evaluate(theme=>{

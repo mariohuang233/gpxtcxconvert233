@@ -1,1 +1,22 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>访问统计 · GPX → TCX</title><link rel="icon" href="/static/favicon.svg"><link rel="stylesheet" href="/static/style.css"><script src="/static/theme.js"></script><script src="/static/analytics.js" defer></script></head><body><main class="stats-container"><header class="stats-header"><h1>访问统计</h1><a href="/">返回转换工具</a></header><p class="field-help">统计保留 30 天，日期按 UTC 汇总；访问次数包括重复访问，独立访客为每日会话去重，最多 10,000 个。转换成功与失败由服务器记录，下载为请求次数。</p><form id="stats-form"><div class="form-group"><label for="admin-token">管理员令牌</label><input type="password" id="admin-token" autocomplete="off" required aria-describedby="token-help"><p id="token-help" class="field-help">使用部署时设置的 ADMIN_TOKEN。令牌仅保留在当前页面内存中。</p></div><button type="submit" class="btn btn-primary">查看统计</button></form><p id="stats-error" role="alert" class="field-error"></p><div id="stats-result" hidden><table><caption class="sr-only">最近 30 天聚合事件</caption><thead><tr><th scope="col">日期（UTC）</th><th scope="col">事件</th><th scope="col">次数</th></tr></thead><tbody id="stats-body"></tbody></table><button type="button" id="clear-stats" class="location-toggle">清空统计</button><p class="field-help">清空后不可恢复，不会删除轨迹任务。</p></div></main></body></html>
+<!doctype html>
+<html lang="zh-CN"><head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+  {% if pages %}<meta name="app-mode" content="pages"><meta http-equiv="Content-Security-Policy" content="{{ pages_csp }}">{% endif %}
+  <title>{{ '本机访问统计' if pages else '访问统计' }} · GPX → TCX</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('static', filename='theme.js') }}"></script>
+  {% if pages %}<script type="module" src="{{ url_for('static', filename='pages-analytics.js') }}"></script>
+  {% else %}<script src="{{ url_for('static', filename='analytics.js') }}" defer></script>{% endif %}
+</head><body><main class="stats-container">
+  <header class="stats-header"><h1>{{ '本机访问统计' if pages else '访问统计' }}</h1><a href="{{ '../' if pages else '/' }}">返回转换工具</a></header>
+  {% if pages %}
+  <p class="field-help">仅显示本浏览器的访问、转换和下载次数，保留最近 30 个 UTC 日期；其他设备的数据不会在这里汇总。轨迹文件不上传服务器。清除浏览器站点数据也会清除这些统计。</p>
+  <p id="remote-stats-note" class="field-help" hidden>本站另有匿名统计后端接收固定事件名称；下方仍只显示本浏览器数据。</p>
+  {% else %}
+  <p class="field-help">统计保留 30 天，日期按 UTC 汇总；访问次数包括重复访问，独立访客为每日会话去重，最多 10,000 个。转换成功与失败由服务器记录，下载为请求次数。</p>
+  <form id="stats-form"><div class="form-group"><label for="admin-token">管理员令牌</label><input type="password" id="admin-token" autocomplete="off" required aria-describedby="token-help"><p id="token-help" class="field-help">使用部署时设置的 ADMIN_TOKEN。令牌仅保留在当前页面内存中。</p></div><button type="submit" class="btn btn-primary">查看统计</button></form>
+  {% endif %}
+  <p id="stats-error" role="alert" class="field-error"></p>
+  <div id="stats-result" hidden><table><caption class="sr-only">最近 30 天{{ '本机' if pages else '聚合' }}事件</caption><thead><tr><th scope="col">日期（UTC）</th><th scope="col">事件</th><th scope="col">次数</th></tr></thead><tbody id="stats-body"></tbody></table><button type="button" id="clear-stats" class="location-toggle">清空统计</button><p class="field-help">清空后不可恢复，不会删除轨迹{{ '结果' if pages else '任务' }}。</p></div>
+</main></body></html>

@@ -1,10 +1,14 @@
-name: Web checks
+name: Web checks and Pages
 on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: web-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   python:
     runs-on: ubuntu-latest
@@ -22,6 +26,9 @@ jobs:
       - run: python -m pytest -q
   browser:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -31,8 +38,10 @@ jobs:
         with:
           node-version: '24'
           cache: npm
-      - run: python -m pip install -r requirements.txt
+      - run: python -m pip install -r requirements-dev.txt
       - run: npm ci
+      - run: npm run test:converter
+      - run: python tests/validate_pages_output.py
       - run: npx playwright install --with-deps chromium
       - name: Browser and accessibility tests
         run: |
@@ -51,3 +60,47 @@ jobs:
               raise RuntimeError('Web server did not start')
           PY
           npm test
+      - name: Build Pages
+        env:
+          PAGES_ANALYTICS_ENDPOINT: ${{ vars.PAGES_ANALYTICS_ENDPOINT }}
+        run: npm run build:pages
+      - name: Static Pages browser and schema checks
+        env:
+          TEST_BASE_URL: http://127.0.0.1:8900/gpxtcxconvert233
+        run: |
+          python tests/serve_pages.py > /tmp/gpx-pages.log 2>&1 &
+          pages_pid=$!
+          trap 'kill "$pages_pid"' EXIT
+          python - <<'PY'
+          import time, urllib.request
+          for attempt in range(50):
+              try:
+                  urllib.request.urlopen('http://127.0.0.1:8900/gpxtcxconvert233/', timeout=1).close()
+                  break
+              except OSError:
+                  time.sleep(.2)
+          else:
+              raise RuntimeError('Pages preview did not start')
+          PY
+          npm run test:pages
+          python tests/validate_pages_output.py test-artifacts/pages
+      - uses: actions/configure-pages@v5
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+      - uses: actions/upload-pages-artifact@v3
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        with:
+          path: _site
+          include-hidden-files: true
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: [python, browser]
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v5
+        id: deployment

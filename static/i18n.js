@@ -30,7 +30,7 @@ export async function setLanguage(lang) {
   let dictionary=cache.get(lang);
   try {
     if (!dictionary) {
-      const response=await fetch(`/static/locales/${lang}.json`);
+      const response=await fetch(new URL(`./locales/${lang}.json`,import.meta.url));
       if (!response.ok) throw new Error('Locale unavailable');
       dictionary=await response.json(); cache.set(lang,dictionary);
     }
@@ -38,6 +38,13 @@ export async function setLanguage(lang) {
   if(serial!==version) return;
   current=lang;
   messages={...extra.en,...dictionary,...(extra[lang] || {})};
+  if(document.querySelector('meta[name="app-mode"]')?.content==='pages')Object.assign(messages,lang==='zh'?{
+    privacyNote:'文件仅在本浏览器中处理，不上传服务器；下载结果在当前页面最多保留 60 分钟，',minutes:'重置、删除或关闭页面后释放。',
+    analyticsNote:'访问、转换与下载次数仅保存在本浏览器，保留最近 30 个 UTC 日期。天气和地图由你主动加载；不会记录文件名、轨迹内容或精确位置。',
+    privacyDesc:'轨迹在浏览器后台线程中处理，不上传服务器。',stats:'本机访问统计'
+  }:{privacyNote:'Files stay in this browser. Downloads remain in this tab for up to 60 minutes; ',minutes:'reset, delete or close the page to release them.',
+    analyticsNote:'Visit, conversion and download counts stay in this browser for 30 UTC dates. Weather and maps are opt-in. Analytics never contain filenames, tracks or precise locations.',
+    privacyDesc:'Tracks are processed in a browser worker without uploading.',stats:'Local visit statistics'});
   document.documentElement.lang=lang==='zh'?'zh-CN':lang==='zh-tw'?'zh-TW':lang;
   document.documentElement.dir=lang==='ar'?'rtl':'ltr';
   document.querySelectorAll('[data-translate]').forEach(el=>{

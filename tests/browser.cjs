@@ -13,9 +13,11 @@ const output=process.env.TEST_ARTIFACTS;
   page.on('pageerror',e=>errors.push(e.message));
   page.on('request',r=>{if(!r.url().startsWith(base)) external.push(r.url());});
   const fixture=await fs.readFile(path.join(__dirname,'fixtures/track.gpx'));
+  let pagesMode=false;
   async function open(){await page.goto(base);await page.waitForFunction(()=>document.getElementById('simulation-badge').textContent.length>0);}
   async function choose(name='测试.gpx',buffer=fixture){await page.locator('#fileInput').setInputFiles({name,mimeType:'application/gpx+xml',buffer});await page.waitForFunction(()=>!document.getElementById('convertBtn').disabled);}
   await open();
+  pagesMode=await page.locator('meta[name="app-mode"]').count()>0;
   assert.equal(await page.locator('#simulate-metrics').isChecked(),true);
   assert.equal(await page.locator('#startTime').inputValue(),'');
   assert.equal(await page.locator('#time-mode').inputValue(),'preserve');
@@ -34,6 +36,7 @@ const output=process.env.TEST_ARTIFACTS;
   const downloadEvent=page.waitForEvent('download');await page.locator('#downloadBtn').click();
   const download=await downloadEvent;const content=await fs.readFile(await download.path());
   assert.match(content.toString(),/SIMULATED/);
+  if(output&&pagesMode)await fs.writeFile(path.join(output,'download-default.tcx'),content);
   if(output)await page.screenshot({path:path.join(output,'desktop-result.png'),fullPage:true});
   await page.locator('#languageSelector').selectOption('en');assert.equal(await page.locator('#upload-heading').textContent(),'<img src=x onerror=alert(1)>.gpx');
   await page.locator('#resetBtn').click();assert.equal(await page.locator('#fileInput').inputValue(),'');
@@ -41,8 +44,12 @@ const output=process.env.TEST_ARTIFACTS;
   await page.locator('#languageSelector').selectOption('zh');
   await choose();await page.locator('#simulate-metrics').uncheck();
   await page.locator('#convertBtn').click();await page.locator('#downloadBtn').waitFor({state:'visible'});
-  const noSimulation=await context.request.get(base+await page.locator('#downloadBtn').getAttribute('href'));
-  assert.doesNotMatch(await noSimulation.text(),/HeartRateBpm|RunCadence|Watts|SIMULATED/);
+  const link=await page.locator('#downloadBtn').getAttribute('href');
+  let noSimulation;
+  if(pagesMode){const nextDownload=page.waitForEvent('download');await page.locator('#downloadBtn').click();const exported=await nextDownload;noSimulation=(await fs.readFile(await exported.path())).toString();}
+  else noSimulation=await (await context.request.get(base+link)).text();
+  assert.doesNotMatch(noSimulation,/HeartRateBpm|RunCadence|Watts|SIMULATED/);
+  if(output&&pagesMode)await fs.writeFile(path.join(output,'download-measured.tcx'),noSimulation);
   await page.locator('#delete-result').click();await page.waitForFunction(()=>document.getElementById('result-summary').textContent.includes('已删除'));
   await page.locator('#resetBtn').click();await choose();
   const missing=Buffer.from('<gpx><trk><trkseg><trkpt lat="1" lon="2"/></trkseg></trk></gpx>');
@@ -66,10 +73,11 @@ const output=process.env.TEST_ARTIFACTS;
     assert.equal(await page.locator('html').getAttribute('dir'),lang==='ar'?'rtl':'ltr');
   }
   await page.locator('#languageSelector').selectOption('zh');
-  await page.route('**/api/weather?**',route=>route.fulfill({status:503,contentType:'application/json',body:'{"available":false,"error":"offline"}'}));
+  assert.equal(external.filter(url=>!url.startsWith('blob:')).length,0,'Initial page, preview and conversion must not contact third parties');
+  const weatherPattern=pagesMode?'https://api.open-meteo.com/**':'**/api/weather?**';
+  await page.route(weatherPattern,route=>route.fulfill({status:503,contentType:'application/json',body:'{"available":false,"error":"offline"}'}));
   await choose();await page.locator('#route-weather').click();await page.waitForFunction(()=>document.getElementById('weatherSummary').textContent.includes('不可用'));
-  await page.unroute('**/api/weather?**');
-  assert.equal(external.length,0,'Initial page, preview and conversion must not contact third parties');
+  await page.unroute(weatherPattern);
   await page.route('https://tile.openstreetmap.org/**',route=>route.fulfill({status:200,contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jR1sAAAAASUVORK5CYII=','base64')}));
   await page.locator('#load-map').click();await page.locator('.leaflet-control-attribution').waitFor();
   await page.locator('#cancel-button').click();assert.equal(await page.locator('.leaflet-container').count(),0);
@@ -84,7 +92,19 @@ const output=process.env.TEST_ARTIFACTS;
   }
   await page.emulateMedia({reducedMotion:'reduce'});
   assert.equal(await page.locator('html').evaluate(el=>getComputedStyle(el).scrollBehavior),'auto');
+  if(pagesMode){
+    const key=await page.evaluate(()=>Object.keys(localStorage).find(key=>key.startsWith('gpx-tcx:stats:')));
+    const stored=await page.evaluate(key=>localStorage.getItem(key),key);
+    assert.doesNotMatch(stored,/测试|\.gpx|coordinates|longitude|latitude|filename/);
+    const today=new Date().toISOString().slice(0,10),counts=JSON.parse(stored)[today];
+    assert.ok(counts.page_view>=1&&counts.conversion_completed>=3&&counts.download>=1);
+    await page.goto(new URL('analytics/',base.endsWith('/')?base:base+'/').href);
+    await page.locator('#stats-result').waitFor({state:'visible'});
+    assert.match(await page.locator('h1').textContent(),/本机/);assert.equal(await page.locator('#admin-token').count(),0);
+    page.once('dialog',dialog=>dialog.accept());await page.locator('#clear-stats').click();
+    assert.match(await page.locator('#stats-body').textContent(),/暂无统计/);
+  }
   assert.deepEqual(errors,[]);
-  console.log(JSON.stringify({passed:true,checks:'Default simulation, dates/timezones, field errors, download, simulation off, file name safety, reset races, keyboard input, 12 languages, weather failures, map opt-in, 3 viewports and 2 themes',pageErrors:errors},null,2));
+  console.log(JSON.stringify({passed:true,pagesMode,checks:'Default simulation, dates/timezones, field errors, download, simulation off, file name safety, reset races, keyboard input, 12 languages, weather failures, map opt-in, 3 viewports and 2 themes',pageErrors:errors},null,2));
   await browser.close();
 })().catch(error=>{console.error(error);process.exit(1);});
