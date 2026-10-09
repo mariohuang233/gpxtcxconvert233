@@ -1,0 +1,6 @@
+* text=auto eol=lf
+*.woff2 binary
+*.webp binary
+static/vendor/** -text
+static/fonts/OFL.txt -text
+tests/schemas/*.xsd -text

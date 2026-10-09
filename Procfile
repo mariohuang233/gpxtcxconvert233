@@ -1,2 +1,1 @@
-web: python3 web_app.py
-worker: python3 monitor_new_tcx.py
+web: waitress-serve --host=0.0.0.0 --port=$PORT web_app:app

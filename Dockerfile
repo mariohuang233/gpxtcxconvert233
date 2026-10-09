@@ -1,46 +1,16 @@
-# 使用官方Python运行时作为父镜像
-FROM python:3.11-slim
-
-# 设置工作目录
+FROM python:3.12-slim
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 HOST=0.0.0.0 PORT=8080 DATA_DIR=/data
 WORKDIR /app
-
-# 设置环境变量
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    FLASK_ENV=production \
-    PORT=8080
-
-# 安装系统依赖
-RUN apt-get update && apt-get install -y \
-    gcc \
-    libxml2-dev \
-    libxslt-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# 复制requirements文件
 COPY requirements.txt .
-
-# 安装Python依赖
-RUN pip install --no-cache-dir -r requirements.txt
-
-# 复制项目文件
-COPY . .
-
-# 创建必要的目录
-RUN mkdir -p uploads outputs && \
-    chmod 755 uploads outputs
-
-# 创建非root用户
-RUN useradd --create-home --shell /bin/bash app && \
-    chown -R app:app /app
-USER app
-
-# 健康检查
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:$PORT/health || exit 1
-
-# 暴露端口
-EXPOSE $PORT
-
-# 启动命令
-CMD ["python3", "web_app.py"]
+RUN pip install --no-cache-dir -r requirements.txt \
+    && useradd --uid 10001 --create-home appuser \
+    && mkdir /data && chown appuser:appuser /data
+COPY web_app.py gpx_to_tcx.py ./
+COPY templates ./templates
+COPY static ./static
+USER appuser
+EXPOSE 8080
+VOLUME ["/data"]
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s \
+  CMD python -c "import os,urllib.request; urllib.request.urlopen('http://127.0.0.1:'+os.environ['PORT']+'/health',timeout=2)"
+CMD ["python", "web_app.py"]

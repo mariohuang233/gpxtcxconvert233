@@ -1,0 +1,17 @@
+{
+  "name": "gpx-tcx-web-tests",
+  "private": true,
+  "description": "Browser checks only; the website does not require Node.js to run.",
+  "scripts": {
+    "test": "node tests/browser.cjs && node tests/accessibility.cjs",
+    "test:browser": "node tests/browser.cjs",
+    "test:accessibility": "node tests/accessibility.cjs",
+    "audit:performance": "lighthouse http://127.0.0.1:8080/ --chrome-flags=--headless --output=json --output-path=lighthouse.json"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "lighthouse": "13.5.0",
+    "playwright": "1.64.0"
+  },
+  "engines": { "node": ">=22.19" }
+}

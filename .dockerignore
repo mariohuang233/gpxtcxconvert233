@@ -1,0 +1,15 @@
+.git
+.venv
+venv
+.data
+__pycache__
+.pytest_cache
+node_modules
+test-artifacts
+.env
+tests
+docs
+package*.json
+requirements-dev.txt
+*.sqlite3*
+lighthouse*.json
